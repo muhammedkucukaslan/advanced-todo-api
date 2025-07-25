@@ -1,0 +1,10 @@
+.git
+/adr-docs
+/.vscode
+/.github/workflows
+.log4brains.yml
+Makefile
+/bin
+*.md
+*.log
+*_test.go

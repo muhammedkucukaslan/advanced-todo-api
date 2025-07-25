@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  backend-api:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile.prod.yml
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    container_name: backend-api
+    volumes: [] # override edip kaldırır
+    command: [] # override edip Dockerfile'daki CMD'yi kullanır

@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  backend-api:
+    image: golang:1.24.5-alpine3.22
+    working_dir: /app
+    volumes:
+      - .:/app
+      - go-mod:/go/pkg/mod
+    ports:
+      - "3000:3000"
+    command: ["go", "run", "./cmd/."]
+    restart: unless-stopped
+
+volumes:
+  go-mod:
