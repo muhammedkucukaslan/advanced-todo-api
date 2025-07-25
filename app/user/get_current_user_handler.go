@@ -1,0 +1,51 @@
+package user
+
+import (
+	"context"
+	"time"
+
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
+)
+
+type GetCurrentUserRequest struct{}
+
+type GetCurrentUserResponse struct {
+	Id              string    `json:"id"`
+	FullName        string    `json:"fullName"`
+	Phone           string    `json:"phone"`
+	Email           string    `json:"email"`
+	Role            string    `json:"role"`
+	Address         string    `json:"address"`
+	IsEmailVerified bool      `json:"isEmailVerified"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
+}
+
+type GetCurrentUserHandler struct {
+	repo Repository
+}
+
+func NewGetCurrentUserHandler(repo Repository) *GetCurrentUserHandler {
+	return &GetCurrentUserHandler{repo: repo}
+}
+
+// @Summary		Get Current User
+// @Description	Get the current user. Requires Bearer token authentication.
+// @Tags			3- User
+// @Accept			json
+// @Produce		json
+// @Security		BearerAuth
+// @Success		200	{object}	GetCurrentUserResponse
+// @Failure		400
+// @Failure		401
+// @Failure		500
+// @Router			/users/profile [get]
+func (h *GetCurrentUserHandler) Handle(ctx context.Context, req *GetCurrentUserRequest) (*GetCurrentUserResponse, int, error) {
+	userID, _ := domain.GetUserID(ctx)
+
+	user, err := h.repo.GetUserById(ctx, userID)
+	if err != nil {
+		return nil, 500, err
+	}
+	return user, 200, nil
+}
