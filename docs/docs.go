@@ -210,18 +210,6 @@ const docTemplate = `{
                 "summary": "Signup",
                 "parameters": [
                     {
-                        "enum": [
-                            "tr",
-                            "ar",
-                            "en"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "description": "Signup request",
                         "name": "request",
                         "in": "body",
@@ -250,8 +238,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/todos": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new todo item for the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "todos"
+                ],
+                "summary": "Create a new todo",
+                "parameters": [
+                    {
+                        "description": "Todo details",
+                        "name": "CreateTodoRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/todo.CreateTodoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Todo created successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/users/account": {
-            "put": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a user's account",
+                "tags": [
+                    "3- User"
+                ],
+                "parameters": [
+                    {
+                        "enum": [
+                            "tr",
+                            "en",
+                            "ar"
+                        ],
+                        "type": "string",
+                        "description": "Response Language",
+                        "name": "response-language",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -287,47 +356,8 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpdateAccountRequest"
+                            "$ref": "#/definitions/user.UpdateFullNameRequest"
                         }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Delete a user's account",
-                "tags": [
-                    "3- User"
-                ],
-                "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -719,6 +749,19 @@ const docTemplate = `{
                 }
             }
         },
+        "todo.CreateTodoRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
+                }
+            }
+        },
         "user.ChangePasswordRequest": {
             "type": "object",
             "required": [
@@ -730,26 +773,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "old_password": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.Donation": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "currency": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }
@@ -768,9 +791,6 @@ const docTemplate = `{
         "user.GetCurrentUserResponse": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -786,13 +806,7 @@ const docTemplate = `{
                 "isEmailVerified": {
                     "type": "boolean"
                 },
-                "phone": {
-                    "type": "string"
-                },
                 "role": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -802,12 +816,6 @@ const docTemplate = `{
             "properties": {
                 "address": {
                     "type": "string"
-                },
-                "donations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/user.Donation"
-                    }
                 },
                 "email": {
                     "type": "string"
@@ -820,9 +828,6 @@ const docTemplate = `{
                 },
                 "is_email_verified": {
                     "type": "boolean"
-                },
-                "phone": {
-                    "type": "string"
                 }
             }
         },
@@ -842,12 +847,11 @@ const docTemplate = `{
                 }
             }
         },
-        "user.UpdateAccountRequest": {
+        "user.UpdateFullNameRequest": {
             "type": "object",
             "required": [
                 "address",
-                "full_name",
-                "phone"
+                "full_name"
             ],
             "properties": {
                 "address": {
@@ -855,18 +859,12 @@ const docTemplate = `{
                 },
                 "full_name": {
                     "type": "string"
-                },
-                "phone": {
-                    "type": "string"
                 }
             }
         },
         "user.User": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -874,9 +872,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
-                },
-                "phone": {
                     "type": "string"
                 }
             }
@@ -915,8 +910,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Islamimerci API Server",
-	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html#/2-%20Auth/post_login).\nAfter login, you will get a JWT token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\nPlease handle errors accordingly on the client side.\nThe API returns an error which is according to a language at some endpoints.\nFor example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.\nIn this case, you need to specify the language in the request header as `accept-language`.\nI will specify which endpoints require that header.\n\nIf you send a request to an admin endpoint, the API will return an error in Turkish.\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
+	Title:            "Advanced Todo API",
+	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html).\nAfter login, you will get a JWT token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\nPlease handle errors accordingly on the client side.\nThe API returns an error which is according to a language at some endpoints.\nFor example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.\nIn this case, you need to specify the language in the request header as `accept-language`.\nI will specify which endpoints require that header.\n\nIf you send a request to an admin endpoint, the API will return an error in Turkish.\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes. Because I love to host my API on \"api\" subdomain.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
