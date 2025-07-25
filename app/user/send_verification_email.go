@@ -52,7 +52,7 @@ func (h *SendVerificationEmailHandler) Handle(ctx context.Context, req *SendVeri
 		return nil, 400, err
 	}
 
-	userId, _ := domain.GetUserID(ctx)
+	userId := domain.GetUserID(ctx)
 
 	fullname, email, err := h.repo.GetUserNameAndEmailByIdForSendingVerificationEmail(ctx, userId)
 	if err != nil {

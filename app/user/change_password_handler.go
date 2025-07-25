@@ -42,7 +42,7 @@ func NewChangePasswordHandler(repo Repository, validate *validator.Validate) *Ch
 //	@Failure		500
 //	@Router			/users/password [patch]
 func (h *ChangePasswordHandler) Handle(ctx context.Context, req *ChangePasswordRequest) (*ChangePasswordResponse, int, error) {
-	userId, _ := domain.GetUserID(ctx)
+	userId := domain.GetUserID(ctx)
 
 	if err := h.validate.Struct(req); err != nil {
 		return nil, 400, domain.ErrInvalidRequest

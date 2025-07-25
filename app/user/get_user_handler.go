@@ -13,21 +13,11 @@ type GetUserRequest struct {
 }
 
 type GetUserResponse struct {
-	ID              uuid.UUID  `json:"id"`
-	FullName        string     `json:"full_name"`
-	Phone           string     `json:"phone"`
-	Email           string     `json:"email"`
-	IsEmailVerified bool       `json:"is_email_verified"`
-	Address         string     `json:"address"`
-	Donations       []Donation `json:"donations"`
-}
-
-type Donation struct {
-	ID        uuid.UUID `json:"id"`
-	Amount    float64   `json:"amount"`
-	Currency  string    `json:"currency"`
-	Title     string    `json:"title"`
-	CreatedAt string    `json:"created_at"`
+	ID              uuid.UUID `json:"id"`
+	FullName        string    `json:"full_name"`
+	Email           string    `json:"email"`
+	IsEmailVerified bool      `json:"is_email_verified"`
+	Address         string    `json:"address"`
 }
 
 type GetUserHandler struct {

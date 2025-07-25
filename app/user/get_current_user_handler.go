@@ -12,13 +12,10 @@ type GetCurrentUserRequest struct{}
 type GetCurrentUserResponse struct {
 	Id              string    `json:"id"`
 	FullName        string    `json:"fullName"`
-	Phone           string    `json:"phone"`
 	Email           string    `json:"email"`
 	Role            string    `json:"role"`
-	Address         string    `json:"address"`
 	IsEmailVerified bool      `json:"isEmailVerified"`
 	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
 type GetCurrentUserHandler struct {
@@ -41,9 +38,9 @@ func NewGetCurrentUserHandler(repo Repository) *GetCurrentUserHandler {
 // @Failure		500
 // @Router			/users/profile [get]
 func (h *GetCurrentUserHandler) Handle(ctx context.Context, req *GetCurrentUserRequest) (*GetCurrentUserResponse, int, error) {
-	userID, _ := domain.GetUserID(ctx)
+	userId := domain.GetUserID(ctx)
 
-	user, err := h.repo.GetUserById(ctx, userID)
+	user, err := h.repo.GetUserById(ctx, userId)
 	if err != nil {
 		return nil, 500, err
 	}

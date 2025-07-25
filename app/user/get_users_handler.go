@@ -18,9 +18,7 @@ type GetUsersResponse []User
 type User struct {
 	Id       uuid.UUID `json:"id"`
 	FullName string    `json:"full_name"`
-	Phone    string    `json:"phone"`
 	Email    string    `json:"email"`
-	Address  string    `json:"address"`
 }
 
 type GetUsersHandler struct {

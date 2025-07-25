@@ -8,22 +8,20 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
-type UpdateAccountRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
+type UpdateFullNameRequest struct {
 	FullName string `json:"full_name,omitempty" validate:"required"`
 	Address  string `json:"address,omitempty" validate:"required"`
-	Phone    string `json:"phone,omitempty" validate:"required"`
 }
 
-type UpdateAccountResponse struct{}
+type UpdateFullNameResponse struct{}
 
-type UpdateAccountHandler struct {
+type UpdateFullNameService struct {
 	repo     Repository
 	validate *validator.Validate
 }
 
-func NewUpdateAccountHandler(repo Repository, validate *validator.Validate) *UpdateAccountHandler {
-	return &UpdateAccountHandler{repo: repo, validate: validate}
+func NewUpdateFullNameHandler(repo Repository, validate *validator.Validate) *UpdateFullNameService {
+	return &UpdateFullNameService{repo: repo, validate: validate}
 }
 
 // Handle processes the request to update a user's account information.
@@ -34,19 +32,19 @@ func NewUpdateAccountHandler(repo Repository, validate *validator.Validate) *Upd
 //	@Accept			json
 //	@Produce		json
 //	@Param			response-language	header	string					true	"Response Language"	Enums(tr, en, ar)
-//	@Param			request				body	UpdateAccountRequest	true	"Update User Account Request"
+//	@Param			request				body	UpdateFullNameRequest	true	"Update User Account Request"
 //	@Security		BearerAuth
 //	@Success		204
 //	@Failure		400
 //	@Failure		401
 //	@Failure		500
-//	@Router			/users/account [put]
-func (h *UpdateAccountHandler) Handle(ctx context.Context, req *UpdateAccountRequest) (*UpdateAccountResponse, int, error) {
+//	@Router			/users/account [patch]
+func (h *UpdateFullNameService) Handle(ctx context.Context, req *UpdateFullNameRequest) (*UpdateFullNameResponse, int, error) {
 	if err := h.validate.Struct(req); err != nil {
 		return nil, 400, domain.ErrInvalidRequest
 	}
-	userID, _ := domain.GetUserID(ctx)
-	if err := h.repo.UpdateAccount(ctx, userID, req.FullName, req.Address, req.Phone); err != nil {
+	userId := domain.GetUserID(ctx)
+	if err := h.repo.UpdateFullName(ctx, userId, req.FullName); err != nil {
 		fmt.Println("Error updating account:", err)
 		return nil, 500, domain.ErrInternalServer
 	}
