@@ -1,7 +1,6 @@
-version: "3.8"
 
 services:
-  backend-api:
+  api:
     image: golang:1.24.5-alpine3.22
     working_dir: /app
     volumes:

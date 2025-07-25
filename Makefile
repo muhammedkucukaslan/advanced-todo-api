@@ -1,7 +1,8 @@
 swagger: 
 	swag fmt
 	swag init -g ./cmd/router.go
-	go run  ./cmd/.
+dev:
+	docker-compose up --build 
 run: 
 	go run ./cmd/.
 test:
