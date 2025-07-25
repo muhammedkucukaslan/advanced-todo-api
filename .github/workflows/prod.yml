@@ -1,0 +1,103 @@
+name: Production Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [ "opened", "synchronize", "reopened" ]
+
+
+jobs:
+
+  build-and-test:
+    name: Build And Test Application  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            
+      - name: Build
+        run: go build -v ./...
+
+      - name: Run Tests
+        run: go test -v ./...
+  docker-build-push:
+    if: github.event_name == 'push'
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      - name: Copy Production Dockerignore
+        run: cp prod.dockerignore .dockerignore
+
+      - name: Docker Build and push
+        uses: docker/build-push-action@v6
+        
+        with:
+          context: .
+          file: Dockerfile.prod
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            muhammedkucukaslan/advanced-todo-api-prod:latest
+            muhammedkucukaslan/advanced-todo-api-prod:${{ github.sha }}
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+          
+  
+  # deploy:
+  #   if: github.event_name == 'push' 
+  #   name: Deploy to Production
+  #   runs-on: ubuntu-latest
+  #   needs: docker-build-push
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Deploy to Dokploy
+  #       run: |
+  #         response=$(curl -s -w "%{http_code}" ${{ secrets.DOKPLOY_REDEPLOY_URL }})
+  #         http_code=${response: -3}
+  #         if [ $http_code -ne 200 ]; then
+  #           echo "Deployment failed with HTTP code: $http_code"
+  #           exit 1
+  #         fi
+  #         echo "Deployment successful!"
+          
+  #     - name: Verify Deployment
+  #       run: |
+  #         echo "⏳ Waiting 5 seconds before health check..."
+  #         sleep 5
+
+  #         echo "🔎 Running health check..."
+  #         if curl -f --connect-timeout 5 --max-time 10 "${{ secrets.HEALTH_CHECK_URL }}"; then
+  #           echo "Health check passed!"
+  #         else
+  #           echo "Health check failed!"
+  #           exit 1
+  #         fi
