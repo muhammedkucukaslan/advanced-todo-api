@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -45,33 +46,32 @@ func NewLoginHandler(repo Repository, ts TokenService, validator *validator.Vali
 // @Router			/login [post]
 func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginResponse, int, error) {
 	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	user, err := h.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 
 		if errors.Is(err, domain.ErrEmailNotFound) {
-			return nil, 404, domain.ErrEmailNotFound
+			return nil, http.StatusNotFound, domain.ErrEmailNotFound
 		}
 		h.logger.Error("error while getting user by email: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-
 	err = user.ValidatePassword(req.Password)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidCredentials) {
-			return nil, 400, domain.ErrInvalidCredentials
+			return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 		}
 		h.logger.Error("error while validating password: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	token, err := h.ts.GenerateToken(user.Id.String(), user.Role, time.Now())
 	if err != nil {
 		h.logger.Error("error while generating token: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return &LoginResponse{Token: token}, 200, nil
+	return &LoginResponse{Token: token}, http.StatusOK, nil
 }

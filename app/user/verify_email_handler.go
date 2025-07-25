@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -43,18 +44,18 @@ func NewVerifyEmailHandler(repo Repository, validate *validator.Validate, ts Tok
 //	@Router			/users/verify-email [post]
 func (h *VerifyEmailHandler) Handle(ctx context.Context, req *VerifiyEmailRequest) (*VerifyEmailResponse, int, error) {
 	if err := h.validate.Struct(req); err != nil {
-		return nil, 400, err
+		return nil, http.StatusBadRequest, err
 	}
 
 	email, err := h.ts.ValidateVerifyEmailToken(req.Token)
 	if err != nil {
-		return nil, 401, domain.ErrUnauthorized
+		return nil, http.StatusUnauthorized, domain.ErrUnauthorized
 	}
 
 	if err := h.repo.VerifyEmail(ctx, email); err != nil {
 
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

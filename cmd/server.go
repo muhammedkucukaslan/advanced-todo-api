@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"time"
 
@@ -60,7 +61,7 @@ func registerMiddlewares(app *fiber.App) {
 		},
 		LimitReached: func(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
-				"code":    429,
+				"code":    http.StatusTooManyRequests,
 				"message": "you've sent too many requests. Please wait.",
 			})
 		},

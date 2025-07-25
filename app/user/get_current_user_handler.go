@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -42,7 +43,7 @@ func (h *GetCurrentUserHandler) Handle(ctx context.Context, req *GetCurrentUserR
 
 	user, err := h.repo.GetUserById(ctx, userId)
 	if err != nil {
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
-	return user, 200, nil
+	return user, http.StatusOK, nil
 }

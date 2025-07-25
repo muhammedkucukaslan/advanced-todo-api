@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -41,12 +42,12 @@ func NewUpdateFullNameHandler(repo Repository, validate *validator.Validate) *Up
 //	@Router			/users/account [patch]
 func (h *UpdateFullNameService) Handle(ctx context.Context, req *UpdateFullNameRequest) (*UpdateFullNameResponse, int, error) {
 	if err := h.validate.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 	userId := domain.GetUserID(ctx)
 	if err := h.repo.UpdateFullName(ctx, userId, req.FullName); err != nil {
 		fmt.Println("Error updating account:", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

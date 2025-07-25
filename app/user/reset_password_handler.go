@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -48,22 +49,22 @@ func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger 
 //	@Router			/users/reset-password [post]
 func (h *ResetPasswordHandler) Handle(ctx context.Context, req *ResetPasswordRequest) (*ResetPasswordResponse, int, error) {
 	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	email, err := h.tokenService.ValidateForgotPasswordToken(req.Token)
 	if err != nil {
 		h.logger.Error("failed to validate token for forgot password: ", err)
-		return nil, 401, domain.ErrUnauthorized
+		return nil, http.StatusUnauthorized, domain.ErrUnauthorized
 	}
 
 	hashedPassword, err := domain.HashPassword(req.Password)
 	if err != nil {
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	if err := h.repo.ResetPasswordByEmail(ctx, email, hashedPassword); err != nil {
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

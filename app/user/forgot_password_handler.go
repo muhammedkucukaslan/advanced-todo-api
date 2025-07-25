@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -48,17 +49,17 @@ func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenSe
 //	@Router			/users/forgot-password [post]
 func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordRequest) (*ForgotPasswordResponse, int, error) {
 	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	if exists, _ := h.repo.EmailExists(ctx, req.Email); !exists {
-		return nil, 200, nil
+		return nil, http.StatusOK, nil
 	}
 
 	token, err := h.tokenService.GenerateTokenForForgotPassword(req.Email)
 	if err != nil {
 		h.logger.Error("failed to generate token for forgot password: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	if err := h.emailService.SendPasswordResetEmail(
@@ -67,8 +68,8 @@ func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordR
 		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token), req.Language),
 	); err != nil {
 		h.logger.Error("failed to send forgot password email: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

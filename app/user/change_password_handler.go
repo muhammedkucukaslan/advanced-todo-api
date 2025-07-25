@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -45,34 +46,34 @@ func (h *ChangePasswordHandler) Handle(ctx context.Context, req *ChangePasswordR
 	userId := domain.GetUserID(ctx)
 
 	if err := h.validate.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	if len(req.OldPassword) < 8 || len(req.NewPassword) < 8 {
-		return nil, 400, domain.ErrPasswordTooShort
+		return nil, http.StatusBadRequest, domain.ErrPasswordTooShort
 	}
 
 	// return a user only having password
 	user, err := h.repo.GetUserOnlyHavingPasswordById(ctx, userId)
 	if err != nil {
 		if err == domain.ErrUserNotFound {
-			return nil, 404, domain.ErrUserNotFound
+			return nil, http.StatusNotFound, domain.ErrUserNotFound
 		}
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 	if err := user.ValidatePassword(req.OldPassword); err != nil {
-		return nil, 400, domain.ErrInvalidCredentials
+		return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 	}
 
 	if err := user.HashPassword(req.NewPassword); err != nil {
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	user.Id = userId
 
 	if err := h.repo.ChangePassword(ctx, user); err != nil {
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

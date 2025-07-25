@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -42,7 +43,7 @@ func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate *v
 func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, int, error) {
 
 	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	userId := domain.GetUserID(ctx)
@@ -51,7 +52,7 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 	fullName, email, err := h.repo.DeleteAccount(ctx, userId)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("failed to delete user account: %v", err))
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	// TODO mail notification
@@ -77,5 +78,5 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
 	}(fullName, email, req.Language)
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

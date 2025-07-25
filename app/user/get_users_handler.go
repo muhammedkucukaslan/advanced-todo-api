@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -52,13 +53,13 @@ func NewGetUsersHandler(repo Repository, validate *validator.Validate) *GetUsers
 func (h *GetUsersHandler) Handle(ctx context.Context, req *GetUsersRequest) (*GetUsersResponse, int, error) {
 
 	if err := h.validate.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	users, err := h.repo.GetUsers(ctx, req.Page, req.Limit)
 	if err != nil {
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return &users, 200, nil
+	return &users, http.StatusOK, nil
 }
