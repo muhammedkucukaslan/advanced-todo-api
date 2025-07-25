@@ -38,11 +38,8 @@ func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validat
 // @Tags			2- Auth
 // @Accept			json
 // @Produce		json
-//
-// @Param			response-language	header		string			true	"Response Language"	Enums(tr, ar, en)
-//
-// @Param			request				body		SignupRequest	true	"Signup request"
-// @Success		200					{object}	SignupResponse
+// @Param			request	body		SignupRequest	true	"Signup request"
+// @Success		200		{object}	SignupResponse
 // @Failure		400
 // @Failure		409
 // @Failure		500
@@ -64,6 +61,15 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 	token, err := h.ts.GenerateToken(user.Id.String(), user.Role, time.Now())
 	if err != nil {
 		h.logger.Error("error while generating token: ", err)
+		return nil, 500, domain.ErrInternalServer
+	}
+
+	err = h.repo.CreateUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			return nil, 409, domain.ErrUserAlreadyExists
+		}
+		h.logger.Error("error while creating user in repository: ", err)
 		return nil, 500, domain.ErrInternalServer
 	}
 
