@@ -84,6 +84,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
+	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
@@ -131,6 +132,8 @@ func setupRoutes(app *fiber.App) {
 	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validate, tokenService)
 	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validate, tokenService, mailersendService)
 
+	createTodoHandler := todo.NewCreateTodoHandler(repo)
+
 	app.Get("/healthcheck", handle(healthcheckHandler))
 	app.Use(fiberInfra.ContextMiddleware)
 
@@ -155,13 +158,8 @@ func setupRoutes(app *fiber.App) {
 	usersAdminApp.Get("/", handle(getUsersHandler))
 	usersAdminApp.Get("/:id", handle(getUserHandler))
 
-	todosApp := app.Group("/todos")
-	todosApp.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
-			Message: "This endpoint is not implemented yet",
-			Code:    http.StatusNotImplemented,
-		})
-	})
+	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
+	todosApp.Post("/", handle(createTodoHandler))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
