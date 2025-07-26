@@ -43,6 +43,9 @@ func (h *GetCurrentUserHandler) Handle(ctx context.Context, req *GetCurrentUserR
 
 	user, err := h.repo.GetUserById(ctx, userId)
 	if err != nil {
+		if err == domain.ErrUserNotFound {
+			return nil, http.StatusNotFound, domain.ErrUserNotFound
+		}
 		return nil, http.StatusInternalServerError, err
 	}
 	return user, http.StatusOK, nil

@@ -25,7 +25,7 @@ func (r *Repository) GetUserById(ctx context.Context, id uuid.UUID) (*user.GetCu
 	err := row.Scan(&user.Id, &user.FullName, &user.Role, &user.Email, &user.IsEmailVerified, &user.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, domain.ErrUserNotFound
 		}
 		return nil, err
 	}
