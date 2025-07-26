@@ -20,12 +20,10 @@ func TestCreateTodoHandler(t *testing.T) {
 	}
 
 	// This is a real user ID for testing
-	realUserId := "9796b492-662d-4742-8f7b-5eefbe1da107"
-	mockUserId := "5ee1903d-0c9a-4d95-aae2-7215e168564b"
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
-	ctx := context.WithValue(context.Background(), domain.UserIDKey, realUserId)
-	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, mockUserId)
+	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
+	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, domain.FakeUserId)
 
 	validCreateTodoRequest := &todo.CreateTodoRequest{
 		Title: "Test Todo",
@@ -104,13 +102,13 @@ func TestCreateTodoHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_, code, err := createTodoHandler.Handle(tt.args.ctx, tt.args.req)
 
+			assert.Equal(t, code, tt.code)
 			if err != nil {
 				assert.Error(t, err)
 				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Equal(t, code, tt.code)
+
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, code, tt.code)
 			}
 
 		})
