@@ -44,6 +44,7 @@ var (
 	ErrNoRows            = errors.New("no rows in result set")
 	ErrEmailNotFound     = errors.New("email not found")
 	ErrUserNotFound      = errors.New("user not found")
+	ErrInvalidUserID     = errors.New("invalid user ID")
 
 	ErrEmailAlreadyVerified = errors.New("email already verified")
 	ErrEmailAlreadyExists   = errors.New("email already exists")
