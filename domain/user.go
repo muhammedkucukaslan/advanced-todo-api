@@ -2,17 +2,20 @@ package domain
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	Id       uuid.UUID `json:"id" validate:"required"`
-	FullName string    `json:"fullName" validate:"required"`
-	Role     string    `json:"role" validate:"required"`
-	Password string    `json:"password" validate:"required"`
-	Email    string    `json:"email" validate:"required"`
+	Id              uuid.UUID `json:"id" validate:"required"`
+	FullName        string    `json:"fullName" validate:"required"`
+	Role            string    `json:"role" validate:"required"`
+	Password        string    `json:"password" validate:"required"`
+	IsEmailVerified bool      `json:"isEmailVerified" validate:"required"`
+	CreatedAt       time.Time `json:"createdAt" validate:"required"`
+	Email           string    `json:"email" validate:"required"`
 }
 
 func NewUser(fullName, password, email string) (*User, error) {
