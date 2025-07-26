@@ -10,4 +10,5 @@ test:
 test-coverage:
 	go test -v ./... -coverprofile=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
-
+unit-test:
+	go test -v ./tests/unit/... 

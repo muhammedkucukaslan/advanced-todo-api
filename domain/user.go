@@ -36,6 +36,11 @@ func NewUser(fullName, password, email string) (*User, error) {
 }
 
 func (u *User) ValidatePassword(password string) error {
+
+	if len(password) < 8 {
+		return ErrPasswordTooShort
+	}
+
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
