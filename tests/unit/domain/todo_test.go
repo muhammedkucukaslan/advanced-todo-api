@@ -59,7 +59,6 @@ func TestNewTodo(t *testing.T) {
 			got, err := domain.NewTodo(tt.args.userId, tt.args.title)
 			if err != nil {
 				assert.Equal(t, tt.wantErr, err)
-				return
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)

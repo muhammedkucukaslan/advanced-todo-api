@@ -9,7 +9,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	fmt.Println("Running integration tests...")
+	fmt.Println("Running userintegration tests...")
 	err := godotenv.Load("../../../.env")
 	if err != nil {
 		panic("Failed to load .env file: " + err.Error())
