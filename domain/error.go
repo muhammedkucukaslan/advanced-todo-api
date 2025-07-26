@@ -35,6 +35,11 @@ var (
 	ErrUnauthorized       = errors.New("unauthorized access")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 
+	ErrEmptyTitle          = errors.New("title cannot be empty")
+	ErrUserIdCannotBeEmpty = errors.New("user ID cannot be empty")
+	ErrTitleTooLong        = errors.New("title cannot exceed 100 characters")
+	ErrTitleTooShort       = errors.New("title must be at least 3 characters long")
+
 	ErrUserAlreadyExists = errors.New("user already exists")
 	ErrNoRows            = errors.New("no rows in result set")
 	ErrEmailNotFound     = errors.New("email not found")

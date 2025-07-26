@@ -44,10 +44,12 @@ func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) 
 
 	userId := domain.GetUserID(ctx)
 
-	todo := domain.NewTodo(userId, req.Title)
-	err := h.repo.CreateTodo(ctx, todo)
-
+	todo, err := domain.NewTodo(userId, req.Title)
 	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	if err = h.repo.CreateTodo(ctx, todo); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 
