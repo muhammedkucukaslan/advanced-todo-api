@@ -8,3 +8,4 @@ Makefile
 *.md
 *.log
 *_test.go
+./tests/*
