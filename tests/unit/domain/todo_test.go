@@ -21,36 +21,36 @@ func TestNewTodo(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "should create valid todo",
-			args: args{
+			"should create valid todo",
+			args{
 				userId: uuid.New(),
 				title:  "Buy groceries",
 			},
-			wantErr: nil,
+			nil,
 		},
 		{
-			name: "should return error for empty title",
-			args: args{
+			"should return error for empty title",
+			args{
 				userId: uuid.New(),
 				title:  "",
 			},
-			wantErr: domain.ErrEmptyTitle,
+			domain.ErrEmptyTitle,
 		},
 		{
-			name: "should return error for title too long",
-			args: args{
+			"should return error for title too long",
+			args{
 				userId: uuid.New(),
 				title:  "a very long title that exceeds the maximum length of one hundred characters.........................................................................................",
 			},
-			wantErr: domain.ErrTitleTooLong,
+			domain.ErrTitleTooLong,
 		},
 		{
-			name: "should return error for title too short",
-			args: args{
+			"should return error for title too short",
+			args{
 				userId: uuid.New(),
 				title:  "ab",
 			},
-			wantErr: domain.ErrTitleTooShort,
+			domain.ErrTitleTooShort,
 		},
 	}
 

@@ -21,23 +21,23 @@ func TestNewUser(t *testing.T) {
 	}{
 		// Validator library checks if email is valid, so we can skip that here
 		{
-			name: "should create valid user",
-			args: args{
+			"should create valid user",
+			args{
 				fullName: "John Doe",
 				password: "mypassword",
 				email:    "john@example.com",
 			},
-			wantErr: nil,
+			nil,
 		},
 
 		{
-			name: "should fail with weak password",
-			args: args{
+			"should fail with weak password",
+			args{
 				fullName: "John Doe",
 				password: "123",
 				email:    "john@example.com",
 			},
-			wantErr: domain.ErrPasswordTooShort,
+			domain.ErrPasswordTooShort,
 		},
 	}
 
@@ -85,36 +85,36 @@ func TestUser_ValidatePassword(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "valid password",
-			args: args{
+			"valid password",
+			args{
 				oldPassword: hashedPassword,
 				password:    "secret123",
 			},
-			wantErr: nil,
+			nil,
 		},
 		{
-			name: "invalid old password",
-			args: args{
+			"invalid old password",
+			args{
 				oldPassword: "secret123", // this must be hashed
 				password:    "secret123",
 			},
-			wantErr: domain.ErrInternalServer,
+			domain.ErrInternalServer,
 		},
 		{
-			name: "invalid password",
-			args: args{
+			"invalid password",
+			args{
 				oldPassword: hashedPassword,
 				password:    "wrongpassword",
 			},
-			wantErr: domain.ErrInvalidCredentials,
+			domain.ErrInvalidCredentials,
 		},
 		{
-			name: "short password",
-			args: args{
+			"short password",
+			args{
 				oldPassword: "secret123",
 				password:    "short",
 			},
-			wantErr: domain.ErrPasswordTooShort,
+			domain.ErrPasswordTooShort,
 		},
 	}
 
