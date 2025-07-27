@@ -10,8 +10,7 @@ import (
 )
 
 type ForgotPasswordRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
-	Email    string `json:"email" validate:"required,email"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type ForgotPasswordResponse struct{}
@@ -64,8 +63,8 @@ func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordR
 
 	if err := h.emailService.SendPasswordResetEmail(
 		req.Email,
-		domain.NewForgotPasswordSubject(req.Language),
-		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token), req.Language),
+		domain.ForgotPasswordEmailSubject,
+		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token)),
 	); err != nil {
 		h.logger.Error("failed to send forgot password email: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
