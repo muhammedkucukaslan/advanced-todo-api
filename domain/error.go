@@ -31,7 +31,7 @@ const (
 
 var (
 	ErrPasswordTooShort   = errors.New("password must be at least 8 characters long")
-	ErrInvalidRequest     = errors.New("geçersiz istek")
+	ErrInvalidRequest     = errors.New("invalid request")
 	ErrUnauthorized       = errors.New("unauthorized access")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -20,10 +19,10 @@ type ForgotPasswordHandler struct {
 	emailService MailService
 	tokenService TokenService
 	logger       *logrus.Logger
-	validator    *validator.Validate
+	validator    domain.Validator
 }
 
-func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger *logrus.Logger, validator *validator.Validate) *ForgotPasswordHandler {
+func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger *logrus.Logger, validator domain.Validator) *ForgotPasswordHandler {
 	return &ForgotPasswordHandler{
 		repo:         repo,
 		emailService: emailService,
@@ -47,7 +46,7 @@ func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenSe
 //	@Failure		500
 //	@Router			/users/forgot-password [post]
 func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordRequest) (*ForgotPasswordResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 

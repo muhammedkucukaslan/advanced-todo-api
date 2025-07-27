@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -18,10 +17,10 @@ type ChangePasswordResponse struct{}
 
 type ChangePasswordHandler struct {
 	repo     Repository
-	validate *validator.Validate
+	validate domain.Validator
 }
 
-func NewChangePasswordHandler(repo Repository, validate *validator.Validate) *ChangePasswordHandler {
+func NewChangePasswordHandler(repo Repository, validate domain.Validator) *ChangePasswordHandler {
 	return &ChangePasswordHandler{repo: repo, validate: validate}
 }
 
@@ -45,7 +44,7 @@ func NewChangePasswordHandler(repo Repository, validate *validator.Validate) *Ch
 func (h *ChangePasswordHandler) Handle(ctx context.Context, req *ChangePasswordRequest) (*ChangePasswordResponse, int, error) {
 	userId := domain.GetUserID(ctx)
 
-	if err := h.validate.Struct(req); err != nil {
+	if err := h.validate.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 

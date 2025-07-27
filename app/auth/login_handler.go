@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -14,7 +14,7 @@ import (
 type LoginRequest struct {
 	Language string `reqHeader:"response-language" validate:"required,oneof=en tr ar" swaggerignore:"true"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 type LoginResponse struct {
@@ -24,11 +24,11 @@ type LoginResponse struct {
 type LoginHandler struct {
 	repo      Repository
 	ts        TokenService
-	validator *validator.Validate
+	validator domain.Validator
 	logger    *logrus.Logger
 }
 
-func NewLoginHandler(repo Repository, ts TokenService, validator *validator.Validate, logger *logrus.Logger) *LoginHandler {
+func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validator, logger *logrus.Logger) *LoginHandler {
 	return &LoginHandler{repo: repo, ts: ts, validator: validator, logger: logger}
 }
 
@@ -45,7 +45,7 @@ func NewLoginHandler(repo Repository, ts TokenService, validator *validator.Vali
 // @Failure		500
 // @Router			/login [post]
 func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
@@ -60,6 +60,7 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 	}
 	err = user.ValidatePassword(req.Password)
 	if err != nil {
+		fmt.Println("Password validation error:", err)
 		if errors.Is(err, domain.ErrInvalidCredentials) {
 			return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 		}

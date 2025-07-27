@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -18,10 +17,10 @@ type UpdateFullNameResponse struct{}
 
 type UpdateFullNameService struct {
 	repo     Repository
-	validate *validator.Validate
+	validate domain.Validator
 }
 
-func NewUpdateFullNameHandler(repo Repository, validate *validator.Validate) *UpdateFullNameService {
+func NewUpdateFullNameHandler(repo Repository, validate domain.Validator) *UpdateFullNameService {
 	return &UpdateFullNameService{repo: repo, validate: validate}
 }
 
@@ -41,7 +40,7 @@ func NewUpdateFullNameHandler(repo Repository, validate *validator.Validate) *Up
 //	@Failure		500
 //	@Router			/users/account [patch]
 func (h *UpdateFullNameService) Handle(ctx context.Context, req *UpdateFullNameRequest) (*UpdateFullNameResponse, int, error) {
-	if err := h.validate.Struct(req); err != nil {
+	if err := h.validate.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 	userId := domain.GetUserID(ctx)

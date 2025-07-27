@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -20,11 +19,11 @@ type DeleteAccountResponse struct{}
 type DeleteAccountHandler struct {
 	repo      Repository
 	logger    *logrus.Logger
-	validator *validator.Validate
+	validator domain.Validator
 	ms        MailService
 }
 
-func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate *validator.Validate, ms MailService) *DeleteAccountHandler {
+func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate domain.Validator, ms MailService) *DeleteAccountHandler {
 	return &DeleteAccountHandler{repo: repo, logger: logger, ms: ms, validator: validate}
 }
 
@@ -42,7 +41,7 @@ func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate *v
 //	@Router			/users/account [delete]
 func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, int, error) {
 
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 

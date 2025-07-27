@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -16,12 +15,12 @@ type SendVerificationEmailResponse struct{}
 
 type SendVerificationEmailHandler struct {
 	repo         Repository
-	validate     *validator.Validate
+	validate     domain.Validator
 	tokenService TokenService
 	ms           MailService
 }
 
-func NewSendVerificationEmailHandler(repo Repository, validate *validator.Validate, tokenService TokenService, ms MailService) *SendVerificationEmailHandler {
+func NewSendVerificationEmailHandler(repo Repository, validate domain.Validator, tokenService TokenService, ms MailService) *SendVerificationEmailHandler {
 	return &SendVerificationEmailHandler{
 		repo:         repo,
 		validate:     validate,
@@ -49,7 +48,7 @@ func NewSendVerificationEmailHandler(repo Repository, validate *validator.Valida
 //	@Router			/users/send-verification-email [post]
 func (h *SendVerificationEmailHandler) Handle(ctx context.Context, req *SendVerificationEmailRequest) (*SendVerificationEmailResponse, int, error) {
 
-	if err := h.validate.Struct(req); err != nil {
+	if err := h.validate.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 

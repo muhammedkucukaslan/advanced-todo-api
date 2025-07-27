@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -26,11 +25,11 @@ type SignupHandler struct {
 	repo      Repository
 	ts        TokenService
 	es        EmailService
-	validator *validator.Validate
+	validator domain.Validator
 	logger    *logrus.Logger
 }
 
-func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator *validator.Validate, logger *logrus.Logger) *SignupHandler {
+func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator domain.Validator, logger *logrus.Logger) *SignupHandler {
 	return &SignupHandler{repo: repo, ts: ts, es: es, validator: validator, logger: logger}
 }
 
@@ -46,7 +45,7 @@ func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validat
 // @Failure		500
 // @Router			/signup [post]
 func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*SignupResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 

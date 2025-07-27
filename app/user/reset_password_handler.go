@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -21,10 +20,10 @@ type ResetPasswordHandler struct {
 	repo         Repository
 	tokenService TokenService
 	logger       *logrus.Logger
-	validator    *validator.Validate
+	validator    domain.Validator
 }
 
-func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger *logrus.Logger, validator *validator.Validate) *ResetPasswordHandler {
+func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger *logrus.Logger, validator domain.Validator) *ResetPasswordHandler {
 	return &ResetPasswordHandler{
 		repo:         repo,
 		tokenService: tokenService,
@@ -48,7 +47,7 @@ func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger 
 //	@Failure		500
 //	@Router			/users/reset-password [post]
 func (h *ResetPasswordHandler) Handle(ctx context.Context, req *ResetPasswordRequest) (*ResetPasswordResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 

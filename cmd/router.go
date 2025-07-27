@@ -81,7 +81,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
@@ -91,6 +90,7 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	mailersend "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	"github.com/sirupsen/logrus"
 
 	"github.com/gofiber/fiber/v2"
@@ -108,7 +108,7 @@ func setupRoutes(app *fiber.App) {
 	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
 	MockEmailServer := &domain.MockEmailServer{}
 	fmt.Println(MockEmailServer)
-	validate := validator.New(validator.WithRequiredStructEnabled())
+	validator := validator.NewValidator()
 	middlewareManager := NewMiddlewareManager(tokenService)
 
 	logger := logrus.New()
@@ -118,19 +118,19 @@ func setupRoutes(app *fiber.App) {
 	})
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
-	signupHandler := auth.NewSignupHandler(repo, tokenService, mailersendService, validate, logger)
-	loginHandler := auth.NewLoginHandler(repo, tokenService, validate, logger)
+	signupHandler := auth.NewSignupHandler(repo, tokenService, mailersendService, validator, logger)
+	loginHandler := auth.NewLoginHandler(repo, tokenService, validator, logger)
 
 	getUserHandler := user.NewGetUserHandler(repo)
-	getUsersHandler := user.NewGetUsersHandler(repo, validate)
-	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validate, MockEmailServer)
-	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validate)
+	getUsersHandler := user.NewGetUsersHandler(repo, validator)
+	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validator, MockEmailServer)
+	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validator)
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
-	updatePasswordHandler := user.NewChangePasswordHandler(repo, validate)
-	forgotPasswordHandler := user.NewForgotPasswordHandler(repo, mailersendService, tokenService, logger, validate)
-	resetPasswordHandler := user.NewResetPasswordHandler(repo, tokenService, logger, validate)
-	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validate, tokenService)
-	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validate, tokenService, mailersendService)
+	updatePasswordHandler := user.NewChangePasswordHandler(repo, validator)
+	forgotPasswordHandler := user.NewForgotPasswordHandler(repo, mailersendService, tokenService, logger, validator)
+	resetPasswordHandler := user.NewResetPasswordHandler(repo, tokenService, logger, validator)
+	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validator, tokenService)
+	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validator, tokenService, mailersendService)
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 

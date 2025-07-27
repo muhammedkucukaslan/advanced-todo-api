@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
@@ -24,10 +23,10 @@ type User struct {
 
 type GetUsersHandler struct {
 	repo     Repository
-	validate *validator.Validate
+	validate domain.Validator
 }
 
-func NewGetUsersHandler(repo Repository, validate *validator.Validate) *GetUsersHandler {
+func NewGetUsersHandler(repo Repository, validate domain.Validator) *GetUsersHandler {
 	return &GetUsersHandler{
 		repo:     repo,
 		validate: validate,
@@ -52,7 +51,7 @@ func NewGetUsersHandler(repo Repository, validate *validator.Validate) *GetUsers
 //	@Router			/admin/users [get]
 func (h *GetUsersHandler) Handle(ctx context.Context, req *GetUsersRequest) (*GetUsersResponse, int, error) {
 
-	if err := h.validate.Struct(req); err != nil {
+	if err := h.validate.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
