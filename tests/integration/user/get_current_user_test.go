@@ -20,7 +20,7 @@ func TestGetCurrentUserHandler(t *testing.T) {
 	}
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
 
-	mockUser, validCtx, invalidCtx := setupTestData()
+	mockUser, validCtx, invalidCtx := setupGetCurrentUserTestData()
 
 	validGetCurrentUserRequest := &user.GetCurrentUserRequest{}
 
@@ -81,7 +81,7 @@ func TestGetCurrentUserHandler(t *testing.T) {
 	}
 }
 
-func setupTestData() (*user.GetCurrentUserResponse, context.Context, context.Context) {
+func setupGetCurrentUserTestData() (*user.GetCurrentUserResponse, context.Context, context.Context) {
 
 	mockUser := &user.GetCurrentUserResponse{
 		Id:              domain.TestUser.Id.String(),

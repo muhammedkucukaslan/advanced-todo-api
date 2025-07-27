@@ -18,7 +18,6 @@ type GetUserResponse struct {
 	FullName        string    `json:"full_name"`
 	Email           string    `json:"email"`
 	IsEmailVerified bool      `json:"is_email_verified"`
-	Address         string    `json:"address"`
 }
 
 type GetUserHandler struct {
