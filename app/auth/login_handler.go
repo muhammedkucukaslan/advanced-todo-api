@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type LoginRequest struct {
@@ -25,10 +24,10 @@ type LoginHandler struct {
 	repo      Repository
 	ts        TokenService
 	validator domain.Validator
-	logger    *logrus.Logger
+	logger    domain.Logger
 }
 
-func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validator, logger *logrus.Logger) *LoginHandler {
+func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validator, logger domain.Logger) *LoginHandler {
 	return &LoginHandler{repo: repo, ts: ts, validator: validator, logger: logger}
 }
 

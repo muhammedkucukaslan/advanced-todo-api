@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type ResetPasswordRequest struct {
@@ -19,11 +18,11 @@ type ResetPasswordResponse struct{}
 type ResetPasswordHandler struct {
 	repo         Repository
 	tokenService TokenService
-	logger       *logrus.Logger
+	logger       domain.Logger
 	validator    domain.Validator
 }
 
-func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger *logrus.Logger, validator domain.Validator) *ResetPasswordHandler {
+func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger domain.Logger, validator domain.Validator) *ResetPasswordHandler {
 	return &ResetPasswordHandler{
 		repo:         repo,
 		tokenService: tokenService,

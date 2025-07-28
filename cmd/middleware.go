@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
@@ -13,13 +12,15 @@ import (
 // Middleware manager to hold shared services
 type MiddlewareManager struct {
 	tokenService auth.TokenService
+	logger       domain.Logger
 }
 
 // NewMiddlewareManager creates a new middleware manager with initialized services
 // TODO  Here is dependent on auth.TokenService fix it
-func NewMiddlewareManager(tokenService auth.TokenService) *MiddlewareManager {
+func NewMiddlewareManager(tokenService auth.TokenService, logger domain.Logger) *MiddlewareManager {
 	return &MiddlewareManager{
 		tokenService: tokenService,
+		logger:       logger,
 	}
 }
 
@@ -52,7 +53,6 @@ func (m *MiddlewareManager) AuthMiddleware(c *fiber.Ctx) error {
 
 	payload, err := m.tokenService.ValidateToken(token)
 	if err != nil {
-		fmt.Println("WARN: Invalid or expired token, but allowing anonymous access:", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
 			Message: "invalid or expired token",
 			Code:    fiber.StatusUnauthorized,

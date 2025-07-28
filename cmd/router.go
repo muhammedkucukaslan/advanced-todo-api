@@ -90,8 +90,8 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	mailersend "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
-	"github.com/sirupsen/logrus"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -109,13 +109,9 @@ func setupRoutes(app *fiber.App) {
 	MockEmailServer := &domain.MockEmailServer{}
 	fmt.Println(MockEmailServer)
 	validator := validator.NewValidator()
-	middlewareManager := NewMiddlewareManager(tokenService)
+	logger := slog.NewLogger()
 
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		DisableColors: true,
-		FullTimestamp: true,
-	})
+	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
 	signupHandler := auth.NewSignupHandler(repo, tokenService, mailersendService, validator, logger)

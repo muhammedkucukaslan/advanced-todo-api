@@ -48,7 +48,9 @@ func registerMiddlewares(app *fiber.App) {
 	app.Use(recover.New())
 
 	app.Use(logger.New(logger.Config{
-		Format: "${time} | ${status} | ${method} | ${path}\n",
+		Format:     "${time} | ${status} | ${method} | ${path} | ${latency}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+		TimeZone:   "Local",
 	}))
 
 	app.Use(helmet.New())

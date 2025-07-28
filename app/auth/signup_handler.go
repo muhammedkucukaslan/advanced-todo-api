@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type SignupRequest struct {
@@ -26,10 +25,10 @@ type SignupHandler struct {
 	ts        TokenService
 	es        EmailService
 	validator domain.Validator
-	logger    *logrus.Logger
+	logger    domain.Logger
 }
 
-func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator domain.Validator, logger *logrus.Logger) *SignupHandler {
+func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator domain.Validator, logger domain.Logger) *SignupHandler {
 	return &SignupHandler{repo: repo, ts: ts, es: es, validator: validator, logger: logger}
 }
 

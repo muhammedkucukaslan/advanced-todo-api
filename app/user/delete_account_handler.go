@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type DeleteAccountRequest struct {
@@ -18,12 +17,12 @@ type DeleteAccountResponse struct{}
 
 type DeleteAccountHandler struct {
 	repo      Repository
-	logger    *logrus.Logger
+	logger    domain.Logger
 	validator domain.Validator
 	ms        MailService
 }
 
-func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate domain.Validator, ms MailService) *DeleteAccountHandler {
+func NewDeleteAccountHandler(repo Repository, logger domain.Logger, validate domain.Validator, ms MailService) *DeleteAccountHandler {
 	return &DeleteAccountHandler{repo: repo, logger: logger, ms: ms, validator: validate}
 }
 
@@ -68,12 +67,12 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 			if err == nil {
 				return
 			}
-			h.logger.Errorf("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
+			h.logger.Error("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
 			if attempt < maxRetries {
 				time.Sleep(retryInterval)
 			}
 		}
-		h.logger.Errorf("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
+		h.logger.Error("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
 	}(fullName, email, req.Language)
 

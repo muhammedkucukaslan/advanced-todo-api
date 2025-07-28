@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type ForgotPasswordRequest struct {
@@ -18,11 +17,11 @@ type ForgotPasswordHandler struct {
 	repo         Repository
 	emailService MailService
 	tokenService TokenService
-	logger       *logrus.Logger
+	logger       domain.Logger
 	validator    domain.Validator
 }
 
-func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger *logrus.Logger, validator domain.Validator) *ForgotPasswordHandler {
+func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger domain.Logger, validator domain.Validator) *ForgotPasswordHandler {
 	return &ForgotPasswordHandler{
 		repo:         repo,
 		emailService: emailService,
