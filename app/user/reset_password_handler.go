@@ -2,13 +2,13 @@ package user
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
 type ResetPasswordRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
 	Token    string `json:"token" validate:"required"`
 	Password string `json:"password" validate:"required,min=8"`
 }
@@ -58,10 +58,14 @@ func (h *ResetPasswordHandler) Handle(ctx context.Context, req *ResetPasswordReq
 
 	hashedPassword, err := domain.HashPassword(req.Password)
 	if err != nil {
+		if errors.Is(err, domain.ErrPasswordTooShort) {
+			return nil, http.StatusBadRequest, domain.ErrPasswordTooShort
+		}
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	if err := h.repo.ResetPasswordByEmail(ctx, email, hashedPassword); err != nil {
+
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 	return nil, http.StatusNoContent, nil

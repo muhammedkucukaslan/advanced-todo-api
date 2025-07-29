@@ -65,6 +65,9 @@ func (u *User) HashPassword(password string) error {
 }
 
 func HashPassword(password string) (string, error) {
+	if len(password) < 8 {
+		return "", ErrPasswordTooShort
+	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", ErrInternalServer
