@@ -92,6 +92,7 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	mock "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -106,10 +107,9 @@ func setupRoutes(app *fiber.App) {
 	tokenService := jwt.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
 	// cookieService := fiberInfra.NewFiberCookieService()
 	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
-	MockEmailServer := &domain.MockEmailServer{}
-	fmt.Println(MockEmailServer)
-	validator := validator.NewValidator()
+	MockEmailService := &mock.MockEmailService{}
 	logger := slog.NewLogger()
+	validator := validator.NewValidator(logger)
 
 	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
@@ -119,7 +119,7 @@ func setupRoutes(app *fiber.App) {
 
 	getUserHandler := user.NewGetUserHandler(repo)
 	getUsersHandler := user.NewGetUsersHandler(repo, validator)
-	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validator, MockEmailServer)
+	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validator, MockEmailService)
 	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validator)
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
 	updatePasswordHandler := user.NewChangePasswordHandler(repo, validator)
@@ -130,32 +130,32 @@ func setupRoutes(app *fiber.App) {
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 
-	app.Get("/healthcheck", handle(healthcheckHandler))
+	app.Get("/healthcheck", handle(healthcheckHandler, logger))
 	app.Use(fiberInfra.ContextMiddleware)
 
 	adminApp := app.Group("/admin", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware)
 
-	app.Post("/signup", handle(signupHandler))
-	app.Post("/login", handle(loginHandler))
+	app.Post("/signup", handle(signupHandler, logger))
+	app.Post("/login", handle(loginHandler, logger))
 
 	usersPublicApp := app.Group("/users")
-	usersPublicApp.Post("/forgot-password", handle(forgotPasswordHandler))
-	usersPublicApp.Post("/reset-password", handle(resetPasswordHandler))
-	usersPublicApp.Post("/verify-email", handle(verifyEmailHandler))
+	usersPublicApp.Post("/forgot-password", handle(forgotPasswordHandler, logger))
+	usersPublicApp.Post("/reset-password", handle(resetPasswordHandler, logger))
+	usersPublicApp.Post("/verify-email", handle(verifyEmailHandler, logger))
 
 	usersApp := app.Group("/users", middlewareManager.AuthMiddleware)
-	usersApp.Get("/profile", handle(getCurrentUserHandler))
-	usersApp.Delete("/account", handle(deleteAccountHandler))
-	usersApp.Patch("/account", handle(updateFullNameHandler))
-	usersApp.Patch("/password", handle(updatePasswordHandler))
-	usersApp.Post("/send-verification-email", handle(sendVerificationEmailHandler))
+	usersApp.Get("/profile", handle(getCurrentUserHandler, logger))
+	usersApp.Delete("/account", handle(deleteAccountHandler, logger))
+	usersApp.Patch("/account", handle(updateFullNameHandler, logger))
+	usersApp.Patch("/password", handle(updatePasswordHandler, logger))
+	usersApp.Post("/send-verification-email", handle(sendVerificationEmailHandler, logger))
 
 	usersAdminApp := adminApp.Group("/users")
-	usersAdminApp.Get("/", handle(getUsersHandler))
-	usersAdminApp.Get("/:id", handle(getUserHandler))
+	usersAdminApp.Get("/", handle(getUsersHandler, logger))
+	usersAdminApp.Get("/:id", handle(getUserHandler, logger))
 
 	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
-	todosApp.Post("/", handle(createTodoHandler))
+	todosApp.Post("/", handle(createTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
