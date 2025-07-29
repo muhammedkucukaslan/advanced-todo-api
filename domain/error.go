@@ -30,6 +30,7 @@ const (
 )
 
 var (
+	ErrInvalidToken       = errors.New("invalid token")
 	ErrPasswordTooShort   = errors.New("password must be at least 8 characters long")
 	ErrInvalidRequest     = errors.New("invalid request")
 	ErrUnauthorized       = errors.New("unauthorized access")
