@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
@@ -46,9 +47,12 @@ func registerMiddlewares(app *fiber.App) {
 	}))
 
 	app.Use(recover.New())
+	app.Use(requestid.New(requestid.Config{
+		Header: "X-Request-Id",
+	}))
 
 	app.Use(logger.New(logger.Config{
-		Format:     "${time} | ${status} | ${method} | ${path} | ${latency}\n",
+		Format:     "${time} | ${status} | ${method} | ${path} | ${latency} | ${locals:requestid} | \n",
 		TimeFormat: "2006-01-02 15:04:05",
 		TimeZone:   "Local",
 	}))
