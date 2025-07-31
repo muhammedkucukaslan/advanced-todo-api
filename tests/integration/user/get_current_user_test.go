@@ -37,7 +37,7 @@ func TestGetCurrentUserHandler(t *testing.T) {
 		code    int
 	}{
 		{
-			"should get current user successfully",
+			"valid user ID request",
 			args{
 				ctx: validCtx,
 				req: validGetCurrentUserRequest,
@@ -47,7 +47,7 @@ func TestGetCurrentUserHandler(t *testing.T) {
 			http.StatusOK,
 		},
 		{
-			"should return 404 for fake user ID",
+			"invalid user ID request",
 			args{
 				ctx: invalidCtx,
 				req: validGetCurrentUserRequest,

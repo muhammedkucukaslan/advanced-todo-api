@@ -21,7 +21,7 @@ func TestNewUser(t *testing.T) {
 	}{
 		// Validator library checks if email is valid, so we can skip that here
 		{
-			"should create valid user",
+			"create valid user",
 			args{
 				fullName: "John Doe",
 				password: "mypassword",
@@ -31,13 +31,22 @@ func TestNewUser(t *testing.T) {
 		},
 
 		{
-			"should fail with weak password",
+			"too short password",
 			args{
 				fullName: "John Doe",
 				password: "123",
 				email:    "john@example.com",
 			},
 			domain.ErrPasswordTooShort,
+		},
+		{
+			"too short fullName",
+			args{
+				fullName: "JD",
+				password: "mypassword",
+				email:    "john@example.com",
+			},
+			domain.ErrTooShortFullName,
 		},
 	}
 

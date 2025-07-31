@@ -21,7 +21,7 @@ func TestNewTodo(t *testing.T) {
 		wantErr error
 	}{
 		{
-			"should create valid todo",
+			"valid creation",
 			args{
 				userId: uuid.New(),
 				title:  "Buy groceries",
@@ -29,7 +29,7 @@ func TestNewTodo(t *testing.T) {
 			nil,
 		},
 		{
-			"should return error for empty title",
+			"empty title",
 			args{
 				userId: uuid.New(),
 				title:  "",
@@ -37,7 +37,7 @@ func TestNewTodo(t *testing.T) {
 			domain.ErrEmptyTitle,
 		},
 		{
-			"should return error for title too long",
+			"title too long",
 			args{
 				userId: uuid.New(),
 				title:  "a very long title that exceeds the maximum length of one hundred characters.........................................................................................",
@@ -45,7 +45,7 @@ func TestNewTodo(t *testing.T) {
 			domain.ErrTitleTooLong,
 		},
 		{
-			"should return error for title too short",
+			"title too short",
 			args{
 				userId: uuid.New(),
 				title:  "ab",

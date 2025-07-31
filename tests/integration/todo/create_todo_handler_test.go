@@ -19,8 +19,6 @@ func TestCreateTodoHandler(t *testing.T) {
 		t.Fatalf("failed to create repository: %v", err)
 	}
 
-	// This is a real user ID for testing
-
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, domain.FakeUserId)
@@ -51,7 +49,7 @@ func TestCreateTodoHandler(t *testing.T) {
 		code    int
 	}{
 		{
-			"should create todo successfully",
+			"valid creation",
 			args{
 				ctx: ctx,
 				req: validCreateTodoRequest,
@@ -60,7 +58,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			http.StatusCreated,
 		},
 		{
-			"should return forbidden error for userId which is not in database",
+			"invalid user ID request",
 			args{
 				ctx: ctxWithFakeUserId,
 				req: validCreateTodoRequest,
@@ -70,7 +68,7 @@ func TestCreateTodoHandler(t *testing.T) {
 		},
 
 		{
-			"should return bad request error for invalid title",
+			"invalid request",
 			args{
 				ctx: ctx,
 				req: invalidCreateTodoRequest,
@@ -79,7 +77,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			http.StatusBadRequest,
 		},
 		{
-			"should return bad request error for too short title",
+			"too short title",
 			args{
 				ctx: ctx,
 				req: tooShortCreateTodoRequest,
@@ -88,7 +86,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			http.StatusBadRequest,
 		},
 		{
-			"should return bad request error for too long title",
+			"too long title",
 			args{
 				ctx: ctx,
 				req: tooLongCreateTodoRequest,
