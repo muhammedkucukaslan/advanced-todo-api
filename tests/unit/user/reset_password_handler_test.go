@@ -2,6 +2,7 @@ package testuser
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
@@ -10,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestResetPasswordHandler_Handle(t *testing.T) {
+func TestResetPasswordHandler(t *testing.T) {
 
 	handler := user.NewResetPasswordHandler(NewMockRepository(), mock.NewMockTokenService(), mock.NewMockLogger(), mock.NewMockValidator())
 
@@ -31,14 +32,14 @@ func TestResetPasswordHandler_Handle(t *testing.T) {
 				Token:    "validToken",
 				Password: "validPassword123",
 			},
-		}, 204, nil},
+		}, http.StatusNoContent, nil},
 		{"too short password", args{
 			ctx: context.Background(),
 			req: &user.ResetPasswordRequest{
 				Token:    "validToken",
 				Password: "short",
 			},
-		}, 400, domain.ErrPasswordTooShort},
+		}, http.StatusBadRequest, domain.ErrPasswordTooShort},
 	}
 
 	for _, tt := range tests {
