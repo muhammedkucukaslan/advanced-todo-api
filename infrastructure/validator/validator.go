@@ -21,6 +21,7 @@ func NewValidator(logger domain.Logger) *Validator {
 func (v *Validator) Validate(data any) error {
 	if err := v.validator.Struct(data); err != nil {
 		v.logger.Error("Validation error", "err", err.Error())
+		return domain.ErrInvalidRequest
 	}
 	return nil
 }
