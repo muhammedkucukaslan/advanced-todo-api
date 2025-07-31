@@ -20,6 +20,10 @@ type User struct {
 
 func NewUser(fullName, password, email string) (*User, error) {
 
+	if fullName == "" || len(fullName) < 3 {
+		return nil, ErrTooShortFullName
+	}
+
 	if len(password) < 8 {
 		return nil, ErrPasswordTooShort
 	}
@@ -33,7 +37,7 @@ func NewUser(fullName, password, email string) (*User, error) {
 		Id:       uuid.New(),
 		FullName: fullName,
 		Role:     "USER",
-		Password: string(hashedPassword),
+		Password: hashedPassword,
 		Email:    email,
 	}, nil
 }

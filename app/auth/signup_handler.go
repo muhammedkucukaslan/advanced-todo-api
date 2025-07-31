@@ -50,8 +50,8 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 
 	user, err := domain.NewUser(req.FullName, req.Password, req.Email)
 	if err != nil {
-		if errors.Is(err, domain.ErrPasswordTooShort) {
-			return nil, http.StatusBadRequest, domain.ErrPasswordTooShort
+		if !errors.Is(err, domain.ErrInternalServer) {
+			return nil, http.StatusBadRequest, err
 		}
 		h.logger.Error("error while creating domain user: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
