@@ -39,7 +39,7 @@ func (m *MockRepository) DeleteAccount(ctx context.Context, id uuid.UUID) (strin
 func (m *MockRepository) GetUserOnlyHavingPasswordById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	return &domain.User{
 		Id:       id,
-		Password: "<hashed_password>",
+		Password: "$2y$10$7ALFQvvizAtvcM.zmnoZHOBDAPVQfrxJ4gPf/vzFzio.zPWYlFE5W", // hash for "password123"
 	}, nil
 }
 

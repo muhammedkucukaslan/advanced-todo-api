@@ -8,7 +8,6 @@ import (
 )
 
 type ChangePasswordRequest struct {
-	Language    string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
 }
@@ -60,6 +59,7 @@ func (h *ChangePasswordHandler) Handle(ctx context.Context, req *ChangePasswordR
 		}
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
+
 	if err := user.ValidatePassword(req.OldPassword); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 	}
