@@ -1,5 +1,12 @@
 package mock
 
+import (
+	"time"
+
+	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
+)
+
 // MockEmailService
 type MockEmailService struct {
 }
@@ -49,12 +56,15 @@ func NewMockTokenService() *MockTokenService {
 	return &MockTokenService{}
 }
 
-func (m *MockTokenService) GenerateToken(userID string) (string, error) {
-	return "mockedToken", nil
+func (m *MockTokenService) GenerateToken(userID, role string, time time.Time) (string, error) {
+	return domain.MockToken, nil
 }
 
-func (m *MockTokenService) ValidateToken(token string) (string, error) {
-	return "mockedUserID", nil
+func (m *MockTokenService) ValidateToken(token string) (auth.TokenPayload, error) {
+	return auth.TokenPayload{
+		UserID: domain.TestUser.Id.String(),
+		Role:   domain.TestUser.Role,
+	}, nil
 }
 
 func (m *MockTokenService) GenerateVerificationToken(email string) (string, error) {
