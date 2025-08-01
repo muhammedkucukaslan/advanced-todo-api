@@ -60,6 +60,21 @@ func setupTestUser(t *testing.T, connStr string) {
 
 }
 
+func setupTestTodo(t *testing.T, connStr string) {
+	db, err := sql.Open("postgres", connStr)
+	require.NoError(t, err)
+	defer db.Close()
+
+	query := "INSERT INTO todos (id, user_id, title, completed) VALUES ($1, $2, $3, $4)"
+	_, err = db.Exec(query,
+		domain.TestTodo.Id,
+		domain.TestUser.Id,
+		domain.TestTodo.Title,
+		domain.TestTodo.Completed,
+	)
+	require.NoError(t, err)
+}
+
 func runMigrations(t *testing.T, connStr string) {
 	db, err := sql.Open("postgres", connStr)
 	require.NoError(t, err)
