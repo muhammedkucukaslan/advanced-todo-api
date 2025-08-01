@@ -65,8 +65,8 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 
 	err = h.repo.CreateUser(ctx, user)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserAlreadyExists) {
-			return nil, http.StatusConflict, domain.ErrUserAlreadyExists
+		if errors.Is(err, domain.ErrEmailAlreadyExists) {
+			return nil, http.StatusConflict, domain.ErrEmailAlreadyExists
 		}
 		h.logger.Error("error while creating user in repository: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
