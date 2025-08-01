@@ -3,21 +3,29 @@ package testuser
 import (
 	"context"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+
+	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCurrentUserHandler(t *testing.T) {
+	ctx := context.Background()
+	postgresContainer, connStr := createTestContainer(t, ctx)
+	defer func() {
+		err := postgresContainer.Terminate(ctx)
+		require.NoError(t, err, "failed to terminate postgres container")
+	}()
 
-	repo, err := postgres.NewRepository(os.Getenv("DATABASE_URL"))
-	if err != nil {
-		t.Fatalf("failed to create repository: %v", err)
-	}
+	repo, err := postgresRepo.NewRepository(connStr)
+	require.NoError(t, err, "failed to create repository")
+	runMigrations(t, connStr)
+	setupTestUser(t, connStr)
+
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
 
 	mockUser, validCtx, invalidCtx := setupGetCurrentUserTestData()
@@ -84,7 +92,7 @@ func TestGetCurrentUserHandler(t *testing.T) {
 func setupGetCurrentUserTestData() (*user.GetCurrentUserResponse, context.Context, context.Context) {
 
 	mockUser := &user.GetCurrentUserResponse{
-		Id:              domain.TestUser.Id.String(),
+		Id:              domain.RealUserId,
 		FullName:        domain.TestUser.FullName,
 		Email:           domain.TestUser.Email,
 		Role:            domain.TestUser.Role,
