@@ -13,6 +13,7 @@ var (
 		FullName:        "Test User",
 		Email:           "user@user.com",
 		Role:            "USER",
-		IsEmailVerified: true,
+		Password:        "testpassword123",
+		IsEmailVerified: false,
 	}
 )
