@@ -3,24 +3,35 @@ package testtodo
 import (
 	"context"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateTodoHandler(t *testing.T) {
+	ctx := context.Background()
 
-	repo, err := postgres.NewRepository(os.Getenv("DATABASE_URL"))
-	if err != nil {
-		t.Fatalf("failed to create repository: %v", err)
-	}
+	postgresContainer, connStr := createTestContainer(t, ctx)
+	defer func() {
+		err := postgresContainer.Terminate(ctx)
+		require.NoError(t, err, "failed to terminate postgres container")
+	}()
+
+	repo, err := postgresRepo.NewRepository(connStr)
+	require.NoError(t, err, "failed to create repository")
+	runMigrations(t, connStr)
+	setupTestUser(t, connStr)
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
-	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
+	ctx = context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
+
+	runMigrations(t, connStr)
+	setupTestUser(t, connStr)
+
 	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, domain.FakeUserId)
 
 	validCreateTodoRequest := &todo.CreateTodoRequest{
