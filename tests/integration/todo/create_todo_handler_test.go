@@ -29,24 +29,7 @@ func TestCreateTodoHandler(t *testing.T) {
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 	ctx = context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
-	runMigrations(t, connStr)
-	setupTestUser(t, connStr)
-
 	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, domain.FakeUserId)
-
-	validCreateTodoRequest := &todo.CreateTodoRequest{
-		Title: "Test Todo",
-	}
-
-	invalidCreateTodoRequest := &todo.CreateTodoRequest{}
-
-	tooShortCreateTodoRequest := &todo.CreateTodoRequest{
-		Title: "ab",
-	}
-
-	tooLongCreateTodoRequest := &todo.CreateTodoRequest{
-		Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
-	}
 
 	type args struct {
 		ctx context.Context
@@ -63,7 +46,9 @@ func TestCreateTodoHandler(t *testing.T) {
 			"valid creation",
 			args{
 				ctx: ctx,
-				req: validCreateTodoRequest,
+				req: &todo.CreateTodoRequest{
+					Title: "Test Todo",
+				},
 			},
 			nil,
 			http.StatusCreated,
@@ -72,7 +57,9 @@ func TestCreateTodoHandler(t *testing.T) {
 			"invalid user ID request",
 			args{
 				ctx: ctxWithFakeUserId,
-				req: validCreateTodoRequest,
+				req: &todo.CreateTodoRequest{
+					Title: "Test Todo",
+				},
 			},
 			domain.ErrUserNotFound,
 			http.StatusForbidden,
@@ -82,7 +69,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			"invalid request",
 			args{
 				ctx: ctx,
-				req: invalidCreateTodoRequest,
+				req: &todo.CreateTodoRequest{},
 			},
 			domain.ErrInvalidRequest,
 			http.StatusBadRequest,
@@ -91,7 +78,9 @@ func TestCreateTodoHandler(t *testing.T) {
 			"too short title",
 			args{
 				ctx: ctx,
-				req: tooShortCreateTodoRequest,
+				req: &todo.CreateTodoRequest{
+					Title: "ab",
+				},
 			},
 			domain.ErrTitleTooShort,
 			http.StatusBadRequest,
@@ -100,7 +89,9 @@ func TestCreateTodoHandler(t *testing.T) {
 			"too long title",
 			args{
 				ctx: ctx,
-				req: tooLongCreateTodoRequest,
+				req: &todo.CreateTodoRequest{
+					Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
+				},
 			},
 			domain.ErrTitleTooLong,
 			http.StatusBadRequest,
