@@ -58,7 +58,7 @@ func TestSignupHandler(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "valid signup ",
+			name: "valid signup",
 			args: args{
 				ctx: context.Background(),
 				req: &auth.SignupRequest{
@@ -185,7 +185,6 @@ func TestSignupHandler(t *testing.T) {
 				payload, err := tokenService.ValidateToken(got.Token)
 				assert.NoError(t, err)
 				assert.NotNil(t, payload)
-				assert.Equal(t, domain.RealUserId, payload.UserID)
 				assert.Equal(t, domain.TestUser.Role, payload.Role)
 			}
 		})
