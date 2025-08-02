@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"database/sql"
 
@@ -13,9 +14,9 @@ import (
 
 func (r *Repository) CreateTodo(ctx context.Context, todo *domain.Todo) error {
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO todos (user_id, id, title, completed, created_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`, todo.UserId, todo.Id, todo.Title, todo.Completed, todo.CreatedAt)
+		INSERT INTO todos (user_id, id, title, completed)
+		VALUES ($1, $2, $3, $4)
+	`, todo.UserId, todo.Id, todo.Title, todo.Completed)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23503" {
 			return domain.ErrUserNotFound
@@ -36,17 +37,23 @@ func (r *Repository) UpdateTodo(ctx context.Context, id uuid.UUID, title string)
 
 func (r *Repository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTodoByIdResponse, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, title, completed
+		SELECT id, title, completed, created_at, completed_at
 		FROM todos
 		WHERE id = $1
 	`, id)
 
 	var resp todo.GetTodoByIdResponse
-	if err := row.Scan(&resp.Id, &resp.Title, &resp.Completed); err != nil {
+	var completedAt sql.NullTime
+	if err := row.Scan(&resp.Id, &resp.Title, &resp.Completed, &resp.CreatedAt, &completedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrTodoNotFound
 		}
 		return nil, err
+	}
+	if completedAt.Valid {
+		resp.CompletedAt = completedAt.Time
+	} else {
+		resp.CompletedAt = time.Time{}
 	}
 	return &resp, nil
 }
