@@ -76,7 +76,7 @@ func (r *Repository) GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*t
 
 	var todos todo.GetTodosResponse
 	for rows.Next() {
-		var resp domain.Todo
+		var resp todo.Todo
 		var completedAt sql.NullTime
 		if err := rows.Scan(&resp.Id, &resp.Title, &resp.Completed, &resp.CreatedAt, &completedAt); err != nil {
 			return nil, err

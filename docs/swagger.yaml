@@ -40,21 +40,6 @@ definitions:
       message:
         type: string
     type: object
-  domain.Todo:
-    properties:
-      completed:
-        type: boolean
-      completedAt:
-        type: string
-      createdAt:
-        type: string
-      id:
-        type: string
-      title:
-        type: string
-      userId:
-        type: string
-    type: object
   healthcheck.HealthcheckResponse:
     properties:
       status:
@@ -71,6 +56,19 @@ definitions:
     - title
     type: object
   todo.GetTodoByIdResponse:
+    properties:
+      completed:
+        type: boolean
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  todo.Todo:
     properties:
       completed:
         type: boolean
@@ -393,7 +391,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/domain.Todo'
+              $ref: '#/definitions/todo.Todo'
             type: array
         "401":
           description: Unauthorized
@@ -484,6 +482,35 @@ paths:
       security:
       - BearerAuth: []
       summary: Get a todo by ID
+      tags:
+      - todos
+    patch:
+      consumes:
+      - application/json
+      description: Toggles the completion status of a todo item for the authenticated
+        user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo completion status toggled
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Toggle todo completion status
       tags:
       - todos
     put:

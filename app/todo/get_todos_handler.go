@@ -3,14 +3,24 @@ package todo
 import (
 	"context"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
 type GetTodosRequest struct {
 }
 
-type GetTodosResponse []domain.Todo
+type GetTodosResponse []Todo
+
+type Todo struct {
+	Id          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Completed   bool      `json:"completed"`
+	CreatedAt   time.Time `json:"created_at"`
+	CompletedAt time.Time `json:"completed_at"`
+}
 
 type GetTodosHandler struct {
 	repo TodoRepository
