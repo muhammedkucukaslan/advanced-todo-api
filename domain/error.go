@@ -36,6 +36,7 @@ var (
 	ErrUnauthorized       = errors.New("unauthorized access")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrTooShortFullName   = errors.New("full name must be at least 3 characters long")
+	ErrTodoNotFound       = errors.New("todo not found")
 
 	ErrEmptyTitle          = errors.New("title cannot be empty")
 	ErrUserIdCannotBeEmpty = errors.New("user ID cannot be empty")
