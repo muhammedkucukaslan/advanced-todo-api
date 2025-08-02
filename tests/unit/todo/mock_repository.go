@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -20,4 +21,8 @@ func (m *MockRepository) UpdateTodo(ctx context.Context, id uuid.UUID, title str
 		return domain.ErrInvalidRequest
 	}
 	return nil
+}
+
+func (m *MockRepository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTodoByIdResponse, error) {
+	return nil, nil
 }

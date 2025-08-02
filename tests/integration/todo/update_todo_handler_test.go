@@ -32,9 +32,6 @@ func TestUpdateTodoHandler(t *testing.T) {
 	validator := validator.NewValidator(slog.NewLogger())
 	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
 
-	runMigrations(t, connStr)
-	setupTestUser(t, connStr)
-
 	type args struct {
 		ctx context.Context
 		req *todo.UpdateTodoRequest
