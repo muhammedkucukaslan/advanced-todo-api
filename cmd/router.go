@@ -129,6 +129,9 @@ func setupRoutes(app *fiber.App) {
 	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validator, tokenService, mailersendService)
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
+	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo, validator)
+	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
+	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
 
 	app.Get("/healthcheck", handle(healthcheckHandler, logger))
 	app.Use(fiberInfra.ContextMiddleware)
@@ -156,6 +159,9 @@ func setupRoutes(app *fiber.App) {
 
 	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
 	todosApp.Post("/", handle(createTodoHandler, logger))
+	todosApp.Get("/:id", handle(getTodoByIdHandler, logger))
+	todosApp.Put("/:id", handle(updateTodoHandler, logger))
+	todosApp.Delete("/:id", handle(deleteTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
