@@ -10,4 +10,5 @@ import (
 type TodoRepository interface {
 	CreateTodo(ctx context.Context, todo *domain.Todo) error
 	UpdateTodo(ctx context.Context, id uuid.UUID, title string) error
+	GetById(ctx context.Context, id uuid.UUID) (*GetTodoByIdResponse, error)
 }

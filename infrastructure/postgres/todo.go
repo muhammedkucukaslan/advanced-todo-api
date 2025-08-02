@@ -3,8 +3,11 @@ package postgres
 import (
 	"context"
 
+	"database/sql"
+
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -29,4 +32,21 @@ func (r *Repository) UpdateTodo(ctx context.Context, id uuid.UUID, title string)
 		WHERE id = $2
 	`, title, id)
 	return err
+}
+
+func (r *Repository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTodoByIdResponse, error) {
+	row := r.db.QueryRowContext(ctx, `
+		SELECT id, title, completed
+		FROM todos
+		WHERE id = $1
+	`, id)
+
+	var resp todo.GetTodoByIdResponse
+	if err := row.Scan(&resp.Id, &resp.Title, &resp.Completed); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrTodoNotFound
+		}
+		return nil, err
+	}
+	return &resp, nil
 }
