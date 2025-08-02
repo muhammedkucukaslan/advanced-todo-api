@@ -40,6 +40,21 @@ definitions:
       message:
         type: string
     type: object
+  domain.Todo:
+    properties:
+      completed:
+        type: boolean
+      completedAt:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      userId:
+        type: string
+    type: object
   healthcheck.HealthcheckResponse:
     properties:
       status:
@@ -367,6 +382,28 @@ paths:
       tags:
       - 2- Auth
   /todos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all todos for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Todo'
+            type: array
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get all todos
+      tags:
+      - todos
     post:
       consumes:
       - application/json

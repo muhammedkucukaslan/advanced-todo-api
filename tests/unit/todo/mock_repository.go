@@ -30,3 +30,7 @@ func (m *MockRepository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTo
 func (m *MockRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
+
+func (m *MockRepository) GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*todo.GetTodosResponse, error) {
+	return nil, nil
+}
