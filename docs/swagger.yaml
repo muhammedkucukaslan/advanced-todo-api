@@ -4,6 +4,7 @@ definitions:
       email:
         type: string
       password:
+        minLength: 8
         type: string
     required:
     - email
@@ -54,6 +55,26 @@ definitions:
     required:
     - title
     type: object
+  todo.GetTodoByIdResponse:
+    properties:
+      completed:
+        type: boolean
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  todo.UpdateTodoRequest:
+    properties:
+      title:
+        type: string
+    required:
+    - title
+    type: object
   user.ChangePasswordRequest:
     properties:
       new_password:
@@ -88,8 +109,6 @@ definitions:
     type: object
   user.GetUserResponse:
     properties:
-      address:
-        type: string
       email:
         type: string
       full_name:
@@ -366,11 +385,102 @@ paths:
           description: Todo created successfully
         "400":
           description: Invalid request
+        "401":
+          description: Unauthorized
         "500":
           description: Internal server error
       security:
       - BearerAuth: []
       summary: Create a new todo
+      tags:
+      - todos
+  /todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a todo item for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo deleted successfully
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Delete a todo
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a todo item by its ID for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.GetTodoByIdResponse'
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get a todo by ID
+      tags:
+      - todos
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing todo item for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Todo details
+        in: body
+        name: UpdateTodoRequest
+        required: true
+        schema:
+          $ref: '#/definitions/todo.UpdateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo updated successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Update an existing todo
       tags:
       - todos
   /users/account:

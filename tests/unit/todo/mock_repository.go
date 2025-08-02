@@ -26,3 +26,7 @@ func (m *MockRepository) UpdateTodo(ctx context.Context, id uuid.UUID, title str
 func (m *MockRepository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTodoByIdResponse, error) {
 	return nil, nil
 }
+
+func (m *MockRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	return nil
+}

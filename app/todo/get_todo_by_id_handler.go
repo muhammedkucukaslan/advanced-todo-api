@@ -29,6 +29,21 @@ func NewGetTodoByIdHandler(repo TodoRepository, validator domain.Validator) *Get
 	return &GetTodoByIdHandler{repo: repo}
 }
 
+// GetTodoByIdHandler handles the retrieval of a todo item by its ID.
+//
+//	@Summary		Get a todo by ID
+//	@Description	Retrieves a todo item by its ID for the authenticated user.
+//	@Tags			todos
+//	@Security		BearerAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Todo ID"
+//	@Success		200	{object}	GetTodoByIdResponse
+//	@Failure		400	"Invalid request"
+//	@Failure		401	"Unauthorized"
+//	@Failure		404	"Todo not found"
+//	@Failure		500	"Internal server error"
+//	@Router			/todos/{id} [get]
 func (h *GetTodoByIdHandler) Handle(ctx context.Context, req *GetTodoByIdRequest) (*GetTodoByIdResponse, int, error) {
 	todo, err := h.repo.GetById(ctx, req.Id)
 	if err != nil {

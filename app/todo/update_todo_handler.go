@@ -9,7 +9,7 @@ import (
 )
 
 type UpdateTodoRequest struct {
-	Id    uuid.UUID `params:"id" validate:"required,uuid"`
+	Id    uuid.UUID `params:"id" validate:"required,uuid" swaggerignore:"true"`
 	Title string    `json:"title" validate:"required"`
 }
 
@@ -27,18 +27,20 @@ func NewUpdateTodoHandler(repo TodoRepository, validator domain.Validator) *Upda
 
 // UpdateTodoHandler handles the update of an existing todo item.
 //
-//		@Summary		Update an existing todo
-//		@Description	Updates an existing todo item for the authenticated user.
-//		@Tags			todos
-//	   @Security		BearerAuth
-//	   @Accept			json
-//	   @Produce		json
-//	   @Param			UpdateTodoRequest	body	UpdateTodoRequest	true	"Todo details"
-//	   @Success		204					"Todo updated successfully"
-//	   @Failure		400					"Invalid request"
-//	   @Failure		404					"Todo not found"
-//	   @Failure		500					"Internal server error"
-//	   @Router			/todos/{id} [put]
+//	@Summary		Update an existing todo
+//	@Description	Updates an existing todo item for the authenticated user.
+//	@Tags			todos
+//	@Security		BearerAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id					path	string				true	"Todo ID"
+//	@Param			UpdateTodoRequest	body	UpdateTodoRequest	true	"Todo details"
+//	@Success		204					"Todo updated successfully"
+//	@Failure		400					"Invalid request"
+//	@Failure		401					"Unauthorized"
+//	@Failure		404					"Todo not found"
+//	@Failure		500					"Internal server error"
+//	@Router			/todos/{id} [put]
 func (h *UpdateTodoHandler) Handle(ctx context.Context, req *UpdateTodoRequest) (*UpdateTodoResponse, int, error) {
 	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest

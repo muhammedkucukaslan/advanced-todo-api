@@ -36,6 +36,7 @@ func NewCreateTodoHandler(repo TodoRepository) *CreateTodoHandler {
 //	@Param			CreateTodoRequest	body	CreateTodoRequest	true	"Todo details"
 //	@Success		201					"Todo created successfully"
 //	@Failure		400					"Invalid request"
+//	@Failure		401					"Unauthorized"
 //	@Failure		500					"Internal server error"
 //	@Router			/todos [post]
 func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) (*CreateTodoResponse, int, error) {
