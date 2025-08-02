@@ -81,7 +81,8 @@ func TestNewUser(t *testing.T) {
 
 func TestUser_ValidatePassword(t *testing.T) {
 	// This is a hashed password for `secret123`
-	hashedPassword := "$2y$10$IkBM5kx5MuMxCGLyHEepveo3GfcDHnR2H22wUjWSIitlp4DDVGwIu"
+	hashedPassword, err := domain.HashPassword("secret123")
+	assert.NoError(t, err, "should hash password without error")
 
 	type args struct {
 		oldPassword string
