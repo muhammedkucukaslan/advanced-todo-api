@@ -130,6 +130,7 @@ func setupRoutes(app *fiber.App) {
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo, validator)
+	getTodosHandler := todo.NewGetTodosHandler(repo)
 	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
 	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
 
@@ -160,6 +161,7 @@ func setupRoutes(app *fiber.App) {
 	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
 	todosApp.Post("/", handle(createTodoHandler, logger))
 	todosApp.Get("/:id", handle(getTodoByIdHandler, logger))
+	todosApp.Get("/", handle(getTodosHandler, logger))
 	todosApp.Put("/:id", handle(updateTodoHandler, logger))
 	todosApp.Delete("/:id", handle(deleteTodoHandler, logger))
 

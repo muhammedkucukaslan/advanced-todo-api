@@ -62,3 +62,36 @@ func (r *Repository) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := r.db.ExecContext(ctx, `DELETE FROM todos WHERE id = $1`, id)
 	return err
 }
+
+func (r *Repository) GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*todo.GetTodosResponse, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, title, completed, created_at, completed_at
+		FROM todos
+		WHERE user_id = $1
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos todo.GetTodosResponse
+	for rows.Next() {
+		var resp domain.Todo
+		var completedAt sql.NullTime
+		if err := rows.Scan(&resp.Id, &resp.Title, &resp.Completed, &resp.CreatedAt, &completedAt); err != nil {
+			return nil, err
+		}
+		if completedAt.Valid {
+			resp.CompletedAt = completedAt.Time
+		} else {
+			resp.CompletedAt = time.Time{}
+		}
+		todos = append(todos, resp)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &todos, nil
+}
