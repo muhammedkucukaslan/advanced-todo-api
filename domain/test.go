@@ -25,4 +25,6 @@ var (
 		Title:     "Test Todo",
 		Completed: false,
 	}
+
+	MockJWTTestKey = "d16fb74a2c2d3ab64d6247fdcb703d08f9f4dd86625420a3e23ea08c1deaad19"
 )
