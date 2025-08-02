@@ -13,4 +13,5 @@ type TodoRepository interface {
 	GetById(ctx context.Context, id uuid.UUID) (*GetTodoByIdResponse, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*GetTodosResponse, error)
+	ToggleCompleted(ctx context.Context, id uuid.UUID) error
 }

@@ -95,3 +95,27 @@ func (r *Repository) GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*t
 
 	return &todos, nil
 }
+
+func (r *Repository) ToggleCompleted(ctx context.Context, id uuid.UUID) error {
+	res, err := r.db.ExecContext(ctx, `
+	UPDATE todos
+	SET completed = NOT completed,
+	    completed_at = CASE
+			WHEN NOT completed THEN NOW() 
+			ELSE NULL
+		END
+	WHERE id = $1
+	`, id)
+
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return domain.ErrTodoNotFound
+	}
+	return nil
+}

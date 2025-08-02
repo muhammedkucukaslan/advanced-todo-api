@@ -133,6 +133,7 @@ func setupRoutes(app *fiber.App) {
 	getTodosHandler := todo.NewGetTodosHandler(repo)
 	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
 	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
+	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
 
 	app.Get("/healthcheck", handle(healthcheckHandler, logger))
 	app.Use(fiberInfra.ContextMiddleware)
@@ -164,6 +165,7 @@ func setupRoutes(app *fiber.App) {
 	todosApp.Get("/", handle(getTodosHandler, logger))
 	todosApp.Put("/:id", handle(updateTodoHandler, logger))
 	todosApp.Delete("/:id", handle(deleteTodoHandler, logger))
+	todosApp.Patch("/:id", handle(toggleCompletedTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{

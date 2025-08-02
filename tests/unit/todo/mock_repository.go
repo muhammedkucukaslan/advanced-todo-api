@@ -34,3 +34,7 @@ func (m *MockRepository) Delete(ctx context.Context, id uuid.UUID) error {
 func (m *MockRepository) GetTodosByUserID(ctx context.Context, userID uuid.UUID) (*todo.GetTodosResponse, error) {
 	return nil, nil
 }
+
+func (m *MockRepository) ToggleCompleted(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
