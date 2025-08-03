@@ -5,10 +5,14 @@ import (
 	"net/http"
 )
 
+var (
+	IamAlive = "I am alive, alhamdulillah"
+)
+
 type HealthcheckRequest struct{}
 
 type HealthcheckResponse struct {
-	Status string `json:"status" example:"OK"`
+	Status string `json:"status"`
 }
 
 type HealthcheckHandler struct{}
@@ -29,6 +33,6 @@ func NewHealthcheckHandler() *HealthcheckHandler {
 
 func (h *HealthcheckHandler) Handle(ctx context.Context, req *HealthcheckRequest) (*HealthcheckResponse, int, error) {
 	return &HealthcheckResponse{
-		Status: "OK",
+		Status: IamAlive,
 	}, http.StatusOK, nil
 }
