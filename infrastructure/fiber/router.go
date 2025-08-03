@@ -73,7 +73,7 @@
 //
 //	@host						localhost:3000
 
-package main
+package fiber
 
 import (
 	"fmt"
@@ -86,7 +86,6 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	mailersend "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
@@ -97,7 +96,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func setupRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App) {
 	repo, err := postgres.NewRepository(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Println("Error connecting to database:", err)
@@ -136,7 +135,7 @@ func setupRoutes(app *fiber.App) {
 	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
 
 	app.Get("/healthcheck", handle(healthcheckHandler, logger))
-	app.Use(fiberInfra.ContextMiddleware)
+	app.Use(contextMiddleware)
 
 	adminApp := app.Group("/admin", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware)
 

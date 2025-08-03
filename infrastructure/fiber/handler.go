@@ -1,4 +1,4 @@
-package main
+package fiber
 
 import (
 	"context"

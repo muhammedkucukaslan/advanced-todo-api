@@ -1,4 +1,4 @@
-package main
+package fiber
 
 import (
 	"net/http"
@@ -15,7 +15,7 @@ import (
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
-func setupServer() *fiber.App {
+func SetupServer() *fiber.App {
 	app := fiber.New(fiber.Config{
 		IdleTimeout:  5 * time.Second,
 		ReadTimeout:  3 * time.Second,
