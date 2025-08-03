@@ -4,13 +4,10 @@ swagger:
 dev:
 	docker-compose up --build 
 run: 
-	go run ./cmd/.
-test:
-	go test -v ./...
-test-coverage:
-	go test -v ./... -coverprofile=coverage.out
-	go tool cover -html=coverage.out -o coverage.html
+	go run ./cmd/main.go
+
 unit-test:
 	go test -v ./tests/unit/... 
+
 integration-test:
-	go test -v ./tests/integration/...
+	go test -v  ./tests/integration/...

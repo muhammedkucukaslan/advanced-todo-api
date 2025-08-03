@@ -10,3 +10,6 @@ Makefile
 *.env
 *_test.go
 ./tests/*
+
+*_coverage.out 
+*_coverage.html
