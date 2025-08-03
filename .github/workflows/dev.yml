@@ -36,6 +36,8 @@ jobs:
     
     - name: Integration Testing
       run: go test -v ./tests/integration/... 
+    - name: HTTP Testing
+      run: go test -v ./tests/httptest/...
 
   docker-build-push:
     name: Build and Push Docker Image
