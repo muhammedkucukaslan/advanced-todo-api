@@ -53,7 +53,7 @@ func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) 
 
 	if err = h.repo.CreateTodo(ctx, todo); err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
-			return nil, http.StatusForbidden, domain.ErrUserNotFound
+			return nil, http.StatusNotFound, domain.ErrUserNotFound
 		}
 		return nil, http.StatusInternalServerError, err
 	}

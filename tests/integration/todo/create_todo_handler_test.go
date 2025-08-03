@@ -39,8 +39,8 @@ func TestCreateTodoHandler(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wantErr error
 		code    int
+		wantErr error
 	}{
 		{
 			"valid creation",
@@ -50,8 +50,8 @@ func TestCreateTodoHandler(t *testing.T) {
 					Title: "Test Todo",
 				},
 			},
-			nil,
 			http.StatusCreated,
+			nil,
 		},
 		{
 			"invalid user ID request",
@@ -61,18 +61,17 @@ func TestCreateTodoHandler(t *testing.T) {
 					Title: "Test Todo",
 				},
 			},
+			http.StatusNotFound,
 			domain.ErrUserNotFound,
-			http.StatusForbidden,
 		},
-
 		{
 			"invalid request",
 			args{
 				ctx: ctx,
 				req: &todo.CreateTodoRequest{},
 			},
-			domain.ErrInvalidRequest,
 			http.StatusBadRequest,
+			domain.ErrInvalidRequest,
 		},
 		{
 			"too short title",
@@ -82,8 +81,8 @@ func TestCreateTodoHandler(t *testing.T) {
 					Title: "ab",
 				},
 			},
-			domain.ErrTitleTooShort,
 			http.StatusBadRequest,
+			domain.ErrTitleTooShort,
 		},
 		{
 			"too long title",
@@ -93,8 +92,8 @@ func TestCreateTodoHandler(t *testing.T) {
 					Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
 				},
 			},
-			domain.ErrTitleTooLong,
 			http.StatusBadRequest,
+			domain.ErrTitleTooLong,
 		},
 	}
 

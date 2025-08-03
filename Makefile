@@ -11,3 +11,6 @@ unit-test:
 
 integration-test:
 	go test -v  ./tests/integration/...
+
+httptest:
+	go test -v ./tests/httptest/...
