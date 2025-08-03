@@ -2,15 +2,13 @@ package user
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type ForgotPasswordRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
-	Email    string `json:"email" validate:"required,email"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type ForgotPasswordResponse struct{}
@@ -19,11 +17,11 @@ type ForgotPasswordHandler struct {
 	repo         Repository
 	emailService MailService
 	tokenService TokenService
-	logger       *logrus.Logger
-	validator    *validator.Validate
+	logger       domain.Logger
+	validator    domain.Validator
 }
 
-func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger *logrus.Logger, validator *validator.Validate) *ForgotPasswordHandler {
+func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenService TokenService, logger domain.Logger, validator domain.Validator) *ForgotPasswordHandler {
 	return &ForgotPasswordHandler{
 		repo:         repo,
 		emailService: emailService,
@@ -35,40 +33,45 @@ func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenSe
 
 // Handle processes the request to initiate a password reset.
 //
-//	@Summary		Forgot Password
-//	@Description	It sends  a password reset link to the user's email address.
-//	@Tags			3- User
-//	@Accept			json
-//	@Produce		json
-//	@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
-//	@Param			request				body	ForgotPasswordRequest	true	"Forgot Password Request"
-//	@Success		204
-//	@Failure		400
-//	@Failure		500
-//	@Router			/users/forgot-password [post]
+//		@Summary		Forgot Password
+//		@Description	It sends  a password reset link to the user's email address.
+//		@Tags			3- User
+//		@Accept			json
+//		@Produce		json
+//		@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
+//		@Param			request				body	ForgotPasswordRequest	true	"Forgot Password Request"
+//		@Success		204
+//		@Failure		400
+//	 @Failure		401
+//		@Failure		500
+//		@Router			/users/forgot-password [post]
 func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordRequest) (*ForgotPasswordResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+	if err := h.validator.Validate(req); err != nil {
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
-	if exists, _ := h.repo.EmailExists(ctx, req.Email); !exists {
-		return nil, 200, nil
+	if exists, err := h.repo.EmailExists(ctx, req.Email); err != nil {
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	} else if !exists {
+		// If the email does not exist, we still return a success response
+		// to prevent email enumeration attacks.
+		return nil, http.StatusNoContent, nil
 	}
 
 	token, err := h.tokenService.GenerateTokenForForgotPassword(req.Email)
 	if err != nil {
 		h.logger.Error("failed to generate token for forgot password: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	if err := h.emailService.SendPasswordResetEmail(
 		req.Email,
-		domain.NewForgotPasswordSubject(req.Language),
-		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token), req.Language),
+		domain.ForgotPasswordEmailSubject,
+		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token)),
 	); err != nil {
 		h.logger.Error("failed to send forgot password email: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

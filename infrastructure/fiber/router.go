@@ -47,7 +47,7 @@
 //	@description	"code": 400
 //	@description	}
 //	@description	```
-//	@description	Please handle errors accordingly on the client side.
+//	@description	Please Handle errors accordingly on the client side.
 //	@description	The API returns an error which is according to a language at some endpoints.
 //	@description	For example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.
 //	@description	In this case, you need to specify the language in the request header as `accept-language`.
@@ -73,7 +73,7 @@
 //
 //	@host						localhost:3000
 
-package main
+package fiber
 
 import (
 	"fmt"
@@ -81,21 +81,22 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
+	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	mailersend "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/sirupsen/logrus"
+	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	mock "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func setupRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App) {
 	repo, err := postgres.NewRepository(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Println("Error connecting to database:", err)
@@ -105,63 +106,65 @@ func setupRoutes(app *fiber.App) {
 	tokenService := jwt.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
 	// cookieService := fiberInfra.NewFiberCookieService()
 	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
-	MockEmailServer := &domain.MockEmailServer{}
-	fmt.Println(MockEmailServer)
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	middlewareManager := NewMiddlewareManager(tokenService)
+	MockEmailService := &mock.MockEmailService{}
+	logger := slog.NewLogger()
+	validator := validator.NewValidator(logger)
 
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		DisableColors: true,
-		FullTimestamp: true,
-	})
+	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
-	signupHandler := auth.NewSignupHandler(repo, tokenService, mailersendService, validate, logger)
-	loginHandler := auth.NewLoginHandler(repo, tokenService, validate, logger)
+	signupHandler := auth.NewSignupHandler(repo, tokenService, mailersendService, validator, logger)
+	loginHandler := auth.NewLoginHandler(repo, tokenService, validator, logger)
 
 	getUserHandler := user.NewGetUserHandler(repo)
-	getUsersHandler := user.NewGetUsersHandler(repo, validate)
-	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validate, MockEmailServer)
-	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validate)
+	getUsersHandler := user.NewGetUsersHandler(repo, validator)
+	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validator, MockEmailService)
+	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validator)
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
-	updatePasswordHandler := user.NewChangePasswordHandler(repo, validate)
-	forgotPasswordHandler := user.NewForgotPasswordHandler(repo, mailersendService, tokenService, logger, validate)
-	resetPasswordHandler := user.NewResetPasswordHandler(repo, tokenService, logger, validate)
-	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validate, tokenService)
-	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validate, tokenService, mailersendService)
+	updatePasswordHandler := user.NewChangePasswordHandler(repo, validator)
+	forgotPasswordHandler := user.NewForgotPasswordHandler(repo, mailersendService, tokenService, logger, validator)
+	resetPasswordHandler := user.NewResetPasswordHandler(repo, tokenService, logger, validator)
+	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validator, tokenService)
+	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validator, tokenService, mailersendService)
 
-	app.Get("/healthcheck", handle(healthcheckHandler))
-	app.Use(fiberInfra.ContextMiddleware)
+	createTodoHandler := todo.NewCreateTodoHandler(repo)
+	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo, validator)
+	getTodosHandler := todo.NewGetTodosHandler(repo)
+	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
+	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
+	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
+
+	app.Get("/healthcheck", Handle(healthcheckHandler, logger))
+	app.Use(contextMiddleware)
 
 	adminApp := app.Group("/admin", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware)
 
-	app.Post("/signup", handle(signupHandler))
-	app.Post("/login", handle(loginHandler))
+	app.Post("/signup", Handle(signupHandler, logger))
+	app.Post("/login", Handle(loginHandler, logger))
 
 	usersPublicApp := app.Group("/users")
-	usersPublicApp.Post("/forgot-password", handle(forgotPasswordHandler))
-	usersPublicApp.Post("/reset-password", handle(resetPasswordHandler))
-	usersPublicApp.Post("/verify-email", handle(verifyEmailHandler))
+	usersPublicApp.Post("/forgot-password", Handle(forgotPasswordHandler, logger))
+	usersPublicApp.Post("/reset-password", Handle(resetPasswordHandler, logger))
+	usersPublicApp.Post("/verify-email", Handle(verifyEmailHandler, logger))
 
 	usersApp := app.Group("/users", middlewareManager.AuthMiddleware)
-	usersApp.Get("/profile", handle(getCurrentUserHandler))
-	usersApp.Delete("/account", handle(deleteAccountHandler))
-	usersApp.Patch("/account", handle(updateFullNameHandler))
-	usersApp.Patch("/password", handle(updatePasswordHandler))
-	usersApp.Post("/send-verification-email", handle(sendVerificationEmailHandler))
+	usersApp.Get("/profile", Handle(getCurrentUserHandler, logger))
+	usersApp.Delete("/account", Handle(deleteAccountHandler, logger))
+	usersApp.Patch("/account", Handle(updateFullNameHandler, logger))
+	usersApp.Patch("/password", Handle(updatePasswordHandler, logger))
+	usersApp.Post("/send-verification-email", Handle(sendVerificationEmailHandler, logger))
 
 	usersAdminApp := adminApp.Group("/users")
-	usersAdminApp.Get("/", handle(getUsersHandler))
-	usersAdminApp.Get("/:id", handle(getUserHandler))
+	usersAdminApp.Get("/", Handle(getUsersHandler, logger))
+	usersAdminApp.Get("/:id", Handle(getUserHandler, logger))
 
-	todosApp := app.Group("/todos")
-	todosApp.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
-			Message: "This endpoint is not implemented yet",
-			Code:    http.StatusNotImplemented,
-		})
-	})
+	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
+	todosApp.Post("/", Handle(createTodoHandler, logger))
+	todosApp.Get("/:id", Handle(getTodoByIdHandler, logger))
+	todosApp.Get("/", Handle(getTodosHandler, logger))
+	todosApp.Put("/:id", Handle(updateTodoHandler, logger))
+	todosApp.Delete("/:id", Handle(deleteTodoHandler, logger))
+	todosApp.Patch("/:id", Handle(toggleCompletedTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{

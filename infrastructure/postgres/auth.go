@@ -5,8 +5,22 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/lib/pq"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
+
+func (r *Repository) CreateUser(ctx context.Context, user *domain.User) error {
+	_, err := r.db.ExecContext(ctx,
+		"INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)",
+		user.Id, user.FullName, user.Email, user.Password, user.Role)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" { // Unique violation
+			return domain.ErrEmailAlreadyExists
+		}
+		return err
+	}
+	return nil
+}
 
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	row := r.db.QueryRowContext(ctx, "SELECT id, email, role, password FROM users WHERE email = $1", email)

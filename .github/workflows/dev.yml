@@ -31,9 +31,12 @@ jobs:
     - name: Build
       run: go build -v ./...
     
-    - name: Test
-      run: go test -v ./...
-  
+    - name: Unit Testing
+      run: go test -v ./tests/unit/...
+    
+    - name: Integration Testing
+      run: go test -v ./tests/integration/... 
+
   docker-build-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest

@@ -3,11 +3,10 @@ package user
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type DeleteAccountRequest struct {
@@ -18,12 +17,12 @@ type DeleteAccountResponse struct{}
 
 type DeleteAccountHandler struct {
 	repo      Repository
-	logger    *logrus.Logger
-	validator *validator.Validate
+	logger    domain.Logger
+	validator domain.Validator
 	ms        MailService
 }
 
-func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate *validator.Validate, ms MailService) *DeleteAccountHandler {
+func NewDeleteAccountHandler(repo Repository, logger domain.Logger, validate domain.Validator, ms MailService) *DeleteAccountHandler {
 	return &DeleteAccountHandler{repo: repo, logger: logger, ms: ms, validator: validate}
 }
 
@@ -41,8 +40,8 @@ func NewDeleteAccountHandler(repo Repository, logger *logrus.Logger, validate *v
 //	@Router			/users/account [delete]
 func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, int, error) {
 
-	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+	if err := h.validator.Validate(req); err != nil {
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	userId := domain.GetUserID(ctx)
@@ -51,7 +50,7 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 	fullName, email, err := h.repo.DeleteAccount(ctx, userId)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("failed to delete user account: %v", err))
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	// TODO mail notification
@@ -68,14 +67,14 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 			if err == nil {
 				return
 			}
-			h.logger.Errorf("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
+			h.logger.Error("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
 			if attempt < maxRetries {
 				time.Sleep(retryInterval)
 			}
 		}
-		h.logger.Errorf("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
+		h.logger.Error("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
 	}(fullName, email, req.Language)
 
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

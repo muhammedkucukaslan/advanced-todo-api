@@ -8,3 +8,7 @@ Makefile
 *.md
 *.log
 *_test.go
+./tests/*
+
+*_coverage.out 
+*_coverage.html

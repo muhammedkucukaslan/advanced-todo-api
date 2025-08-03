@@ -3,17 +3,16 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type LoginRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=en tr ar" swaggerignore:"true"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 type LoginResponse struct {
@@ -23,11 +22,11 @@ type LoginResponse struct {
 type LoginHandler struct {
 	repo      Repository
 	ts        TokenService
-	validator *validator.Validate
-	logger    *logrus.Logger
+	validator domain.Validator
+	logger    domain.Logger
 }
 
-func NewLoginHandler(repo Repository, ts TokenService, validator *validator.Validate, logger *logrus.Logger) *LoginHandler {
+func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validator, logger domain.Logger) *LoginHandler {
 	return &LoginHandler{repo: repo, ts: ts, validator: validator, logger: logger}
 }
 
@@ -44,34 +43,34 @@ func NewLoginHandler(repo Repository, ts TokenService, validator *validator.Vali
 // @Failure		500
 // @Router			/login [post]
 func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+	if err := h.validator.Validate(req); err != nil {
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	user, err := h.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 
 		if errors.Is(err, domain.ErrEmailNotFound) {
-			return nil, 404, domain.ErrEmailNotFound
+			return nil, http.StatusNotFound, domain.ErrEmailNotFound
 		}
 		h.logger.Error("error while getting user by email: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-
 	err = user.ValidatePassword(req.Password)
 	if err != nil {
+		fmt.Println("Password validation error:", err)
 		if errors.Is(err, domain.ErrInvalidCredentials) {
-			return nil, 400, domain.ErrInvalidCredentials
+			return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 		}
 		h.logger.Error("error while validating password: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	token, err := h.ts.GenerateToken(user.Id.String(), user.Role, time.Now())
 	if err != nil {
 		h.logger.Error("error while generating token: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return &LoginResponse{Token: token}, 200, nil
+	return &LoginResponse{Token: token}, http.StatusOK, nil
 }

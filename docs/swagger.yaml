@@ -4,6 +4,7 @@ definitions:
       email:
         type: string
       password:
+        minLength: 8
         type: string
     required:
     - email
@@ -45,6 +46,48 @@ definitions:
         example: OK
         type: string
     type: object
+  todo.CreateTodoRequest:
+    properties:
+      title:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - title
+    type: object
+  todo.GetTodoByIdResponse:
+    properties:
+      completed:
+        type: boolean
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  todo.Todo:
+    properties:
+      completed:
+        type: boolean
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  todo.UpdateTodoRequest:
+    properties:
+      title:
+        type: string
+    required:
+    - title
+    type: object
   user.ChangePasswordRequest:
     properties:
       new_password:
@@ -55,19 +98,6 @@ definitions:
     - new_password
     - old_password
     type: object
-  user.Donation:
-    properties:
-      amount:
-        type: number
-      created_at:
-        type: string
-      currency:
-        type: string
-      id:
-        type: string
-      title:
-        type: string
-    type: object
   user.ForgotPasswordRequest:
     properties:
       email:
@@ -77,8 +107,6 @@ definitions:
     type: object
   user.GetCurrentUserResponse:
     properties:
-      address:
-        type: string
       createdAt:
         type: string
       email:
@@ -89,21 +117,11 @@ definitions:
         type: string
       isEmailVerified:
         type: boolean
-      phone:
-        type: string
       role:
-        type: string
-      updatedAt:
         type: string
     type: object
   user.GetUserResponse:
     properties:
-      address:
-        type: string
-      donations:
-        items:
-          $ref: '#/definitions/user.Donation'
-        type: array
       email:
         type: string
       full_name:
@@ -112,8 +130,6 @@ definitions:
         type: string
       is_email_verified:
         type: boolean
-      phone:
-        type: string
     type: object
   user.ResetPasswordRequest:
     properties:
@@ -126,30 +142,23 @@ definitions:
     - password
     - token
     type: object
-  user.UpdateAccountRequest:
+  user.UpdateFullNameRequest:
     properties:
       address:
         type: string
       full_name:
         type: string
-      phone:
-        type: string
     required:
     - address
     - full_name
-    - phone
     type: object
   user.User:
     properties:
-      address:
-        type: string
       email:
         type: string
       full_name:
         type: string
       id:
-        type: string
-      phone:
         type: string
     type: object
   user.VerifiyEmailRequest:
@@ -172,7 +181,7 @@ info:
 
     Some endpoints require authentication. In this case, you need to log in first.
     I created two types of users for this project: admin and regular user.
-    Just send a POST request as below at [here](http://localhost:3000/swagger/index.html#/2-%20Auth/post_login).
+    Just send a POST request as below at [here](http://localhost:3000/swagger/index.html).
     After login, you will get a JWT token in cookies.
     If you're using cookie-based auth, the cookie will be sent automatically.
     Alternatively, you can use Bearer Token authentication via the "Authorize" button.
@@ -218,11 +227,11 @@ info:
     If you send a request to an admin endpoint, the API will return an error in Turkish.
 
     ## Reminder
-    I did not use `/api` prefix for the endpoint routes.
+    I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
     Status code with `2xx` is a success code.
     Status code with `4xx` is a client error code.
     Status code with `5xx` is a server error code.
-  title: Islamimerci API Server
+  title: Advanced Todo API
   version: "1.0"
 paths:
   /admin/users:
@@ -348,15 +357,6 @@ paths:
       - application/json
       description: Signup a new user
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - ar
-        - en
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Signup request
         in: body
         name: request
@@ -379,6 +379,174 @@ paths:
       summary: Signup
       tags:
       - 2- Auth
+  /todos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all todos for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/todo.Todo'
+            type: array
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get all todos
+      tags:
+      - todos
+    post:
+      consumes:
+      - application/json
+      description: Creates a new todo item for the authenticated user.
+      parameters:
+      - description: Todo details
+        in: body
+        name: CreateTodoRequest
+        required: true
+        schema:
+          $ref: '#/definitions/todo.CreateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Todo created successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Create a new todo
+      tags:
+      - todos
+  /todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a todo item for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo deleted successfully
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Delete a todo
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a todo item by its ID for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/todo.GetTodoByIdResponse'
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Get a todo by ID
+      tags:
+      - todos
+    patch:
+      consumes:
+      - application/json
+      description: Toggles the completion status of a todo item for the authenticated
+        user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo completion status toggled
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Toggle todo completion status
+      tags:
+      - todos
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing todo item for the authenticated user.
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Todo details
+        in: body
+        name: UpdateTodoRequest
+        required: true
+        schema:
+          $ref: '#/definitions/todo.UpdateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Todo updated successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Todo not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Update an existing todo
+      tags:
+      - todos
   /users/account:
     delete:
       description: Delete a user's account
@@ -405,7 +573,7 @@ paths:
       - BearerAuth: []
       tags:
       - 3- User
-    put:
+    patch:
       consumes:
       - application/json
       description: Update a user's account information
@@ -424,7 +592,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.UpdateAccountRequest'
+          $ref: '#/definitions/user.UpdateFullNameRequest'
       produces:
       - application/json
       responses:

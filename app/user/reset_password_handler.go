@@ -2,14 +2,13 @@ package user
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type ResetPasswordRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
 	Token    string `json:"token" validate:"required"`
 	Password string `json:"password" validate:"required,min=8"`
 }
@@ -19,11 +18,11 @@ type ResetPasswordResponse struct{}
 type ResetPasswordHandler struct {
 	repo         Repository
 	tokenService TokenService
-	logger       *logrus.Logger
-	validator    *validator.Validate
+	logger       domain.Logger
+	validator    domain.Validator
 }
 
-func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger *logrus.Logger, validator *validator.Validate) *ResetPasswordHandler {
+func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger domain.Logger, validator domain.Validator) *ResetPasswordHandler {
 	return &ResetPasswordHandler{
 		repo:         repo,
 		tokenService: tokenService,
@@ -47,23 +46,27 @@ func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger 
 //	@Failure		500
 //	@Router			/users/reset-password [post]
 func (h *ResetPasswordHandler) Handle(ctx context.Context, req *ResetPasswordRequest) (*ResetPasswordResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+	if err := h.validator.Validate(req); err != nil {
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	email, err := h.tokenService.ValidateForgotPasswordToken(req.Token)
 	if err != nil {
 		h.logger.Error("failed to validate token for forgot password: ", err)
-		return nil, 401, domain.ErrUnauthorized
+		return nil, http.StatusUnauthorized, domain.ErrUnauthorized
 	}
 
 	hashedPassword, err := domain.HashPassword(req.Password)
 	if err != nil {
-		return nil, 500, domain.ErrInternalServer
+		if errors.Is(err, domain.ErrPasswordTooShort) {
+			return nil, http.StatusBadRequest, domain.ErrPasswordTooShort
+		}
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	if err := h.repo.ResetPasswordByEmail(ctx, email, hashedPassword); err != nil {
-		return nil, 500, domain.ErrInternalServer
+
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-	return nil, 204, nil
+	return nil, http.StatusNoContent, nil
 }

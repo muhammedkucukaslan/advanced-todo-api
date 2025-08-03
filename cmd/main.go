@@ -6,10 +6,10 @@ import (
 	"os"
 	"os/signal"
 
-	_ "github.com/muhammedkucukaslan/advanced-todo-api/docs"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	_ "github.com/muhammedkucukaslan/advanced-todo-api/docs"
+	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
 )
 
 func main() {
@@ -23,8 +23,8 @@ func main() {
 
 	PORT := ":3000"
 
-	app := setupServer()
-	setupRoutes(app)
+	app := fiberInfra.SetupServer()
+	fiberInfra.SetupRoutes(app)
 	fmt.Println("Server is running on port", PORT)
 
 	go func() {

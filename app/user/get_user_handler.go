@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -17,7 +18,6 @@ type GetUserResponse struct {
 	FullName        string    `json:"full_name"`
 	Email           string    `json:"email"`
 	IsEmailVerified bool      `json:"is_email_verified"`
-	Address         string    `json:"address"`
 }
 
 type GetUserHandler struct {
@@ -45,9 +45,9 @@ func (h *GetUserHandler) Handle(ctx context.Context, req *GetUserRequest) (*GetU
 	user, err := h.repo.GetUserByIdForAdmin(ctx, req.Id)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
-			return nil, 404, err
+			return nil, http.StatusNotFound, err
 		}
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
-	return user, 200, nil
+	return user, http.StatusOK, nil
 }

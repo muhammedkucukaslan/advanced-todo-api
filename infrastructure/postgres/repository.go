@@ -3,7 +3,6 @@ package postgres
 import (
 	"database/sql"
 	"log"
-	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -27,10 +26,6 @@ func NewRepository(databaseUrl string) (*Repository, error) {
 
 func (r *Repository) Close() error {
 	return r.db.Close()
-}
-
-func escapeString(str string) string {
-	return strings.ReplaceAll(str, "'", "''")
 }
 
 func rollbackTx(tx *sql.Tx) {

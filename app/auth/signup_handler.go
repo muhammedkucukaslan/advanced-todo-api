@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/sirupsen/logrus"
 )
 
 type SignupRequest struct {
@@ -25,11 +24,11 @@ type SignupHandler struct {
 	repo      Repository
 	ts        TokenService
 	es        EmailService
-	validator *validator.Validate
-	logger    *logrus.Logger
+	validator domain.Validator
+	logger    domain.Logger
 }
 
-func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator *validator.Validate, logger *logrus.Logger) *SignupHandler {
+func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator domain.Validator, logger domain.Logger) *SignupHandler {
 	return &SignupHandler{repo: repo, ts: ts, es: es, validator: validator, logger: logger}
 }
 
@@ -38,33 +37,39 @@ func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validat
 // @Tags			2- Auth
 // @Accept			json
 // @Produce		json
-//
-// @Param			response-language	header		string			true	"Response Language"	Enums(tr, ar, en)
-//
-// @Param			request				body		SignupRequest	true	"Signup request"
-// @Success		200					{object}	SignupResponse
+// @Param			request	body		SignupRequest	true	"Signup request"
+// @Success		200		{object}	SignupResponse
 // @Failure		400
 // @Failure		409
 // @Failure		500
 // @Router			/signup [post]
 func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*SignupResponse, int, error) {
-	if err := h.validator.Struct(req); err != nil {
-		return nil, 400, domain.ErrInvalidRequest
+	if err := h.validator.Validate(req); err != nil {
+		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
 	user, err := domain.NewUser(req.FullName, req.Password, req.Email)
 	if err != nil {
-		if errors.Is(err, domain.ErrPasswordTooShort) {
-			return nil, 400, domain.ErrPasswordTooShort
+		if !errors.Is(err, domain.ErrInternalServer) {
+			return nil, http.StatusBadRequest, err
 		}
 		h.logger.Error("error while creating domain user: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	token, err := h.ts.GenerateToken(user.Id.String(), user.Role, time.Now())
 	if err != nil {
 		h.logger.Error("error while generating token: ", err)
-		return nil, 500, domain.ErrInternalServer
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	}
+
+	err = h.repo.CreateUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, domain.ErrEmailAlreadyExists) {
+			return nil, http.StatusConflict, domain.ErrEmailAlreadyExists
+		}
+		h.logger.Error("error while creating user in repository: ", err)
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	go func(fullname, email string) {
@@ -122,5 +127,5 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
 	}(user.FullName, user.Email)
 
-	return &SignupResponse{Token: token}, 201, nil
+	return &SignupResponse{Token: token}, http.StatusCreated, nil
 }
