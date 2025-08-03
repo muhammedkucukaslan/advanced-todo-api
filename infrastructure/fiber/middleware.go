@@ -27,7 +27,7 @@ func (m *MiddlewareManager) AuthMiddleware(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
 	if authHeader == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
-			Message: "missing authorization header",
+			Message: domain.ErrMissingAuthHeader.Error(),
 			Code:    fiber.StatusUnauthorized,
 		})
 	}
@@ -35,23 +35,16 @@ func (m *MiddlewareManager) AuthMiddleware(c *fiber.Ctx) error {
 	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
-			Message: "invalid authorization header format",
+			Message: domain.ErrInvalidAuthHeader.Error(),
 			Code:    fiber.StatusUnauthorized,
 		})
 	}
 
 	token := parts[1]
-	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
-			Message: "missing token",
-			Code:    fiber.StatusUnauthorized,
-		})
-	}
-
 	payload, err := m.tokenService.ValidateToken(token)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
-			Message: "invalid or expired token",
+			Message: domain.ErrInvalidToken.Error(),
 			Code:    fiber.StatusUnauthorized,
 		})
 	}
