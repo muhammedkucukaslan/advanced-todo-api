@@ -47,7 +47,7 @@
 //	@description	"code": 400
 //	@description	}
 //	@description	```
-//	@description	Please handle errors accordingly on the client side.
+//	@description	Please Handle errors accordingly on the client side.
 //	@description	The API returns an error which is according to a language at some endpoints.
 //	@description	For example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.
 //	@description	In this case, you need to specify the language in the request header as `accept-language`.
@@ -134,37 +134,37 @@ func SetupRoutes(app *fiber.App) {
 	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
 	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
 
-	app.Get("/healthcheck", handle(healthcheckHandler, logger))
+	app.Get("/healthcheck", Handle(healthcheckHandler, logger))
 	app.Use(contextMiddleware)
 
 	adminApp := app.Group("/admin", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware)
 
-	app.Post("/signup", handle(signupHandler, logger))
-	app.Post("/login", handle(loginHandler, logger))
+	app.Post("/signup", Handle(signupHandler, logger))
+	app.Post("/login", Handle(loginHandler, logger))
 
 	usersPublicApp := app.Group("/users")
-	usersPublicApp.Post("/forgot-password", handle(forgotPasswordHandler, logger))
-	usersPublicApp.Post("/reset-password", handle(resetPasswordHandler, logger))
-	usersPublicApp.Post("/verify-email", handle(verifyEmailHandler, logger))
+	usersPublicApp.Post("/forgot-password", Handle(forgotPasswordHandler, logger))
+	usersPublicApp.Post("/reset-password", Handle(resetPasswordHandler, logger))
+	usersPublicApp.Post("/verify-email", Handle(verifyEmailHandler, logger))
 
 	usersApp := app.Group("/users", middlewareManager.AuthMiddleware)
-	usersApp.Get("/profile", handle(getCurrentUserHandler, logger))
-	usersApp.Delete("/account", handle(deleteAccountHandler, logger))
-	usersApp.Patch("/account", handle(updateFullNameHandler, logger))
-	usersApp.Patch("/password", handle(updatePasswordHandler, logger))
-	usersApp.Post("/send-verification-email", handle(sendVerificationEmailHandler, logger))
+	usersApp.Get("/profile", Handle(getCurrentUserHandler, logger))
+	usersApp.Delete("/account", Handle(deleteAccountHandler, logger))
+	usersApp.Patch("/account", Handle(updateFullNameHandler, logger))
+	usersApp.Patch("/password", Handle(updatePasswordHandler, logger))
+	usersApp.Post("/send-verification-email", Handle(sendVerificationEmailHandler, logger))
 
 	usersAdminApp := adminApp.Group("/users")
-	usersAdminApp.Get("/", handle(getUsersHandler, logger))
-	usersAdminApp.Get("/:id", handle(getUserHandler, logger))
+	usersAdminApp.Get("/", Handle(getUsersHandler, logger))
+	usersAdminApp.Get("/:id", Handle(getUserHandler, logger))
 
 	todosApp := app.Group("/todos", middlewareManager.AuthMiddleware)
-	todosApp.Post("/", handle(createTodoHandler, logger))
-	todosApp.Get("/:id", handle(getTodoByIdHandler, logger))
-	todosApp.Get("/", handle(getTodosHandler, logger))
-	todosApp.Put("/:id", handle(updateTodoHandler, logger))
-	todosApp.Delete("/:id", handle(deleteTodoHandler, logger))
-	todosApp.Patch("/:id", handle(toggleCompletedTodoHandler, logger))
+	todosApp.Post("/", Handle(createTodoHandler, logger))
+	todosApp.Get("/:id", Handle(getTodoByIdHandler, logger))
+	todosApp.Get("/", Handle(getTodosHandler, logger))
+	todosApp.Put("/:id", Handle(updateTodoHandler, logger))
+	todosApp.Delete("/:id", Handle(deleteTodoHandler, logger))
+	todosApp.Patch("/:id", Handle(toggleCompletedTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.Error{

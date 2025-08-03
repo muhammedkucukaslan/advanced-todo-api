@@ -17,7 +17,7 @@ type HandlerInterface[R Request, Res Response] interface {
 	Handle(ctx context.Context, req *R) (*Res, int, error)
 }
 
-func handle[R Request, Res Response](handler HandlerInterface[R, Res], logger domain.Logger) fiber.Handler {
+func Handle[R Request, Res Response](handler HandlerInterface[R, Res], logger domain.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req R
 
