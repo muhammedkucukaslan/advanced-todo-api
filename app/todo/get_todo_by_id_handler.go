@@ -2,6 +2,7 @@ package todo
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -47,7 +48,7 @@ func NewGetTodoByIdHandler(repo TodoRepository) *GetTodoByIdHandler {
 func (h *GetTodoByIdHandler) Handle(ctx context.Context, req *GetTodoByIdRequest) (*GetTodoByIdResponse, int, error) {
 	todo, err := h.repo.GetById(ctx, req.Id)
 	if err != nil {
-		if err == domain.ErrTodoNotFound {
+		if errors.Is(err, domain.ErrTodoNotFound) {
 			return nil, http.StatusNotFound, err
 		}
 		return nil, http.StatusInternalServerError, err
