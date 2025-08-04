@@ -2,6 +2,7 @@ package todo
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -53,6 +54,9 @@ func (h *UpdateTodoHandler) Handle(ctx context.Context, req *UpdateTodoRequest) 
 	}
 
 	if err = h.repo.UpdateTodo(ctx, req.Id, req.Title); err != nil {
+		if errors.Is(err, domain.ErrTodoNotFound) {
+			return nil, http.StatusNotFound, err
+		}
 		return nil, http.StatusInternalServerError, err
 	}
 

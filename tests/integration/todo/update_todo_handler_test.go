@@ -3,6 +3,7 @@ package testtodo
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
@@ -44,7 +45,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 		code    int
 	}{
 		{
-			"valid creation",
+			"valid update",
 			args{
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
@@ -55,6 +56,13 @@ func TestUpdateTodoHandler(t *testing.T) {
 			nil,
 			http.StatusNoContent,
 		},
+		{"not found", args{
+			ctx: ctx,
+			req: &todo.UpdateTodoRequest{
+				Id:    domain.FakeTodoIdUuid,
+				Title: "Updated Test Todo",
+			},
+		}, domain.ErrTodoNotFound, http.StatusNotFound},
 		{
 			"invalid request",
 			args{
@@ -84,7 +92,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
 					Id:    domain.TestTodo.Id,
-					Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
+					Title: strings.Repeat("a", 101),
 				},
 			},
 			domain.ErrTitleTooLong,
@@ -96,7 +104,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_, code, err := updateTodoHandler.Handle(tt.args.ctx, tt.args.req)
 
-			assert.Equal(t, code, tt.code)
+			assert.Equal(t, tt.code, code)
 			if err != nil {
 				assert.Error(t, err)
 				assert.ErrorIs(t, err, tt.wantErr)

@@ -27,12 +27,16 @@ func (r *Repository) CreateTodo(ctx context.Context, todo *domain.Todo) error {
 }
 
 func (r *Repository) UpdateTodo(ctx context.Context, id uuid.UUID, title string) error {
-	_, err := r.db.ExecContext(ctx, `
-		UPDATE todos
-		SET title = $1
-		WHERE id = $2
-	`, title, id)
-	return err
+	res, err := r.db.ExecContext(ctx, `UPDATE todos SET title = $1 WHERE id = $2`, title, id)
+	if err != nil {
+		return err
+	}
+
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		return domain.ErrTodoNotFound
+	}
+
+	return nil
 }
 
 func (r *Repository) GetById(ctx context.Context, id uuid.UUID) (*todo.GetTodoByIdResponse, error) {
