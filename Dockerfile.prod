@@ -12,10 +12,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags='-w -s -extldflags "-static"' \
-    -a -installsuffix cgo \
-    -o main ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/.
 
 # Final stages
 FROM alpine:3.18
@@ -23,7 +20,7 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /root/
 
 COPY --from=builder /app/main .
-
+ARG BUILDKIT_INLINE_CACHE=1
 EXPOSE 3000
 ENV ENV=production
 CMD ["./main"]
