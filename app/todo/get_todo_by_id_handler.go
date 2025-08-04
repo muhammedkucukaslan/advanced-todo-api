@@ -25,7 +25,7 @@ type GetTodoByIdHandler struct {
 	repo TodoRepository
 }
 
-func NewGetTodoByIdHandler(repo TodoRepository, validator domain.Validator) *GetTodoByIdHandler {
+func NewGetTodoByIdHandler(repo TodoRepository) *GetTodoByIdHandler {
 	return &GetTodoByIdHandler{repo: repo}
 }
 
