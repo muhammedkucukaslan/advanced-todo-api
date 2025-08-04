@@ -48,7 +48,8 @@ func setupTestUser(t *testing.T, connStr string) {
 	hashedPassword, err := domain.HashPassword(domain.TestUser.Password)
 	require.NoError(t, err)
 
-	query := "INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)"
+	query := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
+			ON CONFLICT (email) DO NOTHING`
 	_, err = db.Exec(query,
 		domain.TestUser.Id,
 		domain.TestUser.FullName,
@@ -66,7 +67,7 @@ func runMigrations(t *testing.T, connStr string) {
 	defer db.Close()
 
 	createTableQuery := `
-		CREATE TABLE users (
+		CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY,
 			fullname VARCHAR(255),
 			role VARCHAR(10) NOT NULL CHECK (role IN ('USER', 'ADMIN')),
@@ -75,6 +76,8 @@ func runMigrations(t *testing.T, connStr string) {
 			is_email_verified BOOLEAN DEFAULT FALSE,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
+
+		TRUNCATE TABLE users CASCADE;
 	`
 
 	_, err = db.Exec(createTableQuery)
