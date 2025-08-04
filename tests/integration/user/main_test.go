@@ -75,6 +75,8 @@ func runMigrations(t *testing.T, connStr string) {
 			is_email_verified BOOLEAN DEFAULT FALSE,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
+
+		TRUNCATE TABLE users;
 	`
 
 	_, err = db.Exec(createTableQuery)
