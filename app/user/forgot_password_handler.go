@@ -33,18 +33,18 @@ func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenSe
 
 // Handle processes the request to initiate a password reset.
 //
-//		@Summary		Forgot Password
-//		@Description	It sends  a password reset link to the user's email address.
-//		@Tags			3- User
-//		@Accept			json
-//		@Produce		json
-//		@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
-//		@Param			request				body	ForgotPasswordRequest	true	"Forgot Password Request"
-//		@Success		204
-//		@Failure		400
-//	 @Failure		401
-//		@Failure		500
-//		@Router			/users/forgot-password [post]
+//	@Summary		Forgot Password
+//	@Description	It sends  a password reset link to the user's email address.
+//	@Tags			3- User
+//	@Accept			json
+//	@Produce		json
+//	@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
+//	@Param			request				body	ForgotPasswordRequest	true	"Forgot Password Request"
+//	@Success		204
+//	@Failure		400
+//	@Failure		401
+//	@Failure		500
+//	@Router			/users/forgot-password [post]
 func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordRequest) (*ForgotPasswordResponse, int, error) {
 	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
