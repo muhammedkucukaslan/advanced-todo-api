@@ -66,7 +66,7 @@ func runMigrations(t *testing.T, connStr string) {
 	defer db.Close()
 
 	createTableQuery := `
-		CREATE TABLE users (
+		CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY,
 			fullname VARCHAR(255),
 			role VARCHAR(10) NOT NULL CHECK (role IN ('USER', 'ADMIN')),
