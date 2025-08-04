@@ -1,5 +1,16 @@
-
 services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: advanced_todo_api_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+   
   api:
     image: golang:1.24.5-alpine3.22
     working_dir: /app
@@ -10,6 +21,11 @@ services:
       - "3000:3000"
     command: ["go", "run", "./cmd/main.go"]
     restart: unless-stopped
+    depends_on:
+      - db
+    env_file:
+      - .env
 
 volumes:
   go-mod:
+  db-data:
