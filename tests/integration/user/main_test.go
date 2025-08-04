@@ -76,7 +76,7 @@ func runMigrations(t *testing.T, connStr string) {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 
-		TRUNCATE TABLE users;
+		TRUNCATE TABLE users CASCADE; 
 	`
 
 	_, err = db.Exec(createTableQuery)
