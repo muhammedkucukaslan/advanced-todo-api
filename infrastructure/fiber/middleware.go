@@ -58,7 +58,7 @@ func (m *MiddlewareManager) AdminMiddleware(c *fiber.Ctx) error {
 	if role != "ADMIN" {
 
 		return c.Status(fiber.StatusForbidden).JSON(domain.Error{
-			Message: "forbidden resource",
+			Message: domain.ErrForbidden.Error(),
 			Code:    fiber.StatusForbidden,
 		})
 	}
