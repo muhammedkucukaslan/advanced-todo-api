@@ -14,3 +14,6 @@ integration-test:
 
 httptest:
 	go test -v ./tests/httptest/...
+
+e2e-test:
+	go test -v ./tests/e2e/...
