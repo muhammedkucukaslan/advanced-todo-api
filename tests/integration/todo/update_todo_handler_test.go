@@ -61,14 +61,14 @@ func TestUpdateTodoHandler(t *testing.T) {
 			},
 		}, domain.ErrTodoNotFound, http.StatusNotFound},
 		{
-			"invalid request",
+			"empty title",
 			args{
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
 					Id: domain.TestTodo.Id,
 				},
 			},
-			domain.ErrInvalidRequest,
+			domain.ErrEmptyTitle,
 			http.StatusBadRequest,
 		},
 		{
