@@ -130,7 +130,7 @@ func SetupRoutes(app *fiber.App) {
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo)
 	getTodosHandler := todo.NewGetTodosHandler(repo)
-	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
+	updateTodoHandler := todo.NewUpdateTodoHandler(repo)
 	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
 	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
 
