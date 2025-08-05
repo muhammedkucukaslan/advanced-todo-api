@@ -17,7 +17,6 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +27,6 @@ func TestUpdateTodoHandler(t *testing.T) {
 
 	tokenService := jwt.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
 	logger := slog.NewLogger()
-	validator := validator.NewValidator(logger)
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
 
@@ -45,7 +43,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
+	updateTodoHandler := todo.NewUpdateTodoHandler(repo)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo)
 	app.Put("/todos/:id", fiberInfra.Handle(updateTodoHandler, logger))
 	app.Get("/todos/:id", fiberInfra.Handle(getTodoByIdHandler, logger))
@@ -64,13 +62,13 @@ func TestUpdateTodoHandler(t *testing.T) {
 	notExistedTodoTestName := "not existed todo id"
 
 	tests := []struct {
-		name        string
-		args        args
-		getWant     *todo.GetTodoByIdResponse
-		putCode     int
-		wantPostErr error
-		getCode     int
-		wantGetErr  error
+		name       string
+		args       args
+		getWant    *todo.GetTodoByIdResponse
+		putCode    int
+		wantPutErr error
+		getCode    int
+		wantGetErr error
 	}{
 
 		{"valid update", args{
@@ -106,7 +104,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 			Id:        uuid.Nil,
 			Title:     domain.TestTodo.Title,
 			Completed: domain.TestTodo.Completed,
-		}, http.StatusBadRequest, domain.ErrTitleTooShort, http.StatusOK, nil},
+		}, http.StatusBadRequest, domain.ErrEmptyTitle, http.StatusOK, nil},
 
 		{notExistedTodoTestName, args{
 			authHeader: validTokenHeader,
@@ -152,7 +150,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				err = json.NewDecoder(resp.Body).Decode(&errResp)
 				require.NoError(t, err)
 				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, errResp.Code, tt.putCode)
+				assert.Equal(t, tt.wantPutErr.Error(), errResp.Message, "error message should match")
 			}
 		})
 
@@ -172,7 +170,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				err = json.NewDecoder(resp.Body).Decode(&errResp)
 				require.NoError(t, err)
 				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, errResp.Code, tt.getCode)
+				assert.Equal(t, tt.wantGetErr.Error(), errResp.Message, "error message should match")
 			} else {
 				var getResp todo.GetTodoByIdResponse
 				err = json.NewDecoder(resp.Body).Decode(&getResp)
