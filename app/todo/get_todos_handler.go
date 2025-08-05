@@ -36,7 +36,7 @@ func NewGetTodosHandler(repo TodoRepository) *GetTodosHandler {
 //
 //	@Summary		Get all todos
 //	@Description	Retrieves all todos for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json

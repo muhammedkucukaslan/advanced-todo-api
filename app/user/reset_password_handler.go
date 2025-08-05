@@ -35,10 +35,10 @@ func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger 
 //
 //	@Summary		Reset Password
 //	@Description	It resets a user's password using a token.
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
-//	@Param			request				body	ResetPasswordRequest	true	"Reset Password Request"
+//	@Param			request	body	ResetPasswordRequest	true	"Reset Password Request"
 //	@Success		204
 //	@Failure		400
 //	@Failure		401

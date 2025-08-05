@@ -30,10 +30,10 @@ func NewVerifyEmailHandler(repo Repository, validate domain.Validator, ts TokenS
 //
 //	@Summary		Verify user email
 //	@Description	Verifies a user's email address using a token
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
-//	@Param			request				body	VerifiyEmailRequest	true	"Verify Email Request"
+//	@Param			request	body	VerifiyEmailRequest	true	"Verify Email Request"
 //	@Success		204
 //	@Failure		400
 //	@Failure		401

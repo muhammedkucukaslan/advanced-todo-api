@@ -29,7 +29,7 @@ func NewUpdateTodoHandler(repo TodoRepository) *UpdateTodoHandler {
 //
 //	@Summary		Update an existing todo
 //	@Description	Updates an existing todo item for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json

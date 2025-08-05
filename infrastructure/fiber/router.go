@@ -48,11 +48,11 @@
 //	@description	}
 //	@description	```
 //	@description
-//	@description				## Reminder
-//	@description				I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
-//	@description				Status code with `2xx` is a success code.
-//	@description				Status code with `4xx` is a client error code.
-//	@description				Status code with `5xx` is a server error code.
+//	@description	## Reminder
+//	@description	I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
+//	@description	Status code with `2xx` is a success code.
+//	@description	Status code with `4xx` is a client error code.
+//	@description	Status code with `5xx` is a server error code.
 //
 
 //

@@ -29,7 +29,7 @@ func NewDeleteAccountHandler(repo Repository, logger domain.Logger, ms MailServi
 //	@Summary		Delete User Account
 //
 //	@Description	Delete a user's account
-//	@Tags			3- User
+//	@Tags			User
 //	@Security		BearerAuth
 //	@Success		204
 //	@Failure		400

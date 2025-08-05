@@ -33,7 +33,7 @@ func NewSendVerificationEmailHandler(repo Repository, validate domain.Validator,
 //	@Summary		Send Verification Email
 //
 //	@Description	Sends a verification email to the user
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
 //
