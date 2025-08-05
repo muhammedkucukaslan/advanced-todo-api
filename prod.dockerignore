@@ -10,6 +10,7 @@ Makefile
 *.env
 *_test.go
 ./tests/*
-
+./images/*
+README.md
 *_coverage.out 
 *_coverage.html

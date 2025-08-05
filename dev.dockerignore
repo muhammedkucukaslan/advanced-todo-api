@@ -9,6 +9,7 @@ Makefile
 *.log
 *_test.go
 ./tests/*
-
-*_coverage.out 
+./images/*
+./README.md
+*_coverage.out
 *_coverage.html

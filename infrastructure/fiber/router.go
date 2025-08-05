@@ -93,7 +93,6 @@ func SetupRoutes(app *fiber.App) {
 	}
 	fmt.Println("Connected to database")
 	tokenService := jwt.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
-	// cookieService := fiberInfra.NewFiberCookieService()
 	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
 
 	logger := slog.NewLogger()
