@@ -23,9 +23,12 @@ func NewRepository(databaseUrl string) (*Repository, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
+	if err := runTableMigrations(db); err != nil {
+		return nil, err
+	}
 
 	if os.Getenv("ENV") != "production" {
-		if err := runMigrations(db); err != nil {
+		if err := runUserMigrations(db); err != nil {
 			return nil, err
 		}
 	}
@@ -43,8 +46,7 @@ func rollbackTx(tx *sql.Tx) {
 	}
 }
 
-func runMigrations(db *sql.DB) error {
-
+func runTableMigrations(db *sql.DB) error {
 	createTableQuery := `
 		CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY,
@@ -66,9 +68,20 @@ func runMigrations(db *sql.DB) error {
 			completed_at TIMESTAMP DEFAULT NULL
 		);
 	`
-	if _, err := db.Exec(createTableQuery); err != nil {
+	_, err := db.Exec(createTableQuery)
+
+	return err
+
+}
+
+func runUserMigrations(db *sql.DB) error {
+	tx, err := db.Begin()
+
+	if err != nil {
 		return err
 	}
+	defer rollbackTx(tx)
+
 	hashedPassword, err := domain.HashPassword(domain.TestUser.Password)
 	if err != nil {
 		return err
@@ -76,7 +89,7 @@ func runMigrations(db *sql.DB) error {
 
 	addUserQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT (email) DO NOTHING`
-	_, err = db.Exec(addUserQuery,
+	_, err = tx.Exec(addUserQuery,
 		domain.TestUser.Id,
 		domain.TestUser.FullName,
 		domain.TestUser.Email,
@@ -90,14 +103,15 @@ func runMigrations(db *sql.DB) error {
 	}
 	addAdminQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT (email) DO NOTHING`
-	_, err = db.Exec(addAdminQuery,
+	_, err = tx.Exec(addAdminQuery,
 		uuid.New(),
 		"ADMIN",
 		"admin@admin.com",
 		adminHashedPassword,
 		"ADMIN",
 	)
-
-	return err
-
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
