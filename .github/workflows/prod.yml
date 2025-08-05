@@ -31,8 +31,15 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      - name: Run Tests
-        run: go test -v ./...
+      - name: Unit Testing
+        run: make unit-test
+      - name: Integration Testing
+        run: make integration-test
+      - name: HTTP Testing
+        run: make httptest
+      - name: E2E Testing
+        run: make e2e-test
+
   docker-build-push:
     if: github.event_name == 'push'
     name: Build and Push Docker Image
@@ -100,4 +107,4 @@ jobs:
   #         else
   #           echo "Health check failed!"
   #           exit 1
-  #         fi
+  #         fi  

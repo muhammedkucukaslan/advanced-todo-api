@@ -40,10 +40,6 @@ func NewCreateTodoHandler(repo TodoRepository) *CreateTodoHandler {
 //	@Failure		500					"Internal server error"
 //	@Router			/todos [post]
 func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) (*CreateTodoResponse, int, error) {
-	if req.Title == "" {
-		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
-	}
-
 	userId := domain.GetUserID(ctx)
 
 	todo, err := domain.NewTodo(userId, req.Title)

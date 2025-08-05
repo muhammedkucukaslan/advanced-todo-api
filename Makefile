@@ -1,6 +1,6 @@
 swagger: 
 	swag fmt
-	swag init -g ./cmd/router.go
+	swag init -g ./infrastructure/fiber/router.go
 dev:
 	docker-compose up --build 
 run: 
@@ -14,3 +14,6 @@ integration-test:
 
 httptest:
 	go test -v ./tests/httptest/...
+
+e2e-test:
+	go test -v ./tests/e2e/...

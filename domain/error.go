@@ -30,7 +30,11 @@ const (
 )
 
 var (
-	ErrInvalidToken       = errors.New("invalid token")
+	ErrMissingAuthHeader = errors.New("missing authorization header")
+	ErrInvalidAuthHeader = errors.New("invalid authorization header format")
+	ErrInvalidToken      = errors.New("invalid or expired token")
+	ErrForbidden         = errors.New("forbidden access")
+
 	ErrPasswordTooShort   = errors.New("password must be at least 8 characters long")
 	ErrInvalidRequest     = errors.New("invalid request")
 	ErrUnauthorized       = errors.New("unauthorized access")

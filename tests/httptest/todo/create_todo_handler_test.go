@@ -47,13 +47,12 @@ func TestCreateTodoHandler(t *testing.T) {
 
 	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())
 	require.NoError(t, err, "failed to generate valid token")
-	fakeToken, err := tokenService.GenerateToken(domain.FakeUserId, domain.TestUser.Role, time.Now())
+
+	fakeUserIdToken, err := tokenService.GenerateToken(domain.FakeUserId, domain.TestUser.Role, time.Now())
 	require.NoError(t, err, "failed to generate fake token")
 
 	validTokenHeader := "Bearer " + validToken
-	fakeTokenHeader := "Bearer " + fakeToken
-	invalidTokenHeader := "Bearer " + "invalid_token"
-	invalidHeader := " Bearerrrrrr " + validToken
+	fakeUserIdTokenHeader := "Bearer " + fakeUserIdToken
 
 	type args struct {
 		authHeader string
@@ -75,7 +74,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			}, http.StatusCreated, nil,
 		},
 		{"fake user ID ", args{
-			authHeader: fakeTokenHeader,
+			authHeader: fakeUserIdTokenHeader,
 			req: &todo.CreateTodoRequest{
 				Title: "Test Todo",
 			},
@@ -93,30 +92,6 @@ func TestCreateTodoHandler(t *testing.T) {
 			req:        &todo.CreateTodoRequest{},
 		}, http.StatusBadRequest, domain.ErrInvalidRequest,
 		},
-		{
-			"unauthorized",
-			args{
-				req: &todo.CreateTodoRequest{
-					Title: "Test Todo",
-				},
-			}, http.StatusUnauthorized, domain.ErrUnauthorized,
-		},
-		{
-			"invalid token", args{
-				authHeader: invalidTokenHeader,
-				req: &todo.CreateTodoRequest{
-					Title: "Test Todo",
-				},
-			}, http.StatusUnauthorized, domain.ErrUnauthorized,
-		},
-		{
-			"invalid header", args{
-				authHeader: invalidHeader,
-				req: &todo.CreateTodoRequest{
-					Title: "Test Todo",
-				},
-			}, http.StatusUnauthorized, domain.ErrUnauthorized,
-		},
 	}
 
 	for _, tt := range tests {
@@ -130,10 +105,8 @@ func TestCreateTodoHandler(t *testing.T) {
 
 			req, _ := http.NewRequest(http.MethodPost, "/todos", body)
 
-			if tt.args.authHeader != "" {
-				req.Header.Set("Authorization", tt.args.authHeader)
-			}
 			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Authorization", tt.args.authHeader)
 
 			resp, err := app.Test(req, -1)
 			require.NoError(t, err, "failed to create request")

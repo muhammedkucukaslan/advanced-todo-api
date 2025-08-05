@@ -20,11 +20,12 @@ func NewTokenService(secretKey string, tokenDuration, emailVerificationToken, fo
 	return &TokenService{secretKey: secretKey, tokenDuration: tokenDuration, emailVerificationToken: emailVerificationToken, forgotPasswordToken: forgotPasswordToken}
 }
 
-func (s *TokenService) GenerateToken(userID, role string, time time.Time) (string, error) {
+func (s *TokenService) GenerateToken(userID, role string, t time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 		"role":   role,
-		"iat":    time.Unix(),
+		"iat":    t.Unix(),
+		"exp":    t.Add(s.tokenDuration).Unix(),
 	})
 
 	return token.SignedString([]byte(s.secretKey))

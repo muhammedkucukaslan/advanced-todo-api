@@ -3,13 +3,12 @@ package testtodo
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,8 +28,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 	setupTestUser(t, connStr)
 	setupTestTodo(t, connStr)
 
-	validator := validator.NewValidator(slog.NewLogger())
-	updateTodoHandler := todo.NewUpdateTodoHandler(repo, validator)
+	updateTodoHandler := todo.NewUpdateTodoHandler(repo)
 
 	type args struct {
 		ctx context.Context
@@ -44,7 +42,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 		code    int
 	}{
 		{
-			"valid creation",
+			"valid update",
 			args{
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
@@ -55,15 +53,22 @@ func TestUpdateTodoHandler(t *testing.T) {
 			nil,
 			http.StatusNoContent,
 		},
+		{"not found", args{
+			ctx: ctx,
+			req: &todo.UpdateTodoRequest{
+				Id:    domain.FakeTodoIdUuid,
+				Title: "Updated Test Todo",
+			},
+		}, domain.ErrTodoNotFound, http.StatusNotFound},
 		{
-			"invalid request",
+			"empty title",
 			args{
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
 					Id: domain.TestTodo.Id,
 				},
 			},
-			domain.ErrInvalidRequest,
+			domain.ErrEmptyTitle,
 			http.StatusBadRequest,
 		},
 		{
@@ -84,7 +89,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				ctx: ctx,
 				req: &todo.UpdateTodoRequest{
 					Id:    domain.TestTodo.Id,
-					Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
+					Title: strings.Repeat("a", 101),
 				},
 			},
 			domain.ErrTitleTooLong,
@@ -96,7 +101,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_, code, err := updateTodoHandler.Handle(tt.args.ctx, tt.args.req)
 
-			assert.Equal(t, code, tt.code)
+			assert.Equal(t, tt.code, code)
 			if err != nil {
 				assert.Error(t, err)
 				assert.ErrorIs(t, err, tt.wantErr)

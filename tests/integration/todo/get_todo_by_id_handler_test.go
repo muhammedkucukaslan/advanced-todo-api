@@ -8,8 +8,6 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,8 +27,7 @@ func TestGetTodoHandler(t *testing.T) {
 	setupTestUser(t, connStr)
 	setupTestTodo(t, connStr)
 
-	validator := validator.NewValidator(slog.NewLogger())
-	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo, validator)
+	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo)
 
 	type args struct {
 		ctx context.Context
