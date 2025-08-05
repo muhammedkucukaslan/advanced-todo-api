@@ -3,6 +3,7 @@ package testtodo
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
@@ -54,7 +55,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			nil,
 		},
 		{
-			"invalid user ID request",
+			"invalid user ID",
 			args{
 				ctx: ctxWithFakeUserId,
 				req: &todo.CreateTodoRequest{
@@ -65,13 +66,13 @@ func TestCreateTodoHandler(t *testing.T) {
 			domain.ErrUserNotFound,
 		},
 		{
-			"invalid request",
+			"empty title",
 			args{
 				ctx: ctx,
 				req: &todo.CreateTodoRequest{},
 			},
 			http.StatusBadRequest,
-			domain.ErrInvalidRequest,
+			domain.ErrEmptyTitle,
 		},
 		{
 			"too short title",
@@ -89,7 +90,7 @@ func TestCreateTodoHandler(t *testing.T) {
 			args{
 				ctx: ctx,
 				req: &todo.CreateTodoRequest{
-					Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
+					Title: strings.Repeat("a", 105),
 				},
 			},
 			http.StatusBadRequest,

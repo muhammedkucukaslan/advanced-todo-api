@@ -3,6 +3,7 @@ package testtodo
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
@@ -10,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateTodoHandlerWithMock(t *testing.T) {
-	ctx := context.WithValue(context.Background(), domain.UserIDKey, "5ee1903d-0c9a-4d95-aae2-7215e168564b")
+func TestCreateTodoHandler(t *testing.T) {
+	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
 	createTodoHandler := todo.NewCreateTodoHandler(&MockRepository{})
 
@@ -26,7 +27,7 @@ func TestCreateTodoHandlerWithMock(t *testing.T) {
 	}
 
 	tooLongCreateTodoRequest := &todo.CreateTodoRequest{
-		Title: "a very long title that exceeds the maximum length of one hundred characters, which is not allowed in this test case............................................................................",
+		Title: strings.Repeat("a", 105),
 	}
 
 	type args struct {
@@ -37,58 +38,39 @@ func TestCreateTodoHandlerWithMock(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wantErr error
 		code    int
+		wantErr error
 	}{
-		{
-			"valid creation",
-			args{
-				ctx: ctx,
-				req: validCreateTodoRequest,
-			},
-			nil,
-			http.StatusCreated,
+		{"valid request", args{
+			ctx: ctx,
+			req: validCreateTodoRequest,
+		}, http.StatusCreated, nil,
 		},
-		{
-			"invalid title creation",
-			args{
-				ctx: ctx,
-				req: invalidCreateTodoRequest,
-			},
-			domain.ErrInvalidRequest,
-			http.StatusBadRequest,
+		{"empty title", args{
+			ctx: ctx,
+			req: invalidCreateTodoRequest,
+		}, http.StatusBadRequest, domain.ErrEmptyTitle,
 		},
-		{
-			"too short title creation",
-			args{
-				ctx: ctx,
-				req: tooShortCreateTodoRequest,
-			},
-			domain.ErrTitleTooShort,
-			http.StatusBadRequest,
+		{"too short title", args{
+			ctx: ctx,
+			req: tooShortCreateTodoRequest,
+		}, http.StatusBadRequest, domain.ErrTitleTooShort,
 		},
-		{
-			"too long title creation",
-			args{
-				ctx: ctx,
-				req: tooLongCreateTodoRequest,
-			},
-			domain.ErrTitleTooLong,
-			http.StatusBadRequest,
+		{"too long title", args{
+			ctx: ctx,
+			req: tooLongCreateTodoRequest,
+		}, http.StatusBadRequest, domain.ErrTitleTooLong,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, code, err := createTodoHandler.Handle(tt.args.ctx, tt.args.req)
-
-			if err != nil {
-				assert.Error(t, err)
+			assert.Equal(t, tt.code, code)
+			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Equal(t, code, tt.code)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, code, tt.code)
 			}
 
 		})
