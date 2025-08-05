@@ -13,9 +13,11 @@
 [![JWT][JWT.io]][JWT-url]
 [![Testify][Testify.com]][Testify-url]
 [![Swagger][Swagger.io]][Swagger-url]
+[![Validator][Validator.com]][Validator-url]
+[![Slog][Slog.com]][Slog-url]
 
 
-<h3 align="center">Advanced Todo API</h3>
+<h1 align="center">Advanced Todo API</h1>
   <p align="center">
     A RESTful API for managing todos with advanced features.
   </p>
@@ -38,7 +40,7 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
-        <li><a href="#usage">Usage</a></li>
+        <li><a href="#api-usage">API Usage</a></li>
       </ul>
     </li>
     <li><a href="#testing">Testing</a></li>
@@ -50,7 +52,7 @@
 
 ## About The Project
 
-As a Backend Developer, I am trying to build robust and scalable API projects by writing clean and maintainable code. It's been hard to learn `advanced` concepts at first, esspecially working on a real-world project. So, I decided to build a project that includes advanced features and concepts but also has a simple business logic such as Todo Management. This project is result of this. 
+As a Backend Developer, I am trying to build robust and scalable API projects by writing clean and maintainable code. It's been hard to learn **advanced** concepts at first, esspecially working on a real-world project. So, I decided to build a project that includes advanced features and concepts but also has a simple business logic such as Todo Management. This project is the result of this desire. 
 
 
 
@@ -65,14 +67,14 @@ As a Backend Developer, I am trying to build robust and scalable API projects by
   - 🔁 Forgot Password & Reset Password
   - 📧 Email Verification
 - 📌 Todo CRUD (Create, Read, Update, Delete)
-- 🔁 Forgot Password and Reset Password Functionality
+- 🧱 Database Migrations for Initializing the Application and Test Environments
 - 🧪 Unit & Integration & Http & E2E Tests with Testify and Test Containers
 - 🧾 Swagger-based API Documentation
 - 🐳 Docker Support via `docker-compose`
 - 📤 Email Notification Integration
 
 ### Tech Stack
-[Golang][Golang-url] [Fiber][Fiber-url], [PostgreSQL][PostgreSQL-url], [Docker][Docker-url], [JWT][JWT-url], [Testify][Testify-url], [Swagger][Swagger-url]
+[Golang][Golang-url] [Fiber][Fiber-url], [PostgreSQL][PostgreSQL-url], [Docker][Docker-url], [JWT][JWT-url], [Testify][Testify-url], [Swagger][Swagger-url], [Validator][Validator.com], [Slog][Slog.com]
 
 ## Getting Started
 
@@ -80,7 +82,6 @@ Follow these steps to get the project up and running on your local machine.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
 * Go 1.23 or later
   ```sh
     sudo apt install golang
@@ -124,7 +125,7 @@ This is an example of how to list things you need to use the software and how to
    ```sh
    go run cmd/main.go
    ```
-    > **Note:** If you are **not** using Docker, make sure you have a running PostgreSQL database on your machine and that your `.env` file is configured with the correct database connection details.
+    > ⚠️**Note:** If you are **not** using Docker, make sure you have a running PostgreSQL database on your machine and that your `.env` file is configured with the correct database connection details.
 
    If you are able to use Makefile, you can also run the following command to start the application:
    
@@ -141,7 +142,7 @@ This is an example of how to list things you need to use the software and how to
 
 ### API Usage
 
-You can explore and test the API using the automatically generated Swagger UI.
+You can explore and test the API manually using the automatically generated Swagger UI.
 #### 🔄 Generate Swagger Docs
 
 If you've made changes to your API, regenerate the Swagger documentation:
@@ -166,6 +167,7 @@ From there, you can:
   - Send test requests
   - See required request bodies and response formats
 
+> You can only access swagger document endpoint when `ENV` environment is not `production`
 
 ## Testing
 You can run the tests by using Makefile:
@@ -176,7 +178,7 @@ You  can also run each test type separately:
 ```sh
 make unit-test
 ```
-You need to have Docker installed on your local machine to run these tests because I am using Test Containers which need Docker to be running.
+> ⚠️ **Note:** Make sure Docker is installed and running on your machine. Testcontainers require Docker to create isolated environments during below testing.
 ```sh
 make integration-test
 make http-test
@@ -225,3 +227,9 @@ Don't forget to give the project a star! Thanks again!
 
 [JWT.io]: https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white
 [JWT-url]: https://jwt.io/
+
+[Validator.com]: https://img.shields.io/badge/Validator-v10-blue?style=for-the-badge&logo=go&logoColor=white
+[Validator-url]: https://pkg.go.dev/github.com/go-playground/validator/v10
+
+[Slog.com]: https://img.shields.io/badge/log%2Fslog-Go%20Logger-informational?style=for-the-badge&logo=go&logoColor=white
+[Slog-url]: https://pkg.go.dev/log/slog
