@@ -3,7 +3,9 @@ package postgres
 import (
 	"database/sql"
 	"log"
+	"os"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
@@ -22,8 +24,10 @@ func NewRepository(databaseUrl string) (*Repository, error) {
 		return nil, err
 	}
 
-	if err := runMigrations(db); err != nil {
-		return nil, err
+	if os.Getenv("ENV") != "production" {
+		if err := runMigrations(db); err != nil {
+			return nil, err
+		}
 	}
 
 	return &Repository{db: db}, nil
@@ -78,6 +82,20 @@ func runMigrations(db *sql.DB) error {
 		domain.TestUser.Email,
 		hashedPassword,
 		domain.TestUser.Role,
+	)
+
+	adminHashedPassword, err := domain.HashPassword("admin123")
+	if err != nil {
+		return err
+	}
+	addAdminQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
+	ON CONFLICT (email) DO NOTHING`
+	_, err = db.Exec(addAdminQuery,
+		uuid.New(),
+		"ADMIN",
+		"admin@admin.com",
+		adminHashedPassword,
+		"ADMIN",
 	)
 
 	return err
