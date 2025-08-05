@@ -21,11 +21,11 @@ type HealthcheckHandler struct{}
 //
 //	@Summary		Healthcheck
 //	@Description	Check the health of the service
-//	@Tags			1- Healthcheck
+//	@Tags			Healthcheck
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	HealthcheckResponse
-//	@Failure		500	{object}	domain.Error
+//	@Success		200
+//	@Failure		500
 //	@Router			/healthcheck [get]
 func NewHealthcheckHandler() *HealthcheckHandler {
 	return &HealthcheckHandler{}

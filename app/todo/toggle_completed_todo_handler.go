@@ -26,7 +26,7 @@ func NewToggleCompletedTodoHandler(repo TodoRepository) *ToggleCompletedTodoHand
 //
 //	@Summary		Toggle todo completion status
 //	@Description	Toggles the completion status of a todo item for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json

@@ -27,7 +27,7 @@ func NewCreateTodoHandler(repo TodoRepository) *CreateTodoHandler {
 //
 //	@Summary		Create a new todo
 //	@Description	Creates a new todo item for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //
 //	@Security		BearerAuth
 //

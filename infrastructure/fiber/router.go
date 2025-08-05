@@ -10,7 +10,7 @@
 //	@description
 //	@description	Some endpoints require authentication. In this case, you need to log in first.
 //	@description	I created two types of users for this project: admin and regular user.
-//	@description	Just send a POST request as below at [here](http://localhost:3000/swagger/index.html).
+//	@description	Just send a POST request as below at [here](http://localhost:3000/swagger/index.html/).
 //	@description	After login, you will get a JWT token in cookies.
 //	@description	If you're using cookie-based auth, the cookie will be sent automatically.
 //	@description	Alternatively, you can use Bearer Token authentication via the "Authorize" button.
@@ -47,24 +47,14 @@
 //	@description	"code": 400
 //	@description	}
 //	@description	```
-//	@description	Please Handle errors accordingly on the client side.
-//	@description	The API returns an error which is according to a language at some endpoints.
-//	@description	For example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.
-//	@description	In this case, you need to specify the language in the request header as `accept-language`.
-//	@description	I will specify which endpoints require that header.
 //	@description
-//	@description	If you send a request to an admin endpoint, the API will return an error in Turkish.
-//	@description
-//	@description				## Reminder
-//	@description				I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
-//	@description				Status code with `2xx` is a success code.
-//	@description				Status code with `4xx` is a client error code.
-//	@description				Status code with `5xx` is a server error code.
+//	@description	## Reminder
+//	@description	I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
+//	@description	Status code with `2xx` is a success code.
+//	@description	Status code with `4xx` is a client error code.
+//	@description	Status code with `5xx` is a server error code.
 //
-//	@securityDefinitions.apikey	JWTAuth
-//	@in							cookie
-//	@name						jwt
-//	@description				JWT cookie obtained from login endpoint
+
 //
 //	@securityDefinitions.apikey	BearerAuth
 //	@in							header
@@ -91,7 +81,6 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
-	mock "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -104,9 +93,8 @@ func SetupRoutes(app *fiber.App) {
 	}
 	fmt.Println("Connected to database")
 	tokenService := jwt.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
-	// cookieService := fiberInfra.NewFiberCookieService()
 	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
-	MockEmailService := &mock.MockEmailService{}
+
 	logger := slog.NewLogger()
 	validator := validator.NewValidator(logger)
 
@@ -118,7 +106,7 @@ func SetupRoutes(app *fiber.App) {
 
 	getUserHandler := user.NewGetUserHandler(repo)
 	getUsersHandler := user.NewGetUsersHandler(repo, validator)
-	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, validator, MockEmailService)
+	deleteAccountHandler := user.NewDeleteAccountHandler(repo, logger, mailersendService)
 	updateFullNameHandler := user.NewUpdateFullNameHandler(repo, validator)
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(repo)
 	updatePasswordHandler := user.NewChangePasswordHandler(repo, validator)

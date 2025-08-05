@@ -28,7 +28,7 @@ func NewDeleteTodoHandler(repo TodoRepository) *DeleteTodoHandler {
 //
 //	@Summary		Delete a todo
 //	@Description	Deletes a todo item for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json

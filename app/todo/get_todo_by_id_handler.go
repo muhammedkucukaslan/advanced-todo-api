@@ -34,7 +34,7 @@ func NewGetTodoByIdHandler(repo TodoRepository) *GetTodoByIdHandler {
 //
 //	@Summary		Get a todo by ID
 //	@Description	Retrieves a todo item by its ID for the authenticated user.
-//	@Tags			todos
+//	@Tags			Todo
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json

@@ -32,7 +32,7 @@ func NewGetUserHandler(repo Repository) *GetUserHandler {
 //
 //	@Summary		Get user details by ID for admin
 //	@Description	Retrieves user details by ID for admin purposes.
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth

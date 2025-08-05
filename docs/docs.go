@@ -30,7 +30,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Get users for admin",
                 "parameters": [
@@ -83,7 +83,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Get user details by ID for admin",
                 "parameters": [
@@ -121,21 +121,15 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "1- Healthcheck"
+                    "Healthcheck"
                 ],
                 "summary": "Healthcheck",
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/healthcheck.HealthcheckResponse"
-                        }
+                        "description": "OK"
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Error"
-                        }
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -150,22 +144,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "2- Auth"
+                    "Autg"
                 ],
                 "summary": "Login",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "ar",
-                            "en"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Login Request",
                         "name": "request",
@@ -205,7 +187,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "2- Auth"
+                    "Autg"
                 ],
                 "summary": "Signup",
                 "parameters": [
@@ -253,7 +235,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Get all todos",
                 "responses": {
@@ -288,7 +270,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Create a new todo",
                 "parameters": [
@@ -333,7 +315,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Get a todo by ID",
                 "parameters": [
@@ -380,7 +362,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Update an existing todo",
                 "parameters": [
@@ -433,7 +415,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Delete a todo",
                 "parameters": [
@@ -471,7 +453,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos"
+                    "Todo"
                 ],
                 "summary": "Toggle todo completion status",
                 "parameters": [
@@ -511,22 +493,9 @@ const docTemplate = `{
                 ],
                 "description": "Delete a user's account",
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
-                "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
+                "summary": "Delete User Account",
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -556,22 +525,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Update User Account",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Update User Account Request",
                         "name": "request",
@@ -608,22 +565,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Forgot Password",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "ar",
-                            "en"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Forgot Password Request",
                         "name": "request",
@@ -665,22 +610,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Change User Password",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "ar",
-                            "en"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Change User Password Request",
                         "name": "request",
@@ -728,7 +661,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Get Current User",
                 "responses": {
@@ -760,22 +693,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Reset Password",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Reset Password Request",
                         "name": "request",
@@ -817,23 +738,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Send Verification Email",
-                "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -860,22 +767,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "3- User"
+                    "User"
                 ],
                 "summary": "Verify user email",
                 "parameters": [
-                    {
-                        "enum": [
-                            "tr",
-                            "en",
-                            "ar"
-                        ],
-                        "type": "string",
-                        "description": "Response Language",
-                        "name": "response-language",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Verify Email Request",
                         "name": "request",
@@ -951,25 +846,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.Error": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "healthcheck.HealthcheckResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
                     "type": "string"
                 }
             }
@@ -1167,12 +1043,6 @@ const docTemplate = `{
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
-        },
-        "JWTAuth": {
-            "description": "JWT cookie obtained from login endpoint",
-            "type": "apiKey",
-            "name": "jwt",
-            "in": "cookie"
         }
     }
 }`
@@ -1184,7 +1054,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Advanced Todo API",
-	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html).\nAfter login, you will get a JWT token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\nPlease Handle errors accordingly on the client side.\nThe API returns an error which is according to a language at some endpoints.\nFor example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.\nIn this case, you need to specify the language in the request header as `accept-language`.\nI will specify which endpoints require that header.\n\nIf you send a request to an admin endpoint, the API will return an error in Turkish.\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes. Because I love to host my API on \"api\" subdomain.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
+	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html/).\nAfter login, you will get a JWT token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes. Because I love to host my API on \"api\" subdomain.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

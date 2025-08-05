@@ -35,11 +35,10 @@ func NewForgotPasswordHandler(repo Repository, emailService MailService, tokenSe
 //
 //	@Summary		Forgot Password
 //	@Description	It sends  a password reset link to the user's email address.
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
-//	@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
-//	@Param			request				body	ForgotPasswordRequest	true	"Forgot Password Request"
+//	@Param			request	body	ForgotPasswordRequest	true	"Forgot Password Request"
 //	@Success		204
 //	@Failure		400
 //	@Failure		401

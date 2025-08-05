@@ -34,7 +34,7 @@ func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validat
 
 // @Summary		Signup
 // @Description	Signup a new user
-// @Tags			2- Auth
+// @Tags			Auth
 // @Accept			json
 // @Produce		json
 // @Param			request	body		SignupRequest	true	"Signup request"

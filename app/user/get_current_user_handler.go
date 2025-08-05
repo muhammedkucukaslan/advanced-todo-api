@@ -29,7 +29,7 @@ func NewGetCurrentUserHandler(repo Repository) *GetCurrentUserHandler {
 
 // @Summary		Get Current User
 // @Description	Get the current user. Requires Bearer token authentication.
-// @Tags			3- User
+// @Tags			User
 // @Accept			json
 // @Produce		json
 // @Security		BearerAuth

@@ -32,12 +32,11 @@ func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validato
 
 // @Summary		Login
 // @Description	Login a user or admin
-// @Tags			2- Auth
+// @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			response-language	header		string			true	"Response Language"	Enums(tr, ar, en)
-// @Param			request				body		LoginRequest	true	"Login Request"
-// @Success		200					{object}	LoginResponse
+// @Param			request	body		LoginRequest	true	"Login Request"
+// @Success		200		{object}	LoginResponse
 // @Failure		400
 // @Failure		404
 // @Failure		500

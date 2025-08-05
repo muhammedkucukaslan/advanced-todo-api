@@ -33,18 +33,6 @@ definitions:
       token:
         type: string
     type: object
-  domain.Error:
-    properties:
-      code:
-        type: integer
-      message:
-        type: string
-    type: object
-  healthcheck.HealthcheckResponse:
-    properties:
-      status:
-        type: string
-    type: object
   todo.CreateTodoRequest:
     properties:
       title:
@@ -180,7 +168,7 @@ info:
 
     Some endpoints require authentication. In this case, you need to log in first.
     I created two types of users for this project: admin and regular user.
-    Just send a POST request as below at [here](http://localhost:3000/swagger/index.html).
+    Just send a POST request as below at [here](http://localhost:3000/swagger/index.html/).
     After login, you will get a JWT token in cookies.
     If you're using cookie-based auth, the cookie will be sent automatically.
     Alternatively, you can use Bearer Token authentication via the "Authorize" button.
@@ -217,13 +205,6 @@ info:
     "code": 400
     }
     ```
-    Please Handle errors accordingly on the client side.
-    The API returns an error which is according to a language at some endpoints.
-    For example, if you send a request to an anonymous user endpoint, the API will return an error in a specific language.
-    In this case, you need to specify the language in the request header as `accept-language`.
-    I will specify which endpoints require that header.
-
-    If you send a request to an admin endpoint, the API will return an error in Turkish.
 
     ## Reminder
     I did not use `/api` prefix for the endpoint routes. Because I love to host my API on "api" subdomain.
@@ -266,7 +247,7 @@ paths:
       - BearerAuth: []
       summary: Get users for admin
       tags:
-      - 3- User
+      - User
   /admin/users/{id}:
     get:
       consumes:
@@ -293,7 +274,7 @@ paths:
       - BearerAuth: []
       summary: Get user details by ID for admin
       tags:
-      - 3- User
+      - User
   /healthcheck:
     get:
       consumes:
@@ -304,30 +285,17 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/healthcheck.HealthcheckResponse'
         "500":
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.Error'
       summary: Healthcheck
       tags:
-      - 1- Healthcheck
+      - Healthcheck
   /login:
     post:
       consumes:
       - application/json
       description: Login a user or admin
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - ar
-        - en
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Login Request
         in: body
         name: request
@@ -349,7 +317,7 @@ paths:
           description: Internal Server Error
       summary: Login
       tags:
-      - 2- Auth
+      - Autg
   /signup:
     post:
       consumes:
@@ -377,7 +345,7 @@ paths:
           description: Internal Server Error
       summary: Signup
       tags:
-      - 2- Auth
+      - Autg
   /todos:
     get:
       consumes:
@@ -400,7 +368,7 @@ paths:
       - BearerAuth: []
       summary: Get all todos
       tags:
-      - todos
+      - Todo
     post:
       consumes:
       - application/json
@@ -427,7 +395,7 @@ paths:
       - BearerAuth: []
       summary: Create a new todo
       tags:
-      - todos
+      - Todo
   /todos/{id}:
     delete:
       consumes:
@@ -452,7 +420,7 @@ paths:
       - BearerAuth: []
       summary: Delete a todo
       tags:
-      - todos
+      - Todo
     get:
       consumes:
       - application/json
@@ -482,7 +450,7 @@ paths:
       - BearerAuth: []
       summary: Get a todo by ID
       tags:
-      - todos
+      - Todo
     patch:
       consumes:
       - application/json
@@ -511,7 +479,7 @@ paths:
       - BearerAuth: []
       summary: Toggle todo completion status
       tags:
-      - todos
+      - Todo
     put:
       consumes:
       - application/json
@@ -545,20 +513,10 @@ paths:
       - BearerAuth: []
       summary: Update an existing todo
       tags:
-      - todos
+      - Todo
   /users/account:
     delete:
       description: Delete a user's account
-      parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - en
-        - ar
-        in: header
-        name: response-language
-        required: true
-        type: string
       responses:
         "204":
           description: No Content
@@ -570,22 +528,14 @@ paths:
           description: Internal Server Error
       security:
       - BearerAuth: []
+      summary: Delete User Account
       tags:
-      - 3- User
+      - User
     patch:
       consumes:
       - application/json
       description: Update a user's account information
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - en
-        - ar
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Update User Account Request
         in: body
         name: request
@@ -607,22 +557,13 @@ paths:
       - BearerAuth: []
       summary: Update User Account
       tags:
-      - 3- User
+      - User
   /users/forgot-password:
     post:
       consumes:
       - application/json
       description: It sends  a password reset link to the user's email address.
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - ar
-        - en
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Forgot Password Request
         in: body
         name: request
@@ -642,22 +583,13 @@ paths:
           description: Internal Server Error
       summary: Forgot Password
       tags:
-      - 3- User
+      - User
   /users/password:
     patch:
       consumes:
       - application/json
       description: Change the password of a user
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - ar
-        - en
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Change User Password Request
         in: body
         name: request
@@ -683,7 +615,7 @@ paths:
       - BearerAuth: []
       summary: Change User Password
       tags:
-      - 3- User
+      - User
   /users/profile:
     get:
       consumes:
@@ -706,22 +638,13 @@ paths:
       - BearerAuth: []
       summary: Get Current User
       tags:
-      - 3- User
+      - User
   /users/reset-password:
     post:
       consumes:
       - application/json
       description: It resets a user's password using a token.
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - en
-        - ar
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Reset Password Request
         in: body
         name: request
@@ -741,22 +664,12 @@ paths:
           description: Internal Server Error
       summary: Reset Password
       tags:
-      - 3- User
+      - User
   /users/send-verification-email:
     post:
       consumes:
       - application/json
       description: Sends a verification email to the user
-      parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - en
-        - ar
-        in: header
-        name: response-language
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -772,22 +685,13 @@ paths:
       - BearerAuth: []
       summary: Send Verification Email
       tags:
-      - 3- User
+      - User
   /users/verify-email:
     post:
       consumes:
       - application/json
       description: Verifies a user's email address using a token
       parameters:
-      - description: Response Language
-        enum:
-        - tr
-        - en
-        - ar
-        in: header
-        name: response-language
-        required: true
-        type: string
       - description: Verify Email Request
         in: body
         name: request
@@ -807,16 +711,11 @@ paths:
           description: Internal Server Error
       summary: Verify user email
       tags:
-      - 3- User
+      - User
 securityDefinitions:
   BearerAuth:
     description: Enter your Bearer token in the format **Bearer &lt;token&gt;**
     in: header
     name: Authorization
-    type: apiKey
-  JWTAuth:
-    description: JWT cookie obtained from login endpoint
-    in: cookie
-    name: jwt
     type: apiKey
 swagger: "2.0"

@@ -37,7 +37,7 @@ func NewGetUsersHandler(repo Repository, validate domain.Validator) *GetUsersHan
 //
 //	@Summary		Get users for admin
 //	@Description	Fetch users with pagination
-//	@Tags			3- User
+//	@Tags			User
 //	@Accept			json
 //	@Produce		json
 //
