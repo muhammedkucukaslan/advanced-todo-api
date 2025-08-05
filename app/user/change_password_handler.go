@@ -30,7 +30,6 @@ func NewChangePasswordHandler(repo Repository, validate domain.Validator) *Chang
 //	@Tags			3- User
 //	@Accept			json
 //	@Produce		json
-//	@Param			response-language	header	string					true	"Response Language"	enums(tr,ar,en)
 //	@Param			request				body	ChangePasswordRequest	true	"Change User Password Request"
 //	@Security		BearerAuth
 //	@Success		204

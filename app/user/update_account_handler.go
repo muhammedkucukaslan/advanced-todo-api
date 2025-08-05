@@ -31,7 +31,6 @@ func NewUpdateFullNameHandler(repo Repository, validate domain.Validator) *Updat
 //	@Tags			3- User
 //	@Accept			json
 //	@Produce		json
-//	@Param			response-language	header	string					true	"Response Language"	Enums(tr, en, ar)
 //	@Param			request				body	UpdateFullNameRequest	true	"Update User Account Request"
 //	@Security		BearerAuth
 //	@Success		204

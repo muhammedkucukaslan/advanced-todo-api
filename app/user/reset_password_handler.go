@@ -38,7 +38,6 @@ func NewResetPasswordHandler(repo Repository, tokenService TokenService, logger 
 //	@Tags			3- User
 //	@Accept			json
 //	@Produce		json
-//	@Param			response-language	header	string					true	"Response Language"	Enums(tr, en, ar)
 //	@Param			request				body	ResetPasswordRequest	true	"Reset Password Request"
 //	@Success		204
 //	@Failure		400

@@ -8,7 +8,6 @@ import (
 )
 
 type SendVerificationEmailRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
 }
 
 type SendVerificationEmailResponse struct{}
@@ -40,7 +39,6 @@ func NewSendVerificationEmailHandler(repo Repository, validate domain.Validator,
 //
 //	@Security		BearerAuth
 //
-//	@Param			response-language	header	string	true	"Response Language"	Enums(tr, en, ar)
 //	@Success		204
 //	@Failure		400
 //	@Failure		401

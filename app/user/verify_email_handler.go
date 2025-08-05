@@ -8,8 +8,7 @@ import (
 )
 
 type VerifiyEmailRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar" swaggerignore:"true"`
-	Token    string `json:"token" validate:"required"`
+	Token string `json:"token" validate:"required"`
 }
 type VerifyEmailResponse struct{}
 
@@ -34,7 +33,6 @@ func NewVerifyEmailHandler(repo Repository, validate domain.Validator, ts TokenS
 //	@Tags			3- User
 //	@Accept			json
 //	@Produce		json
-//	@Param			response-language	header	string				true	"Response Language"	Enums(tr, en, ar)
 //	@Param			request				body	VerifiyEmailRequest	true	"Verify Email Request"
 //	@Success		204
 //	@Failure		400

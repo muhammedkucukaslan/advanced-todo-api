@@ -10,28 +10,26 @@ import (
 )
 
 type DeleteAccountRequest struct {
-	Language string `reqHeader:"response-language" validate:"required,oneof=tr en ar"`
 }
 
 type DeleteAccountResponse struct{}
 
 type DeleteAccountHandler struct {
-	repo      Repository
-	logger    domain.Logger
-	validator domain.Validator
-	ms        MailService
+	repo   Repository
+	logger domain.Logger
+	ms     MailService
 }
 
-func NewDeleteAccountHandler(repo Repository, logger domain.Logger, validate domain.Validator, ms MailService) *DeleteAccountHandler {
-	return &DeleteAccountHandler{repo: repo, logger: logger, ms: ms, validator: validate}
+func NewDeleteAccountHandler(repo Repository, logger domain.Logger, ms MailService) *DeleteAccountHandler {
+	return &DeleteAccountHandler{repo: repo, logger: logger, ms: ms}
 }
 
 // Handle processes the request to delete a user's account.
-// //	@Summary		Delete User Account
+//
+//	@Summary		Delete User Account
 //
 //	@Description	Delete a user's account
 //	@Tags			3- User
-//	@Param			response-language	header	string	true	"Response Language"	Enums(tr, en, ar)
 //	@Security		BearerAuth
 //	@Success		204
 //	@Failure		400
@@ -39,10 +37,6 @@ func NewDeleteAccountHandler(repo Repository, logger domain.Logger, validate dom
 //	@Failure		500
 //	@Router			/users/account [delete]
 func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, int, error) {
-
-	if err := h.validator.Validate(req); err != nil {
-		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
-	}
 
 	userId := domain.GetUserID(ctx)
 
@@ -54,7 +48,7 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 	}
 
 	// TODO mail notification
-	go func(fullName, email, language string) {
+	go func(fullName, email string) {
 		maxRetries := 3
 		retryInterval := 30 * time.Second
 
@@ -74,7 +68,7 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 		}
 		h.logger.Error("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
-	}(fullName, email, req.Language)
+	}(fullName, email)
 
 	return nil, http.StatusNoContent, nil
 }
