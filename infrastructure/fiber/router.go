@@ -155,9 +155,9 @@ func SetupRoutes(app *fiber.App) {
 	todosApp.Patch("/:id", Handle(toggleCompletedTodoHandler, logger))
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
-			Message: "Welcome to Advanced Todo API",
-			Code:    http.StatusOK,
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message": "Welcome to Advanced Todo API",
+			"code":    http.StatusOK,
 		})
 	})
 
