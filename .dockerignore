@@ -14,3 +14,4 @@ Makefile
 README.md
 *_coverage.out 
 *_coverage.html
+.gitignore

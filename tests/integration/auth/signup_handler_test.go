@@ -11,29 +11,31 @@ import (
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
-	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	mock "github.com/muhammedkucukaslan/advanced-todo-api/tests"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 )
 
 func TestSignupHandler(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
 	}()
 
-	repo, err := postgresRepo.NewRepository(connStr)
+	repo, err := postgresInfra.NewRepository(connStr)
 	require.NoError(t, err, "failed to create repository")
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := jwt.NewTokenService("test-secret-key", time.Hour*24, time.Minute*10, time.Minute*10)
-	logger := slog.NewLogger()
+	tokenService := jwtInfra.NewTokenService("test-secret-key", time.Hour*24, time.Minute*10, time.Minute*10)
+	logger := slogInfra.NewLogger()
 	validator := validator.NewValidator(logger)
 	mailService := mock.NewMockEmailService()
 

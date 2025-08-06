@@ -9,14 +9,16 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateTodoHandler(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")

@@ -12,21 +12,23 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
-	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 )
 
 func TestLoginHandler(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
 	}()
 
-	repo, err := postgresRepo.NewRepository(connStr)
+	repo, err := postgresInfra.NewRepository(connStr)
 	require.NoError(t, err, "failed to create repository")
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)

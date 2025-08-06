@@ -1,43 +1,26 @@
 package testuser
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"testing"
+
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func TestMain(m *testing.M) {
 	fmt.Println("Running user integration tests...")
 
+	start := time.Now()
 	code := m.Run()
+	elapsed := time.Since(start)
 
+	fmt.Printf("Tests completed in %s\n", elapsed)
 	os.Exit(code)
-}
-
-func createTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
-	postgresContainer, err := postgres.Run(ctx,
-		"postgres:16",
-		postgres.WithDatabase("testdb"),
-		postgres.WithUsername("testuser"),
-		postgres.WithPassword("testpass"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(60*time.Second)),
-	)
-	require.NoError(t, err)
-	connStr, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err)
-	return postgresContainer, connStr
 }
 
 func setupTestUser(t *testing.T, connStr string) {

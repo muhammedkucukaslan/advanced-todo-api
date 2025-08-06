@@ -8,6 +8,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	UserRole          = "USER"
+	AdminRole         = "ADMIN"
+	MaxFullNameLength = 100
+	MinFullNameLength = 3
+)
+
 type User struct {
 	Id              uuid.UUID `json:"id" validate:"required"`
 	FullName        string    `json:"fullName" validate:"required"`
@@ -20,11 +27,11 @@ type User struct {
 
 func NewUser(fullName, password, email string) (*User, error) {
 
-	if fullName == "" || len(fullName) < 3 {
-		return nil, ErrTooShortFullName
+	if err := ValidateFullName(fullName); err != nil {
+		return nil, err
 	}
 
-	if len(password) < 8 {
+	if IsPasswordTooShort(password) {
 		return nil, ErrPasswordTooShort
 	}
 
@@ -36,7 +43,7 @@ func NewUser(fullName, password, email string) (*User, error) {
 	return &User{
 		Id:       uuid.New(),
 		FullName: fullName,
-		Role:     "USER",
+		Role:     UserRole,
 		Password: hashedPassword,
 		Email:    email,
 	}, nil
@@ -44,7 +51,7 @@ func NewUser(fullName, password, email string) (*User, error) {
 
 func (u *User) ValidatePassword(password string) error {
 
-	if len(password) < 8 {
+	if IsPasswordTooShort(password) {
 		return ErrPasswordTooShort
 	}
 
@@ -77,4 +84,21 @@ func HashPassword(password string) (string, error) {
 		return "", ErrInternalServer
 	}
 	return string(hashedPassword), nil
+}
+
+func ValidateFullName(fullName string) error {
+
+	if len(fullName) == 0 {
+		return ErrEmptyFullName
+	}
+
+	if len(fullName) < MinFullNameLength {
+		return ErrTooShortFullName
+	}
+
+	return nil
+}
+
+func IsPasswordTooShort(password string) bool {
+	return len(password) < 8
 }

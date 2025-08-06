@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,10 +14,10 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
-	"github.com/stretchr/testify/assert"
+	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,14 +25,14 @@ func TestCreateTodoHandler(t *testing.T) {
 
 	app := fiber.New()
 
-	tokenService := jwt.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
-	logger := slog.NewLogger()
+	tokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
 
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
@@ -85,12 +86,19 @@ func TestCreateTodoHandler(t *testing.T) {
 			req: &todo.CreateTodoRequest{
 				Title: "ab",
 			},
-		}, http.StatusBadRequest, domain.ErrInvalidRequest,
+		}, http.StatusBadRequest, domain.ErrTitleTooShort,
 		},
 		{"empty title", args{
 			authHeader: validTokenHeader,
 			req:        &todo.CreateTodoRequest{},
-		}, http.StatusBadRequest, domain.ErrInvalidRequest,
+		}, http.StatusBadRequest, domain.ErrEmptyTitle,
+		},
+		{"too long title", args{
+			authHeader: validTokenHeader,
+			req: &todo.CreateTodoRequest{
+				Title: strings.Repeat("a", 101),
+			},
+		}, http.StatusBadRequest, domain.ErrTitleTooLong,
 		},
 	}
 
@@ -114,13 +122,8 @@ func TestCreateTodoHandler(t *testing.T) {
 			defer resp.Body.Close()
 
 			require.Equal(t, tt.code, resp.StatusCode)
-			if tt.code >= 400 {
-				assert.NotEmpty(t, resp.Body, "response body should not be empty for error cases")
-				var errResp domain.Error
-				err = json.NewDecoder(resp.Body).Decode(&errResp)
-				require.NoError(t, err)
-				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, errResp.Code, tt.code)
+			if testUtils.IsErrorStatusCode(tt.code) {
+				testUtils.VerifyErrorResponse(t, resp.Body, tt.wantErr)
 			}
 		})
 	}
