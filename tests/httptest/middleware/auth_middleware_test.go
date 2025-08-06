@@ -3,6 +3,7 @@ package httptest_middleware
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -104,8 +105,7 @@ func TestAuthMiddleware(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest(http.MethodGet, "/healthcheck", nil)
-			require.NoError(t, err)
+			req := httptest.NewRequest(http.MethodGet, "/healthcheck", nil)
 
 			if tt.args.authHeader != "" {
 				req.Header.Set("Authorization", tt.args.authHeader)
