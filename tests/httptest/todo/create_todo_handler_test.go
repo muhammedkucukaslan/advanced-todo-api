@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -85,12 +86,19 @@ func TestCreateTodoHandler(t *testing.T) {
 			req: &todo.CreateTodoRequest{
 				Title: "ab",
 			},
-		}, http.StatusBadRequest, domain.ErrInvalidRequest,
+		}, http.StatusBadRequest, domain.ErrTitleTooShort,
 		},
 		{"empty title", args{
 			authHeader: validTokenHeader,
 			req:        &todo.CreateTodoRequest{},
-		}, http.StatusBadRequest, domain.ErrInvalidRequest,
+		}, http.StatusBadRequest, domain.ErrEmptyTitle,
+		},
+		{"too long title", args{
+			authHeader: validTokenHeader,
+			req: &todo.CreateTodoRequest{
+				Title: strings.Repeat("a", 101),
+			},
+		}, http.StatusBadRequest, domain.ErrTitleTooLong,
 		},
 	}
 
