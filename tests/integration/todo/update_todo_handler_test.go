@@ -57,7 +57,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 		{"not found", args{
 			ctx: ctx,
 			req: &todo.UpdateTodoRequest{
-				Id:    domain.FakeTodoIdUuid,
+				Id:    domain.FakeTodoUuid,
 				Title: "Updated Test Todo",
 			},
 		}, domain.ErrTodoNotFound, http.StatusNotFound},

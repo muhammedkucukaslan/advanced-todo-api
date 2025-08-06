@@ -55,7 +55,7 @@ func TestGetTodoHandler(t *testing.T) {
 		{"invalid todo id", args{
 			ctx: ctx,
 			req: &todo.GetTodoByIdRequest{
-				Id: domain.FakeTodoIdUuid,
+				Id: domain.FakeTodoUuid,
 			},
 		}, nil, http.StatusNotFound, domain.ErrTodoNotFound},
 	}

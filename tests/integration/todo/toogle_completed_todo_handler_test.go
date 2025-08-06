@@ -57,7 +57,7 @@ func TestToggleCompletedTodoHandler(t *testing.T) {
 			args{
 				ctx: ctx,
 				req: &todo.ToggleCompletedTodoRequest{
-					Id: domain.FakeTodoIdUuid,
+					Id: domain.FakeTodoUuid,
 				},
 			},
 			http.StatusNotFound,
