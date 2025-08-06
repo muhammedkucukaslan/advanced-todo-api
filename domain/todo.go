@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	MaxTitleLength = 100
+	MinTitleLength = 3
+)
+
 type Todo struct {
 	UserId      uuid.UUID
 	Id          uuid.UUID
@@ -16,20 +21,13 @@ type Todo struct {
 }
 
 func NewTodo(userId uuid.UUID, title string) (*Todo, error) {
-	if len(title) == 0 {
-		return nil, ErrEmptyTitle
-	}
 
-	if userId == uuid.Nil {
+	if IsUserIdEmpty(userId) {
 		return nil, ErrUserIdCannotBeEmpty
 	}
 
-	if len(title) > 100 {
-		return nil, ErrTitleTooLong
-	}
-
-	if len(title) < 3 {
-		return nil, ErrTitleTooShort
+	if err := ValidateTitle(title); err != nil {
+		return nil, err
 	}
 
 	return &Todo{
@@ -40,4 +38,21 @@ func NewTodo(userId uuid.UUID, title string) (*Todo, error) {
 		CreatedAt:   time.Now(),
 		CompletedAt: time.Time{},
 	}, nil
+}
+
+func IsUserIdEmpty(userId uuid.UUID) bool {
+	return userId == uuid.Nil
+}
+
+func ValidateTitle(title string) error {
+	if len(title) == 0 {
+		return ErrEmptyTitle
+	}
+	if len(title) > MaxTitleLength {
+		return ErrTitleTooLong
+	}
+	if len(title) < MinTitleLength {
+		return ErrTitleTooShort
+	}
+	return nil
 }
