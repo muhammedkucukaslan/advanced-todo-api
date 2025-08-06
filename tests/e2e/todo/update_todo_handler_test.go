@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -76,6 +77,12 @@ func TestUpdateTodoHandler(t *testing.T) {
 
 	newTitle := "Updated Test Todo"
 
+	// I made id as uuid.Nil.
+	// In unchanging test cases, such as "empty title" and "too short title", i am expecting the todo to be unchanged.
+	// However, if used a specific UUID, the todo would affected by "valid update" test case while whole process.
+	// So, i decided to create a new todo for each test case and then asign the new id to id.
+	// You can analyze the process it between line 165 and 173.
+
 	tests := []updateTodoHandlerTestCase{
 		{
 			name: "valid update",
@@ -142,7 +149,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 			args: &updateTodoHandlerArgs{
 				authHeader: validTokenHeader,
 				req: &todo.UpdateTodoRequest{
-					Id:    uuid.Nil,
+					Id:    domain.FakeTodoUuid,
 					Title: newTitle,
 				},
 			},
@@ -158,6 +165,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 	for _, tt := range tests {
 		todoId := uuid.New()
 
+		// I seperated 2 test cases as "PUT" and "GET" because it became easier to understand which test case is failing.
 		t.Run(tt.name+" PUT", func(t *testing.T) {
 
 			if !tt.skipTodoCreation {
@@ -182,7 +190,7 @@ func testUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updat
 		body = bytes.NewReader(data)
 	}
 
-	req, _ := http.NewRequest(http.MethodPut, "/todos/"+todoId.String(), body)
+	req := httptest.NewRequest(http.MethodPut, "/todos/"+todoId.String(), body)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", tc.args.authHeader)
 
@@ -198,7 +206,7 @@ func testUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updat
 }
 
 func testGetRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
-	req, _ := http.NewRequest(http.MethodGet, "/todos/"+todoId.String(), nil)
+	req := httptest.NewRequest(http.MethodGet, "/todos/"+todoId.String(), nil)
 	req.Header.Set("Authorization", tc.args.authHeader)
 
 	resp, err := app.Test(req, -1)
