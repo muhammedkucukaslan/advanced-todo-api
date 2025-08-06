@@ -12,6 +12,7 @@ import (
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +20,7 @@ import (
 func TestResetPasswordHandler(t *testing.T) {
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")

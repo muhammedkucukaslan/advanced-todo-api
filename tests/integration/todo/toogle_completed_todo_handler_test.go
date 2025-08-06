@@ -8,6 +8,7 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +16,7 @@ import (
 func TestToggleCompletedTodoHandler(t *testing.T) {
 	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")

@@ -10,8 +10,9 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,9 +21,9 @@ func TestAdminMiddleware(t *testing.T) {
 
 	app := fiber.New()
 
-	realTokenService := jwt.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	realTokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
 
-	logger := slog.NewLogger()
+	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(realTokenService, logger)
 
 	healthCheckHandler := healthcheck.NewHealthcheckHandler()
@@ -74,16 +75,10 @@ func TestAdminMiddleware(t *testing.T) {
 			require.NoError(t, err, "failed to create request")
 			require.NotNil(t, resp)
 			defer resp.Body.Close()
-
 			require.Equal(t, tt.code, resp.StatusCode)
-			if tt.code >= 400 {
-				assert.NotEmpty(t, resp.Body, "response body should not be empty for error cases")
-				var errResp domain.Error
-				err = json.NewDecoder(resp.Body).Decode(&errResp)
-				require.NoError(t, err)
-				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, errResp.Message, tt.wantErr.Error())
-				assert.Equal(t, errResp.Code, tt.code)
+
+			if testUtils.IsErrorStatusCode(tt.code) {
+				testUtils.VerifyErrorResponse(t, resp.Body, tt.wantErr)
 			} else {
 				var res healthcheck.HealthcheckResponse
 				err = json.NewDecoder(resp.Body).Decode(&res)
