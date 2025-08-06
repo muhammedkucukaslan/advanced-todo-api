@@ -131,7 +131,7 @@ Follow these steps to get the project up and running on your local machine.
    
    **Using Docker:**
    ```sh
-   make compose
+   make dev
    ```
 
    **Using Go:**
@@ -155,7 +155,7 @@ make swagger
 Use Docker to start the app:
 
 ```sh
-make compose
+make dev
 ```
 ####  🌐 Access Swagger UI
 
@@ -206,7 +206,6 @@ Don't forget to give the project a star! Thanks again!
 * [Medium](https://medium.com/@muhammedkucukaslan)
 
 
-<!-- MARKDOWN LINKS & IMAGES -->
 [Golang.com]: https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white
 [Golang-url]: https://golang.org/
 
