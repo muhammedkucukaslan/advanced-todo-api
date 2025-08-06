@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"time"
+
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/stretchr/testify/require"
 )
@@ -13,8 +15,11 @@ import (
 func TestMain(m *testing.M) {
 	fmt.Println("Running user integration tests...")
 
+	start := time.Now()
 	code := m.Run()
+	elapsed := time.Since(start)
 
+	fmt.Printf("Tests completed in %s\n", elapsed)
 	os.Exit(code)
 }
 

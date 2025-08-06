@@ -32,7 +32,7 @@ func VerifyErrorResponse(t *testing.T, body io.ReadCloser, expectedError error) 
 
 func CreateTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
 	postgresContainer, err := postgres.Run(ctx,
-		"postgres:16",
+		"postgres:15",
 		postgres.WithDatabase("testdb"),
 		postgres.WithUsername("testuser"),
 		postgres.WithPassword("testpass"),
