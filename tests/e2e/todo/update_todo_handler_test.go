@@ -14,30 +14,46 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdateTodoHandler(t *testing.T) {
+type updateTodoHandlerArgs struct {
+	authHeader string
+	req        *todo.UpdateTodoRequest
+}
+type updateTodoHandlerTestCase struct {
+	name             string
+	args             *updateTodoHandlerArgs
+	putCode          int
+	wantPutErr       error
+	getCode          int
+	wantGetErr       error
+	wantGetResp      *todo.GetTodoByIdResponse
+	skipTodoCreation bool
+}
 
+func TestUpdateTodoHandler(t *testing.T) {
 	app := fiber.New()
 
-	tokenService := jwt.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
-	logger := slog.NewLogger()
+	tokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
 
 	ctx := context.Background()
 
-	postgresContainer, connStr := createTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
 
 	}()
+
 	repo, err := postgresRepo.NewRepository(connStr)
 	require.NoError(t, err, "failed to create repository")
 	runMigrations(t, connStr)
@@ -59,126 +75,151 @@ func TestUpdateTodoHandler(t *testing.T) {
 	}
 
 	newTitle := "Updated Test Todo"
-	notExistedTodoTestName := "not existed todo id"
 
-	tests := []struct {
-		name       string
-		args       args
-		getWant    *todo.GetTodoByIdResponse
-		putCode    int
-		wantPutErr error
-		getCode    int
-		wantGetErr error
-	}{
-
-		{"valid update", args{
-			authHeader: validTokenHeader,
-			req: &todo.UpdateTodoRequest{
-				Id:    uuid.Nil,
-				Title: newTitle,
+	tests := []updateTodoHandlerTestCase{
+		{
+			name: "valid update",
+			args: &updateTodoHandlerArgs{
+				authHeader: validTokenHeader,
+				req: &todo.UpdateTodoRequest{
+					Id:    uuid.Nil,
+					Title: newTitle,
+				},
 			},
-		}, &todo.GetTodoByIdResponse{
-			Id:        uuid.Nil,
-			Title:     newTitle,
-			Completed: domain.TestTodo.Completed,
-		}, http.StatusNoContent, nil, http.StatusOK, nil},
-		{"too short title", args{
-			authHeader: validTokenHeader,
-			req: &todo.UpdateTodoRequest{
-				Id:    uuid.Nil,
-				Title: "ab",
+			putCode:    http.StatusNoContent,
+			wantPutErr: nil,
+			getCode:    http.StatusOK,
+			wantGetErr: nil,
+			wantGetResp: &todo.GetTodoByIdResponse{
+				Id:        uuid.Nil,
+				Title:     newTitle,
+				Completed: domain.TestTodo.Completed,
 			},
-		}, &todo.GetTodoByIdResponse{
-			Id:        uuid.Nil,
-			Title:     domain.TestTodo.Title,
-			Completed: domain.TestTodo.Completed,
-		}, http.StatusBadRequest, domain.ErrTitleTooShort, http.StatusOK, nil},
-
-		{"empty title", args{
-			authHeader: validTokenHeader,
-			req: &todo.UpdateTodoRequest{
-				Id:    uuid.Nil,
-				Title: "",
+			skipTodoCreation: false,
+		},
+		{
+			name: "too short title",
+			args: &updateTodoHandlerArgs{
+				authHeader: validTokenHeader,
+				req: &todo.UpdateTodoRequest{
+					Id:    uuid.Nil,
+					Title: "ab",
+				},
 			},
-		}, &todo.GetTodoByIdResponse{
-			Id:        uuid.Nil,
-			Title:     domain.TestTodo.Title,
-			Completed: domain.TestTodo.Completed,
-		}, http.StatusBadRequest, domain.ErrEmptyTitle, http.StatusOK, nil},
-
-		{notExistedTodoTestName, args{
-			authHeader: validTokenHeader,
-			req: &todo.UpdateTodoRequest{
-				Id:    uuid.Nil,
-				Title: newTitle,
+			putCode:    http.StatusBadRequest,
+			wantPutErr: domain.ErrTitleTooShort,
+			getCode:    http.StatusOK,
+			wantGetErr: nil,
+			wantGetResp: &todo.GetTodoByIdResponse{
+				Id:        uuid.Nil,
+				Title:     domain.TestTodo.Title,
+				Completed: domain.TestTodo.Completed,
 			},
-		}, nil, http.StatusNotFound, domain.ErrTodoNotFound, http.StatusNotFound, domain.ErrTodoNotFound},
+			skipTodoCreation: false,
+		},
+		{
+			name: "empty title",
+			args: &updateTodoHandlerArgs{
+				authHeader: validTokenHeader,
+				req: &todo.UpdateTodoRequest{
+					Id:    uuid.Nil,
+					Title: "",
+				},
+			},
+			putCode:    http.StatusBadRequest,
+			wantPutErr: domain.ErrEmptyTitle,
+			getCode:    http.StatusOK,
+			wantGetErr: nil,
+			wantGetResp: &todo.GetTodoByIdResponse{
+				Id:        uuid.Nil,
+				Title:     domain.TestTodo.Title,
+				Completed: domain.TestTodo.Completed,
+			},
+			skipTodoCreation: false,
+		},
+		{
+			name: "not existed todo",
+			args: &updateTodoHandlerArgs{
+				authHeader: validTokenHeader,
+				req: &todo.UpdateTodoRequest{
+					Id:    uuid.Nil,
+					Title: newTitle,
+				},
+			},
+			putCode:          http.StatusNotFound,
+			wantPutErr:       domain.ErrTodoNotFound,
+			getCode:          http.StatusNotFound,
+			wantGetErr:       domain.ErrTodoNotFound,
+			wantGetResp:      nil,
+			skipTodoCreation: true,
+		},
 	}
 
 	for _, tt := range tests {
 		todoId := uuid.New()
 
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.name+" PUT", func(t *testing.T) {
 
-			if tt.name != notExistedTodoTestName {
+			if !tt.skipTodoCreation {
 				setupTestTodoWithTitle(t, todoId, connStr)
 				tt.args.req.Id = todoId
-				tt.getWant.Id = todoId
+				tt.wantGetResp.Id = todoId
 			}
-
-			var body io.Reader
-			if tt.args.req != nil {
-				data, err := json.Marshal(tt.args.req)
-				require.NoError(t, err)
-				body = bytes.NewReader(data)
-			}
-
-			putReq, _ := http.NewRequest(http.MethodPut, "/todos/"+todoId.String(), body)
-
-			putReq.Header.Set("Content-Type", "application/json")
-			putReq.Header.Set("Authorization", tt.args.authHeader)
-
-			resp, err := app.Test(putReq, -1)
-			require.NoError(t, err, "failed to create request")
-
-			defer resp.Body.Close()
-
-			require.Equal(t, tt.putCode, resp.StatusCode)
-			if tt.putCode >= 400 {
-				assert.NotEmpty(t, resp.Body, "response body should not be empty for error cases")
-				var errResp domain.Error
-				err = json.NewDecoder(resp.Body).Decode(&errResp)
-				require.NoError(t, err)
-				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, tt.wantPutErr.Error(), errResp.Message, "error message should match")
-			}
+			testUpdateRequest(t, app, todoId, &tt)
 		})
 
-		t.Run(tt.name+" get", func(t *testing.T) {
-			getReq, _ := http.NewRequest(http.MethodGet, "/todos/"+todoId.String(), nil)
-			getReq.Header.Set("Authorization", tt.args.authHeader)
-
-			resp, err := app.Test(getReq, -1)
-			require.NoError(t, err, "failed to create request")
-
-			defer resp.Body.Close()
-
-			require.Equal(t, tt.getCode, resp.StatusCode)
-			if tt.getCode >= 400 {
-				assert.NotEmpty(t, resp.Body, "response body should not be empty for error cases")
-				var errResp domain.Error
-				err = json.NewDecoder(resp.Body).Decode(&errResp)
-				require.NoError(t, err)
-				assert.NotEmpty(t, errResp.Message, "error message should not be empty")
-				assert.Equal(t, tt.wantGetErr.Error(), errResp.Message, "error message should match")
-			} else {
-				var getResp todo.GetTodoByIdResponse
-				err = json.NewDecoder(resp.Body).Decode(&getResp)
-				require.NoError(t, err)
-				assert.Equal(t, tt.getWant.Id, getResp.Id, "response id should match")
-				assert.Equal(t, tt.getWant.Title, getResp.Title, "response title should match")
-				assert.Equal(t, tt.getWant.Completed, getResp.Completed, "response completed status should match")
-			}
+		t.Run(tt.name+" GET", func(t *testing.T) {
+			testGetRequest(t, app, todoId, &tt)
 		})
 	}
+}
+
+func testUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
+	var body io.Reader
+	if tc.args.req != nil {
+		data, err := json.Marshal(tc.args.req)
+		require.NoError(t, err)
+		body = bytes.NewReader(data)
+	}
+
+	req, _ := http.NewRequest(http.MethodPut, "/todos/"+todoId.String(), body)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", tc.args.authHeader)
+
+	resp, err := app.Test(req, -1)
+	require.NoError(t, err, "failed to send PUT request")
+	defer resp.Body.Close()
+
+	require.Equal(t, tc.putCode, resp.StatusCode, "PUT status code mismatch")
+
+	if testUtils.IsErrorStatusCode(tc.putCode) {
+		testUtils.VerifyErrorResponse(t, resp.Body, tc.wantPutErr)
+	}
+}
+
+func testGetRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
+	req, _ := http.NewRequest(http.MethodGet, "/todos/"+todoId.String(), nil)
+	req.Header.Set("Authorization", tc.args.authHeader)
+
+	resp, err := app.Test(req, -1)
+	require.NoError(t, err, "failed to send GET request")
+	defer resp.Body.Close()
+
+	require.Equal(t, tc.getCode, resp.StatusCode, "GET status code mismatch")
+
+	if testUtils.IsErrorStatusCode(tc.getCode) {
+		testUtils.VerifyErrorResponse(t, resp.Body, tc.wantGetErr)
+	} else {
+		verifyGetRequestSuccessResponse(t, resp.Body, tc.wantGetResp)
+	}
+}
+
+func verifyGetRequestSuccessResponse(t *testing.T, body io.ReadCloser, expected *todo.GetTodoByIdResponse) {
+	var getResp todo.GetTodoByIdResponse
+	err := json.NewDecoder(body).Decode(&getResp)
+	require.NoError(t, err, "failed to decode success response")
+
+	assert.Equal(t, expected.Id, getResp.Id, "response id should match")
+	assert.Equal(t, expected.Title, getResp.Title, "response title should match")
+	assert.Equal(t, expected.Completed, getResp.Completed, "response completed status should match")
 }

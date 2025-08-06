@@ -1,19 +1,14 @@
 package e2e_todo
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func TestMain(m *testing.M) {
@@ -22,23 +17,6 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	os.Exit(code)
-}
-
-func createTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
-	postgresContainer, err := postgres.Run(ctx,
-		"postgres:16",
-		postgres.WithDatabase("testdb"),
-		postgres.WithUsername("testuser"),
-		postgres.WithPassword("testpass"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(60*time.Second)),
-	)
-	require.NoError(t, err)
-	connStr, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err)
-	return postgresContainer, connStr
 }
 
 func setupTestUser(t *testing.T, connStr string) {
@@ -59,21 +37,6 @@ func setupTestUser(t *testing.T, connStr string) {
 	)
 	require.NoError(t, err)
 
-}
-
-func setupTestTodo(t *testing.T, connStr string) {
-	db, err := sql.Open("postgres", connStr)
-	require.NoError(t, err)
-	defer db.Close()
-
-	query := "INSERT INTO todos (id, user_id, title, completed) VALUES ($1, $2, $3, $4)"
-	_, err = db.Exec(query,
-		domain.TestTodo.Id,
-		domain.TestUser.Id,
-		domain.TestTodo.Title,
-		domain.TestTodo.Completed,
-	)
-	require.NoError(t, err)
 }
 
 func setupTestTodoWithTitle(t *testing.T, id uuid.UUID, connStr string) {
