@@ -19,6 +19,7 @@ func TestMain(m *testing.M) {
 }
 
 func setupTestUser(t *testing.T, connStr string) {
+
 	db, err := sql.Open("postgres", connStr)
 	require.NoError(t, err)
 	defer db.Close()

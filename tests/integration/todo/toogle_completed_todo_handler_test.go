@@ -14,6 +14,7 @@ import (
 )
 
 func TestToggleCompletedTodoHandler(t *testing.T) {
+	t.Parallel()
 	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
 	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)

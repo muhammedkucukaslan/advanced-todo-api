@@ -15,6 +15,7 @@ import (
 )
 
 func TestCreateTodoHandler(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
