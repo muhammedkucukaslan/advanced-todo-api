@@ -28,14 +28,14 @@ type updateTodoHandlerArgs struct {
 	req        *todo.UpdateTodoRequest
 }
 type updateTodoHandlerTestCase struct {
-	name             string
-	args             *updateTodoHandlerArgs
-	putCode          int
-	wantPutErr       error
-	getCode          int
-	wantGetErr       error
-	wantGetResp      *todo.GetTodoByIdResponse
-	skipTodoCreation bool
+	name              string
+	args              *updateTodoHandlerArgs
+	putCode           int
+	wantPutErr        error
+	getCode           int
+	wantGetErr        error
+	wantGetResp       *todo.GetTodoByIdResponse
+	needsExistingTodo bool
 }
 
 func TestUpdateTodoHandler(t *testing.T) {
@@ -102,7 +102,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				Title:     newTitle,
 				Completed: domain.TestTodo.Completed,
 			},
-			skipTodoCreation: false,
+			needsExistingTodo: true,
 		},
 		{
 			name: "too short title",
@@ -122,7 +122,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				Title:     domain.TestTodo.Title,
 				Completed: domain.TestTodo.Completed,
 			},
-			skipTodoCreation: false,
+			needsExistingTodo: true,
 		},
 		{
 			name: "empty title",
@@ -142,7 +142,7 @@ func TestUpdateTodoHandler(t *testing.T) {
 				Title:     domain.TestTodo.Title,
 				Completed: domain.TestTodo.Completed,
 			},
-			skipTodoCreation: false,
+			needsExistingTodo: true,
 		},
 		{
 			name: "not existed todo",
@@ -153,12 +153,12 @@ func TestUpdateTodoHandler(t *testing.T) {
 					Title: newTitle,
 				},
 			},
-			putCode:          http.StatusNotFound,
-			wantPutErr:       domain.ErrTodoNotFound,
-			getCode:          http.StatusNotFound,
-			wantGetErr:       domain.ErrTodoNotFound,
-			wantGetResp:      nil,
-			skipTodoCreation: true,
+			putCode:           http.StatusNotFound,
+			wantPutErr:        domain.ErrTodoNotFound,
+			getCode:           http.StatusNotFound,
+			wantGetErr:        domain.ErrTodoNotFound,
+			wantGetResp:       nil,
+			needsExistingTodo: false,
 		},
 	}
 
@@ -168,21 +168,21 @@ func TestUpdateTodoHandler(t *testing.T) {
 		// I seperated 2 test cases as "PUT" and "GET" because it became easier to understand which test case is failing.
 		t.Run(tt.name+" PUT", func(t *testing.T) {
 
-			if !tt.skipTodoCreation {
+			if tt.needsExistingTodo {
 				setupTestTodoWithTitle(t, todoId, connStr)
 				tt.args.req.Id = todoId
 				tt.wantGetResp.Id = todoId
 			}
-			testUpdateRequest(t, app, todoId, &tt)
+			sendTestUpdateRequest(t, app, todoId, &tt)
 		})
 
 		t.Run(tt.name+" GET", func(t *testing.T) {
-			testGetRequest(t, app, todoId, &tt)
+			sendTestGetRequestForUpdatedTodo(t, app, todoId, &tt)
 		})
 	}
 }
 
-func testUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
+func sendTestUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
 	var body io.Reader
 	if tc.args.req != nil {
 		data, err := json.Marshal(tc.args.req)
@@ -205,7 +205,7 @@ func testUpdateRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updat
 	}
 }
 
-func testGetRequest(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
+func sendTestGetRequestForUpdatedTodo(t *testing.T, app *fiber.App, todoId uuid.UUID, tc *updateTodoHandlerTestCase) {
 	req := httptest.NewRequest(http.MethodGet, "/todos/"+todoId.String(), nil)
 	req.Header.Set("Authorization", tc.args.authHeader)
 
