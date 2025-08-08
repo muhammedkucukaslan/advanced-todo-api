@@ -76,27 +76,28 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
-	mailersend "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	mailersendInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
+	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
+	validatorInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
-	repo, err := postgres.NewRepository(os.Getenv("DATABASE_URL"))
+	repo, err := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Println("Error connecting to database:", err)
 		panic(err)
 	}
 	fmt.Println("Connected to database")
-	tokenService := jwt.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
-	mailersendService := mailersend.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
+	tokenService := jwtInfra.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
+	mailersendService := mailersendInfra.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
 
-	logger := slog.NewLogger()
-	validator := validator.NewValidator(logger)
+	logger := slogInfra.NewLogger()
+	validator := validatorInfra.NewValidator(logger)
 
 	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
@@ -154,10 +155,14 @@ func SetupRoutes(app *fiber.App) {
 	todosApp.Delete("/:id", Handle(deleteTodoHandler, logger))
 	todosApp.Patch("/:id", Handle(toggleCompletedTodoHandler, logger))
 
+	if os.Getenv("ENV") != "production" {
+		app.Get("/swagger/*", fiberSwagger.WrapHandler)
+	}
+
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(domain.Error{
-			Message: "Welcome to Advanced Todo API",
-			Code:    http.StatusOK,
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message": "Welcome to Advanced Todo API",
+			"code":    http.StatusOK,
 		})
 	})
 

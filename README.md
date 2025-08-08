@@ -160,7 +160,7 @@ make dev
 ####  🌐 Access Swagger UI
 
 ```sh
-http://localhost:3000/swagger/index.html
+xdg-open http://localhost:3000/swagger/index.html
 ```
 From there, you can:
   - View all available endpoints

@@ -12,7 +12,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 func SetupServer() *fiber.App {
@@ -26,9 +25,6 @@ func SetupServer() *fiber.App {
 
 	registerMiddlewares(app)
 
-	if os.Getenv("ENV") == "development" {
-		app.Get("/swagger/*", fiberSwagger.WrapHandler)
-	}
 	return app
 }
 
