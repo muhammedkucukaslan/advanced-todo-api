@@ -79,6 +79,7 @@ import (
 	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	mailersendInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
+	redisInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/redis"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	validatorInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
@@ -98,6 +99,7 @@ func SetupRoutes(app *fiber.App) {
 
 	logger := slogInfra.NewLogger()
 	validator := validatorInfra.NewValidator(logger)
+	redisClient := redisInfra.NewRedisClient()
 
 	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
@@ -118,7 +120,7 @@ func SetupRoutes(app *fiber.App) {
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo)
-	getTodosHandler := todo.NewGetTodosHandler(repo)
+	getTodosHandler := todo.NewGetTodosHandler(repo, redisClient, time.Minute*5)
 	updateTodoHandler := todo.NewUpdateTodoHandler(repo)
 	deleteTodoHandler := todo.NewDeleteTodoHandler(repo)
 	toggleCompletedTodoHandler := todo.NewToggleCompletedTodoHandler(repo)
