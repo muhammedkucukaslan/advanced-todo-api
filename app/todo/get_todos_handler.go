@@ -2,6 +2,7 @@ package todo
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -23,12 +24,16 @@ type Todo struct {
 }
 
 type GetTodosHandler struct {
-	repo TodoRepository
+	repo  TodoRepository
+	cache domain.Cache
+	ttl   time.Duration
 }
 
-func NewGetTodosHandler(repo TodoRepository) *GetTodosHandler {
+func NewGetTodosHandler(repo TodoRepository, cache domain.Cache, ttl time.Duration) *GetTodosHandler {
 	return &GetTodosHandler{
-		repo: repo,
+		repo:  repo,
+		cache: cache,
+		ttl:   ttl,
 	}
 }
 
@@ -46,9 +51,25 @@ func NewGetTodosHandler(repo TodoRepository) *GetTodosHandler {
 //	@Router			/todos [get]
 func (h *GetTodosHandler) Handle(ctx context.Context, req *GetTodosRequest) (*GetTodosResponse, int, error) {
 	userID := domain.GetUserID(ctx)
+	cacheKey := "todos:" + userID.String()
+
+	if cached, err := h.cache.Get(ctx, cacheKey); err == nil {
+		var todos GetTodosResponse
+		if err := json.Unmarshal(cached, &todos); err == nil {
+			return &todos, http.StatusOK, nil
+		}
+	}
+
 	todos, err := h.repo.GetTodosByUserID(ctx, userID)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
+
+	go func() {
+		if data, err := json.Marshal(todos); err == nil {
+			h.cache.Set(ctx, cacheKey, data, h.ttl)
+		}
+	}()
+
 	return todos, http.StatusOK, nil
 }
