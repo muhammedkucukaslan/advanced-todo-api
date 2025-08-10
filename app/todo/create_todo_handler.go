@@ -16,11 +16,12 @@ type CreateTodoResponse struct {
 }
 
 type CreateTodoHandler struct {
-	repo TodoRepository
+	repo  TodoRepository
+	cache domain.Cache
 }
 
-func NewCreateTodoHandler(repo TodoRepository) *CreateTodoHandler {
-	return &CreateTodoHandler{repo: repo}
+func NewCreateTodoHandler(repo TodoRepository, cache domain.Cache) *CreateTodoHandler {
+	return &CreateTodoHandler{repo: repo, cache: cache}
 }
 
 // CreateTodoHandler handles the creation of a new todo item.
@@ -53,6 +54,10 @@ func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) 
 		}
 		return nil, http.StatusInternalServerError, err
 	}
+
+	go func() {
+		h.cache.Delete(context.Background(), "todos:"+userId.String())
+	}()
 
 	return nil, http.StatusCreated, nil
 }
