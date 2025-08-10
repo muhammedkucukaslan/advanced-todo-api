@@ -9,6 +9,7 @@
 [![Golang][Golang.com]][Golang-url]
 [![Fiber][Fiber.io]][Fiber-url]
 [![PostgreSQL][PostgreSQL.com]][PostgreSQL-url]
+[![Redis][Redis.com]][Redis-url]
 [![Docker][Docker.com]][Docker-url]
 [![JWT][JWT.io]][JWT-url]
 [![Testify][Testify.com]][Testify-url]
@@ -68,13 +69,14 @@ As a Backend Developer, I am trying to build robust and scalable API projects by
   - 📧 Email Verification
 - 📌 Todo CRUD (Create, Read, Update, Delete)
 - 🧱 Database Migrations for Initializing the Application and Test Environments
+- ⚡ Redis Caching for Performance Optimization
 - 🧪 Unit & Integration & Http & E2E Tests with Testify and Test Containers
 - 🧾 Swagger-based API Documentation
 - 🐳 Docker Support via `docker-compose`
 - 📤 Email Notification Integration
 
 ### Tech Stack
-[Golang][Golang-url] [Fiber][Fiber-url], [PostgreSQL][PostgreSQL-url], [Docker][Docker-url], [JWT][JWT-url], [Testify][Testify-url], [Swagger][Swagger-url], [Validator][Validator.com], [Slog][Slog.com]
+[Golang][Golang-url] [Fiber][Fiber-url], [PostgreSQL][PostgreSQL-url], [Redis][Redis-url], [Docker][Docker-url], [JWT][JWT-url], [Testify][Testify-url], [Swagger][Swagger-url], [Validator][Validator.com], [Slog][Slog.com]
 
 ## Getting Started
 
@@ -109,6 +111,8 @@ Follow these steps to get the project up and running on your local machine.
     Then add the following content to the `.env` file:
     ```sh
     DATABASE_URL="host=db user=postgres password=password123 dbname=advanced_todo_api_db port=5432 sslmode=disable"
+    REDIS_URL="redis://:your_redis_password@cache:6379/0"
+    ENV="development"
     JWT_SECRET="your_jwt_secret"
     MAILERSEND_API_KEY="your-api-key"
     MAILERSEND_SENDER_EMAIL="sender@sender_domain.com"
@@ -125,7 +129,7 @@ Follow these steps to get the project up and running on your local machine.
    ```sh
    go run cmd/main.go
    ```
-    > ⚠️**Note:** If you are **not** using Docker, make sure you have a running PostgreSQL database on your machine and that your `.env` file is configured with the correct database connection details.
+    > ⚠️**Note:** If you are **not** using Docker, make sure you have a running PostgreSQL and Redis database on your machine and that your `.env` file is configured with the correct database connection details.
 
    If you are able to use Makefile, you can also run the following command to start the application:
    
@@ -211,6 +215,9 @@ Don't forget to give the project a star! Thanks again!
 
 [PostgreSQL.com]: https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
+
+[Redis.com]: https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white
+[Redis-url]: https://redis.io/
 
 [Docker.com]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
