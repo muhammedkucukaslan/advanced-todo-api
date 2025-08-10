@@ -44,7 +44,7 @@ func TestCreateTodoHandler(t *testing.T) {
 	setupTestUser(t, connStr)
 
 	// I am not trying to test caching. So, i can use mock.
-	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache())
+	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache(), testUtils.NewMockLogger())
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 
 	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())

@@ -15,7 +15,7 @@ import (
 func TestCreateTodoHandler(t *testing.T) {
 	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
-	createTodoHandler := todo.NewCreateTodoHandler(&MockRepository{}, mock.NewMockCache())
+	createTodoHandler := todo.NewCreateTodoHandler(&MockRepository{}, mock.NewMockCache(), mock.NewMockLogger())
 
 	validCreateTodoRequest := &todo.CreateTodoRequest{
 		Title: "Test Todo",

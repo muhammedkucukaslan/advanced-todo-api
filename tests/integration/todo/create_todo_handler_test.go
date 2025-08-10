@@ -29,7 +29,7 @@ func TestCreateTodoHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache())
+	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache(), testUtils.NewMockLogger())
 	ctx = context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
 	ctxWithFakeUserId := context.WithValue(context.Background(), domain.UserIDKey, domain.FakeUserId)
