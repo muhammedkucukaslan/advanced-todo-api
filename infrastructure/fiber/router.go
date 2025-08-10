@@ -99,7 +99,7 @@ func SetupRoutes(app *fiber.App) {
 
 	logger := slogInfra.NewLogger()
 	validator := validatorInfra.NewValidator(logger)
-	redisClient := redisInfra.NewRedisClient()
+	redisClient := redisInfra.NewRedisClient(os.Getenv("REDIS_URL"))
 
 	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
