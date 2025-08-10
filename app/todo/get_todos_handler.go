@@ -67,7 +67,7 @@ func (h *GetTodosHandler) Handle(ctx context.Context, req *GetTodosRequest) (*Ge
 
 	go func() {
 		if data, err := json.Marshal(todos); err == nil {
-			h.cache.Set(ctx, cacheKey, data, h.ttl)
+			h.cache.Set(context.Background(), cacheKey, data, h.ttl)
 		}
 	}()
 
