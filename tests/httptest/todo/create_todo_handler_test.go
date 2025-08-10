@@ -32,7 +32,7 @@ func TestCreateTodoHandler(t *testing.T) {
 
 	ctx := context.Background()
 
-	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreatePostgresTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
@@ -43,7 +43,8 @@ func TestCreateTodoHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	createTodoHandler := todo.NewCreateTodoHandler(repo)
+	// I am not trying to test caching. So, i can use mock.
+	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache(), testUtils.NewMockLogger())
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 
 	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())

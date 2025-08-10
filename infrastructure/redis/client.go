@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,9 +12,9 @@ type RedisClient struct {
 	client *redis.Client
 }
 
-func NewRedisClient() *RedisClient {
+func NewRedisClient(connStr string) *RedisClient {
 
-	opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+	opt, err := redis.ParseURL(connStr)
 	if err != nil {
 		panic(err)
 	}

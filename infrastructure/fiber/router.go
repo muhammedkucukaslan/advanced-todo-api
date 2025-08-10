@@ -99,7 +99,7 @@ func SetupRoutes(app *fiber.App) {
 
 	logger := slogInfra.NewLogger()
 	validator := validatorInfra.NewValidator(logger)
-	redisClient := redisInfra.NewRedisClient()
+	redisClient := redisInfra.NewRedisClient(os.Getenv("REDIS_URL"))
 
 	middlewareManager := NewMiddlewareManager(tokenService, logger)
 
@@ -118,7 +118,7 @@ func SetupRoutes(app *fiber.App) {
 	verifyEmailHandler := user.NewVerifyEmailHandler(repo, validator, tokenService)
 	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(repo, validator, tokenService, mailersendService)
 
-	createTodoHandler := todo.NewCreateTodoHandler(repo)
+	createTodoHandler := todo.NewCreateTodoHandler(repo, redisClient, logger)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(repo)
 	getTodosHandler := todo.NewGetTodosHandler(repo, redisClient, time.Minute*5)
 	updateTodoHandler := todo.NewUpdateTodoHandler(repo)
