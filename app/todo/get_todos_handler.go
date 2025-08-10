@@ -51,7 +51,7 @@ func NewGetTodosHandler(repo TodoRepository, cache domain.Cache, ttl time.Durati
 //	@Router			/todos [get]
 func (h *GetTodosHandler) Handle(ctx context.Context, req *GetTodosRequest) (*GetTodosResponse, int, error) {
 	userID := domain.GetUserID(ctx)
-	cacheKey := "todos:" + userID.String()
+	cacheKey := domain.NewTodoCacheKey(userID)
 
 	if cached, err := h.cache.Get(ctx, cacheKey); err == nil {
 		var todos GetTodosResponse

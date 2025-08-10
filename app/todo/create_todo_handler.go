@@ -63,7 +63,7 @@ func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) 
 }
 
 func (h *CreateTodoHandler) DeleteCacheKey(userId uuid.UUID) {
-	if err := h.cache.Delete(context.Background(), "todos:"+userId.String()); err != nil {
-		h.logger.Error("failed to delete cache key", "key", "todos:"+userId.String(), "error", err)
+	if err := h.cache.Delete(context.Background(), domain.NewTodoCacheKey(userId)); err != nil {
+		h.logger.Error("failed to delete cache key", "key", domain.NewTodoCacheKey(userId), "error", err)
 	}
 }
