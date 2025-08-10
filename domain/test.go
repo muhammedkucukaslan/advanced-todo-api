@@ -16,7 +16,7 @@ var (
 		FullName:        "Test User",
 		Email:           "user@user.com",
 		Role:            "USER",
-		Password:        "testpassword123",
+		Password:        "user1234",
 		IsEmailVerified: false,
 	}
 	TestTodo = &Todo{

@@ -53,7 +53,7 @@ func (h *GetTodosHandler) Handle(ctx context.Context, req *GetTodosRequest) (*Ge
 	userID := domain.GetUserID(ctx)
 	cacheKey := domain.NewTodoCacheKey(userID)
 
-	if cached, err := h.cache.Get(ctx, cacheKey); err == nil {
+	if cached, err := h.cache.Get(ctx, cacheKey); err == nil && !isCacheEmpty(cached) {
 		var todos GetTodosResponse
 		if err := json.Unmarshal(cached, &todos); err == nil {
 			return &todos, http.StatusOK, nil
@@ -65,11 +65,21 @@ func (h *GetTodosHandler) Handle(ctx context.Context, req *GetTodosRequest) (*Ge
 		return nil, http.StatusInternalServerError, err
 	}
 
-	go func() {
-		if data, err := json.Marshal(todos); err == nil {
-			h.cache.Set(context.Background(), cacheKey, data, h.ttl)
-		}
-	}()
+	go h.SetCache(cacheKey, todos)
 
 	return todos, http.StatusOK, nil
+}
+
+func (h *GetTodosHandler) SetCache(key string, todos *GetTodosResponse) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if data, err := json.Marshal(todos); err == nil {
+		if err := h.cache.Set(ctx, key, data, h.ttl); err != nil {
+			// TODO log cache set error
+		}
+	}
+}
+
+func isCacheEmpty(cached []byte) bool {
+	return len(cached) == 0
 }
