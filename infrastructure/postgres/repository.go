@@ -28,7 +28,7 @@ func NewRepository(databaseUrl string) (*Repository, error) {
 	}
 
 	if os.Getenv("ENV") != "production" {
-		if err := runUserMigrations(db); err != nil {
+		if err := runTestUserMigrations(db); err != nil {
 			return nil, err
 		}
 	}
@@ -74,7 +74,7 @@ func runTableMigrations(db *sql.DB) error {
 
 }
 
-func runUserMigrations(db *sql.DB) error {
+func runTestUserMigrations(db *sql.DB) error {
 	tx, err := db.Begin()
 
 	if err != nil {
@@ -82,7 +82,7 @@ func runUserMigrations(db *sql.DB) error {
 	}
 	defer rollbackTx(tx)
 
-	hashedPassword, err := domain.HashPassword(domain.TestUser.Password)
+	userHashedPassword, err := domain.HashPassword(domain.TestUser.Password)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func runUserMigrations(db *sql.DB) error {
 		domain.TestUser.Id,
 		domain.TestUser.FullName,
 		domain.TestUser.Email,
-		hashedPassword,
+		userHashedPassword,
 		domain.TestUser.Role,
 	)
 
@@ -105,7 +105,7 @@ func runUserMigrations(db *sql.DB) error {
 	ON CONFLICT (email) DO NOTHING`
 	_, err = tx.Exec(addAdminQuery,
 		uuid.New(),
-		"ADMIN",
+		"Admin User",
 		"admin@admin.com",
 		adminHashedPassword,
 		"ADMIN",
