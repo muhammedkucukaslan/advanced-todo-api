@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
@@ -16,12 +17,13 @@ type CreateTodoResponse struct {
 }
 
 type CreateTodoHandler struct {
-	repo  TodoRepository
-	cache domain.Cache
+	repo   TodoRepository
+	cache  domain.Cache
+	logger domain.Logger
 }
 
-func NewCreateTodoHandler(repo TodoRepository, cache domain.Cache) *CreateTodoHandler {
-	return &CreateTodoHandler{repo: repo, cache: cache}
+func NewCreateTodoHandler(repo TodoRepository, cache domain.Cache, logger domain.Logger) *CreateTodoHandler {
+	return &CreateTodoHandler{repo: repo, cache: cache, logger: logger}
 }
 
 // CreateTodoHandler handles the creation of a new todo item.
@@ -55,9 +57,13 @@ func (h *CreateTodoHandler) Handle(ctx context.Context, req *CreateTodoRequest) 
 		return nil, http.StatusInternalServerError, err
 	}
 
-	go func() {
-		h.cache.Delete(context.Background(), "todos:"+userId.String())
-	}()
+	go h.DeleteCacheKey(userId)
 
 	return nil, http.StatusCreated, nil
+}
+
+func (h *CreateTodoHandler) DeleteCacheKey(userId uuid.UUID) {
+	if err := h.cache.Delete(context.Background(), "todos:"+userId.String()); err != nil {
+		h.logger.Error("failed to delete cache key", "key", "todos:"+userId.String(), "error", err)
+	}
 }
