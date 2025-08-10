@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
@@ -80,4 +81,24 @@ func (m *MockTokenService) GenerateTokenForForgotPassword(email string) (string,
 
 func (m *MockTokenService) ValidateForgotPasswordToken(tokenString string) (string, error) {
 	return "", nil
+}
+
+// MockCache
+type MockCache struct {
+}
+
+func NewMockCache() *MockCache {
+	return &MockCache{}
+}
+
+func (m *MockCache) Get(ctx context.Context, key string) ([]byte, error) {
+	return nil, nil
+}
+
+func (m *MockCache) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
+	return nil
+}
+
+func (m *MockCache) Delete(ctx context.Context, key string) error {
+	return nil
 }

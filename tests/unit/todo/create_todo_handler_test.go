@@ -8,13 +8,14 @@ import (
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
+	mock "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateTodoHandler(t *testing.T) {
 	ctx := context.WithValue(context.Background(), domain.UserIDKey, domain.RealUserId)
 
-	createTodoHandler := todo.NewCreateTodoHandler(&MockRepository{})
+	createTodoHandler := todo.NewCreateTodoHandler(&MockRepository{}, mock.NewMockCache())
 
 	validCreateTodoRequest := &todo.CreateTodoRequest{
 		Title: "Test Todo",
