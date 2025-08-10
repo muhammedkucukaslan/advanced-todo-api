@@ -30,7 +30,7 @@ func VerifyErrorResponse(t *testing.T, body io.ReadCloser, expectedError error) 
 	assert.Equal(t, expectedError.Error(), errResp.Message, "error message should match")
 }
 
-func CreateTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
+func CreatePostgresTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
 	postgresContainer, err := postgres.Run(ctx,
 		"postgres:15",
 		postgres.WithDatabase("testdb"),

@@ -18,7 +18,7 @@ func TestCreateTodoHandler(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	postgresContainer, connStr := testUtils.CreateTestContainer(t, ctx)
+	postgresContainer, connStr := testUtils.CreatePostgresTestContainer(t, ctx)
 	defer func() {
 		err := postgresContainer.Terminate(ctx)
 		require.NoError(t, err, "failed to terminate postgres container")
