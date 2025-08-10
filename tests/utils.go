@@ -11,7 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -30,12 +31,12 @@ func VerifyErrorResponse(t *testing.T, body io.ReadCloser, expectedError error) 
 	assert.Equal(t, expectedError.Error(), errResp.Message, "error message should match")
 }
 
-func CreatePostgresTestContainer(t *testing.T, ctx context.Context) (*postgres.PostgresContainer, string) {
-	postgresContainer, err := postgres.Run(ctx,
+func CreatePostgresTestContainer(t *testing.T, ctx context.Context) (*tcpostgres.PostgresContainer, string) {
+	postgresContainer, err := tcpostgres.Run(ctx,
 		"postgres:15",
-		postgres.WithDatabase("testdb"),
-		postgres.WithUsername("testuser"),
-		postgres.WithPassword("testpass"),
+		tcpostgres.WithDatabase("testdb"),
+		tcpostgres.WithUsername("testuser"),
+		tcpostgres.WithPassword("testpass"),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
@@ -45,4 +46,16 @@ func CreatePostgresTestContainer(t *testing.T, ctx context.Context) (*postgres.P
 	connStr, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
 	require.NoError(t, err)
 	return postgresContainer, connStr
+}
+
+func CreateRedisTestContainer(t *testing.T, ctx context.Context) (*tcredis.RedisContainer, string) {
+	redisContainer, err := tcredis.Run(ctx, "redis:7")
+
+	require.NoError(t, err, "failed to start Redis container")
+
+	uri, err := redisContainer.ConnectionString(ctx)
+	require.NoError(t, err, "failed to get Redis connection string")
+
+	return redisContainer, uri
+
 }
