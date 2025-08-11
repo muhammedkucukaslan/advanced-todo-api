@@ -88,11 +88,8 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-	repo, err := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
-	if err != nil {
-		fmt.Println("Error connecting to database:", err)
-		panic(err)
-	}
+	repo := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
+
 	fmt.Println("Connected to database")
 	tokenService := jwtInfra.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
 	mailersendService := mailersendInfra.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
@@ -157,7 +154,7 @@ func SetupRoutes(app *fiber.App) {
 	todosApp.Delete("/:id", Handle(deleteTodoHandler, logger))
 	todosApp.Patch("/:id", Handle(toggleCompletedTodoHandler, logger))
 
-	if os.Getenv("ENV") != "production" {
+	if !domain.IsProdEnv() {
 		app.Get("/swagger/*", fiberSwagger.WrapHandler)
 	}
 

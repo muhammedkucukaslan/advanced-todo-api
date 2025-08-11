@@ -3,7 +3,6 @@ package postgres
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -14,26 +13,23 @@ type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(databaseUrl string) (*Repository, error) {
+func NewRepository(databaseUrl string) *Repository {
 	db, err := sql.Open("postgres", databaseUrl)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-	if err := runTableMigrations(db); err != nil {
-		return nil, err
+		panic("Failed to connect to the database: " + err.Error())
 	}
 
-	if os.Getenv("ENV") != "production" {
-		if err := runTestUserMigrations(db); err != nil {
-			return nil, err
-		}
+	runTableMigrations(db)
+
+	if !domain.IsProdEnv() {
+		runTestUserMigrations(db)
 	}
 
-	return &Repository{db: db}, nil
+	return &Repository{db: db}
 }
 
 func (r *Repository) Close() error {
@@ -46,7 +42,7 @@ func rollbackTx(tx *sql.Tx) {
 	}
 }
 
-func runTableMigrations(db *sql.DB) error {
+func runTableMigrations(db *sql.DB) {
 	createTableQuery := `
 		CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY,
@@ -70,21 +66,23 @@ func runTableMigrations(db *sql.DB) error {
 	`
 	_, err := db.Exec(createTableQuery)
 
-	return err
+	if err != nil {
+		panic("Failed to create tables: " + err.Error())
+	}
 
 }
 
-func runTestUserMigrations(db *sql.DB) error {
+func runTestUserMigrations(db *sql.DB) {
 	tx, err := db.Begin()
 
 	if err != nil {
-		return err
+		panic("Failed to begin transaction: " + err.Error())
 	}
 	defer rollbackTx(tx)
 
 	userHashedPassword, err := domain.HashPassword(domain.TestUser.Password)
 	if err != nil {
-		return err
+		panic("Failed to hash password: " + err.Error())
 	}
 
 	addUserQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
@@ -99,7 +97,7 @@ func runTestUserMigrations(db *sql.DB) error {
 
 	adminHashedPassword, err := domain.HashPassword("admin123")
 	if err != nil {
-		return err
+		panic("Failed to hash password: " + err.Error())
 	}
 	addAdminQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
 	ON CONFLICT (email) DO NOTHING`
@@ -111,7 +109,9 @@ func runTestUserMigrations(db *sql.DB) error {
 		"ADMIN",
 	)
 	if err != nil {
-		return err
+		panic("Failed to insert admin user: " + err.Error())
 	}
-	return tx.Commit()
+	if tx.Commit() != nil {
+		panic("Failed to commit transaction: " + tx.Commit().Error())
+	}
 }
