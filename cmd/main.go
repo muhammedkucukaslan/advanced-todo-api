@@ -9,13 +9,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	_ "github.com/muhammedkucukaslan/advanced-todo-api/docs"
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
 )
 
 func main() {
 
-	env := os.Getenv("ENV")
-	if env != "production" {
+	if domain.IsProdEnv() {
 		if err := godotenv.Load(); err != nil {
 			log.Println("No .env file found, skipping...")
 		}
