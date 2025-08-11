@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"os"
 
 	"github.com/google/uuid"
 )
@@ -21,4 +22,8 @@ func GetUserID(ctx context.Context) uuid.UUID {
 
 func GetRole(ctx context.Context) string {
 	return ctx.Value(RoleKey).(string)
+}
+
+func IsProdEnv() bool {
+	return os.Getenv("ENV") == "production"
 }

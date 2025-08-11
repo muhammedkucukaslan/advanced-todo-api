@@ -5,11 +5,11 @@ import (
 	"os"
 )
 
-type slogLogger struct {
+type SlogLogger struct {
 	logger *slog.Logger
 }
 
-func NewLogger() *slogLogger {
+func NewLogger() *SlogLogger {
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
@@ -24,13 +24,13 @@ func NewLogger() *slogLogger {
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
-	return &slogLogger{logger: logger}
+	return &SlogLogger{logger: logger}
 }
 
-func (l *slogLogger) Info(msg string, args ...any) {
+func (l *SlogLogger) Info(msg string, args ...any) {
 	l.logger.Info(msg, args...)
 }
 
-func (l *slogLogger) Error(msg string, args ...any) {
+func (l *SlogLogger) Error(msg string, args ...any) {
 	l.logger.Error(msg, args...)
 }

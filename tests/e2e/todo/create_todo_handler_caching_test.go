@@ -53,8 +53,7 @@ func TestCreateTodoHandlerCaching(t *testing.T) {
 
 	}()
 
-	repo, err := postgresRepo.NewRepository(connStr)
-	require.NoError(t, err, "failed to create repository")
+	repo := postgresRepo.NewRepository(connStr)
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
@@ -66,7 +65,6 @@ func TestCreateTodoHandlerCaching(t *testing.T) {
 	}()
 
 	redisClient := redisInfra.NewRedisClient(redisAddr)
-	require.NoError(t, err, "failed to create Redis client")
 
 	createTodoHandler := todo.NewCreateTodoHandler(repo, redisClient, logger)
 	getTodosHandler := todo.NewGetTodosHandler(repo, redisClient, time.Minute*5)

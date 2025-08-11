@@ -23,8 +23,7 @@ func TestToggleCompletedTodoHandler(t *testing.T) {
 		require.NoError(t, err, "failed to terminate postgres container")
 	}()
 
-	repo, err := postgresRepo.NewRepository(connStr)
-	require.NoError(t, err, "failed to create repository")
+	repo := postgresRepo.NewRepository(connStr)
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 	setupTestTodo(t, connStr)
