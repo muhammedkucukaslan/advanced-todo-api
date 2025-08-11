@@ -28,8 +28,7 @@ func TestLoginHandler(t *testing.T) {
 		require.NoError(t, err, "failed to terminate postgres container")
 	}()
 
-	repo, err := postgresInfra.NewRepository(connStr)
-	require.NoError(t, err, "failed to create repository")
+	repo := postgresInfra.NewRepository(connStr)
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
