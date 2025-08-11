@@ -21,17 +21,10 @@ func main() {
 		}
 	}
 
-	PORT := ":3000"
-
 	app := fiberInfra.SetupServer()
 	fiberInfra.SetupRoutes(app)
-	fmt.Println("Server is running on port", PORT)
 
-	go func() {
-		if err := app.Listen(PORT); err != nil {
-			fmt.Printf("Failed to start server: %v\n", err)
-		}
-	}()
+	go startServer(app)
 
 	gracefulShutdown(app)
 }
@@ -44,4 +37,14 @@ func gracefulShutdown(app *fiber.App) {
 	if err := app.Shutdown(); err != nil {
 		log.Printf("Error shutting down server: %v", err)
 	}
+}
+
+func startServer(app *fiber.App) {
+	PORT := ":3000"
+
+	if err := app.Listen(PORT); err != nil {
+		panic(fmt.Sprintf("Failed to start server: %v\n", err))
+	}
+
+	fmt.Println("Server is running at http://localhost:", PORT)
 }
