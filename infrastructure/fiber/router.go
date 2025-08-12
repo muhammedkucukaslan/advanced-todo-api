@@ -91,7 +91,15 @@ func SetupRoutes(app *fiber.App) {
 	postgresRepo := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
 	fmt.Println("Connected to database")
 
-	jwtTokenService := jwtInfra.NewTokenService(os.Getenv("JWT_SECRET_KEY"), time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenServiceConfig := jwtInfra.Config{
+		SecretKey:                 os.Getenv("JWT_SECRET_KEY"),
+		AuthTokenDuration:         time.Hour * 24,
+		EmailVerificationDuration: time.Minute * 10,
+		ForgotPasswordDuration:    time.Minute * 10,
+	}
+
+	jwtTokenService := jwtInfra.NewJWTTokenService(tokenServiceConfig)
+
 	mailersendService := mailersendInfra.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
 
 	slogLogger := slogInfra.NewLogger()
