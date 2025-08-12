@@ -4,14 +4,12 @@ import (
 	"context"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
@@ -32,7 +30,7 @@ func TestLoginHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := jwt.NewTokenService("test-secret-key", time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slog.NewLogger()
 	validator := validator.NewValidator(logger)
 
@@ -157,7 +155,7 @@ func TestLoginHandler(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
 				assert.NotEmpty(t, got.Token)
-				payload, err := tokenService.ValidateToken(got.Token)
+				payload, err := tokenService.ValidateAuthToken(got.Token)
 				assert.NoError(t, err)
 				assert.NotNil(t, payload)
 				assert.Equal(t, domain.RealUserId, payload.UserID)

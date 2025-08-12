@@ -7,14 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
@@ -39,7 +37,7 @@ type deleteTodoHandlerTestCase struct {
 func TestDeleteTodoHandler(t *testing.T) {
 	app := fiber.New()
 
-	tokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
@@ -62,7 +60,7 @@ func TestDeleteTodoHandler(t *testing.T) {
 	app.Delete("/todos/:id", fiberInfra.Handle(deleteTodoHandler, logger))
 	app.Get("/todos/:id", fiberInfra.Handle(getTodoByIdHandler, logger))
 
-	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())
+	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
 	validTokenHeader := "Bearer " + validToken

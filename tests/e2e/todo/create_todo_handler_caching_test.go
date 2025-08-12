@@ -14,7 +14,6 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	redisInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/redis"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
@@ -39,7 +38,7 @@ type CacheGetTest struct {
 func TestCreateTodoHandlerCaching(t *testing.T) {
 	app := fiber.New()
 
-	tokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
@@ -71,7 +70,7 @@ func TestCreateTodoHandlerCaching(t *testing.T) {
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 	app.Get("/todos", fiberInfra.Handle(getTodosHandler, logger))
 
-	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())
+	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
 	validTokenHeader := "Bearer " + validToken

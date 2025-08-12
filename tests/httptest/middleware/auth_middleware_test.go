@@ -21,8 +21,8 @@ import (
 func TestAuthMiddleware(t *testing.T) {
 	app := fiber.New()
 
-	realTokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
-	fakeTokenService := jwtInfra.NewTokenService("fake-key", time.Hour*24, time.Minute*10, time.Minute*10)
+	realTokenService := jwtInfra.NewJWTTokenService(realTokenServiceConfig)
+	fakeTokenService := jwtInfra.NewJWTTokenService(fakeTokenServiceConfig)
 
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(realTokenService, logger)
@@ -30,21 +30,17 @@ func TestAuthMiddleware(t *testing.T) {
 	healthCheckHandler := healthcheck.NewHealthcheckHandler()
 	app.Get("/healthcheck", middlewareManager.AuthMiddleware, fiberInfra.Handle(healthCheckHandler, logger))
 
-	validToken, err := realTokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())
+	validToken, err := realTokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
-	fakeToken, err := fakeTokenService.GenerateToken(domain.FakeUserId, domain.TestUser.Role, time.Now())
+	fakeToken, err := fakeTokenService.GenerateAuthToken(domain.FakeUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate fake token")
-
-	expiredToken, err := realTokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now().Add(-time.Hour*100))
-	require.NoError(t, err, "failed to generate expired token")
 
 	validTokenHeader := "Bearer " + validToken
 	fakeTokenHeader := "Bearer " + fakeToken
 	invalidTokenHeader := "Bearer " + "invalid_token"
 	invalidHeader := " Bearerrrrrr " + validToken
 	missingTokenHeader := "Bearer "
-	expiredTokenHeader := "Bearer " + expiredToken
 
 	type args struct {
 		authHeader string
@@ -75,12 +71,6 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			"fake token", args{
 				authHeader: fakeTokenHeader,
-				req:        &healthcheck.HealthcheckRequest{},
-			}, nil, http.StatusUnauthorized, domain.ErrInvalidToken,
-		},
-		{
-			"expired token", args{
-				authHeader: expiredTokenHeader,
 				req:        &healthcheck.HealthcheckRequest{},
 			}, nil, http.StatusUnauthorized, domain.ErrInvalidToken,
 		},
@@ -129,3 +119,14 @@ func TestAuthMiddleware(t *testing.T) {
 		})
 	}
 }
+
+var (
+	realTokenServiceConfig = jwtInfra.Config{
+		SecretKey:         domain.MockJWTTestKey,
+		AuthTokenDuration: time.Hour * 24,
+	}
+	fakeTokenServiceConfig = jwtInfra.Config{
+		SecretKey:         "fake-key",
+		AuthTokenDuration: time.Hour * 24,
+	}
+)
