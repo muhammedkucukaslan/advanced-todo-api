@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
+	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -58,4 +59,13 @@ func CreateRedisTestContainer(t *testing.T, ctx context.Context) (*tcredis.Redis
 
 	return redisContainer, uri
 
+}
+
+func NewTestJWTTokenService() *jwtInfra.Service {
+	return jwtInfra.NewJWTTokenService(jwtInfra.Config{
+		SecretKey:                 "test_secret_key",
+		AuthTokenDuration:         time.Hour * 24,
+		EmailVerificationDuration: time.Minute * 10,
+		ForgotPasswordDuration:    time.Minute * 10,
+	})
 }

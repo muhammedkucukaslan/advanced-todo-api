@@ -4,11 +4,9 @@ import (
 	"context"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
@@ -31,7 +29,7 @@ func TestResetPasswordHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := jwt.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slog.NewLogger()
 	validator := validator.NewValidator(logger)
 

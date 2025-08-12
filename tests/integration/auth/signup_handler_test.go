@@ -4,14 +4,12 @@ import (
 	"context"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	"github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/validator"
@@ -33,7 +31,7 @@ func TestSignupHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := jwtInfra.NewTokenService("test-secret-key", time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slogInfra.NewLogger()
 	validator := validator.NewValidator(logger)
 	mailService := mock.NewMockEmailService()
@@ -183,7 +181,7 @@ func TestSignupHandler(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
 				assert.NotEmpty(t, got.Token)
-				payload, err := tokenService.ValidateToken(got.Token)
+				payload, err := tokenService.ValidateAuthToken(got.Token)
 				assert.NoError(t, err)
 				assert.NotNil(t, payload)
 				assert.Equal(t, domain.TestUser.Role, payload.Role)

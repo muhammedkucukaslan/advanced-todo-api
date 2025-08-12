@@ -13,6 +13,9 @@ type RedisClient struct {
 }
 
 func NewRedisClient(connStr string) *RedisClient {
+	if connStr == "" {
+		panic("Redis connection string is empty")
+	}
 
 	opt, err := redis.ParseURL(connStr)
 	if err != nil {

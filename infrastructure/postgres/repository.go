@@ -14,6 +14,10 @@ type Repository struct {
 }
 
 func NewRepository(databaseUrl string) *Repository {
+	if databaseUrl == "" {
+		panic("Database URL is empty")
+	}
+
 	db, err := sql.Open("postgres", databaseUrl)
 	if err != nil {
 		return nil

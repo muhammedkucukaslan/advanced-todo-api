@@ -5,13 +5,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
@@ -22,18 +20,22 @@ func TestAdminMiddleware(t *testing.T) {
 
 	app := fiber.New()
 
-	realTokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 
 	logger := slogInfra.NewLogger()
-	middlewareManager := fiberInfra.NewMiddlewareManager(realTokenService, logger)
+	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 
 	healthCheckHandler := healthcheck.NewHealthcheckHandler()
-	app.Get("/healthcheck", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware, fiberInfra.Handle(healthCheckHandler, logger))
+	app.Get("/healthcheck",
+		middlewareManager.AuthMiddleware,
+		middlewareManager.AdminMiddleware,
+		fiberInfra.Handle(healthCheckHandler, logger),
+	)
 
-	adminToken, err := realTokenService.GenerateToken(domain.RealUserId, "ADMIN", time.Now())
+	adminToken, err := tokenService.GenerateAuthToken(domain.RealUserId, "ADMIN")
 	require.NoError(t, err, "failed to generate valid token")
 
-	userToken, err := realTokenService.GenerateToken(domain.RealUserId, "USER", time.Now())
+	userToken, err := tokenService.GenerateAuthToken(domain.RealUserId, "USER")
 	require.NoError(t, err, "failed to generate valid token")
 
 	type args struct {

@@ -9,31 +9,43 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-type TokenService struct {
-	secretKey              string
-	tokenDuration          time.Duration
-	emailVerificationToken time.Duration
-	forgotPasswordToken    time.Duration
+type Config struct {
+	SecretKey                 string
+	AuthTokenDuration         time.Duration
+	EmailVerificationDuration time.Duration
+	ForgotPasswordDuration    time.Duration
 }
 
-func NewTokenService(secretKey string, tokenDuration, emailVerificationToken, forgotPasswordToken time.Duration) *TokenService {
-	return &TokenService{secretKey: secretKey, tokenDuration: tokenDuration, emailVerificationToken: emailVerificationToken, forgotPasswordToken: forgotPasswordToken}
+type Service struct {
+	secretKey                 string
+	authTokenDuration         time.Duration
+	emailVerificationDuration time.Duration
+	forgotPasswordDuration    time.Duration
 }
 
-func (s *TokenService) GenerateToken(userID, role string, t time.Time) (string, error) {
+func NewJWTTokenService(config Config) *Service {
+	return &Service{
+		secretKey:                 config.SecretKey,
+		authTokenDuration:         config.AuthTokenDuration,
+		emailVerificationDuration: config.EmailVerificationDuration,
+		forgotPasswordDuration:    config.ForgotPasswordDuration,
+	}
+}
+
+func (s *Service) GenerateAuthToken(userID, role string) (string, error) {
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 		"role":   role,
-		"iat":    t.Unix(),
-		"exp":    t.Add(s.tokenDuration).Unix(),
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(s.authTokenDuration).Unix(),
 	})
 
 	return token.SignedString([]byte(s.secretKey))
 }
 
-func (s *TokenService) ValidateToken(tokenString string) (auth.TokenPayload, error) {
+func (s *Service) ValidateAuthToken(tokenString string) (auth.TokenPayload, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		// Verify signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -78,16 +90,16 @@ func (s *TokenService) ValidateToken(tokenString string) (auth.TokenPayload, err
 	}, nil
 }
 
-func (s *TokenService) GenerateTokenForForgotPassword(email string) (string, error) {
+func (s *Service) GenerateTokenForForgotPassword(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(s.forgotPasswordToken).Unix(),
+		"exp":   time.Now().Add(s.forgotPasswordDuration).Unix(),
 	})
 
 	return token.SignedString([]byte(s.secretKey))
 }
 
-func (s *TokenService) ValidateForgotPasswordToken(tokenString string) (string, error) {
+func (s *Service) ValidateForgotPasswordToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -120,16 +132,16 @@ func (s *TokenService) ValidateForgotPasswordToken(tokenString string) (string, 
 	return email, nil
 }
 
-func (s *TokenService) GenerateVerificationToken(email string) (string, error) {
+func (s *Service) GenerateVerificationToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(s.tokenDuration).Unix(),
+		"exp":   time.Now().Add(s.emailVerificationDuration).Unix(),
 	})
 
 	return token.SignedString([]byte(s.secretKey))
 }
 
-func (s *TokenService) ValidateVerifyEmailToken(tokenString string) (string, error) {
+func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

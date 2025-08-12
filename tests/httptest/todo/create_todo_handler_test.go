@@ -8,13 +8,11 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
 	postgresRepo "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
@@ -25,7 +23,7 @@ func TestCreateTodoHandler(t *testing.T) {
 
 	app := fiber.New()
 
-	tokenService := jwtInfra.NewTokenService(domain.MockJWTTestKey, time.Hour*24, time.Minute*10, time.Minute*10)
+	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)
@@ -46,10 +44,10 @@ func TestCreateTodoHandler(t *testing.T) {
 	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache(), testUtils.NewMockLogger())
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 
-	validToken, err := tokenService.GenerateToken(domain.RealUserId, domain.TestUser.Role, time.Now())
+	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
-	fakeUserIdToken, err := tokenService.GenerateToken(domain.FakeUserId, domain.TestUser.Role, time.Now())
+	fakeUserIdToken, err := tokenService.GenerateAuthToken(domain.FakeUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate fake token")
 
 	validTokenHeader := "Bearer " + validToken
