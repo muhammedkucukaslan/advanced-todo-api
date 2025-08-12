@@ -3,9 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
@@ -55,19 +53,16 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 		h.logger.Error("error while getting user by email: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
-	err = user.ValidatePassword(req.Password)
-	if err != nil {
-		fmt.Println("Password validation error:", err)
+
+	if err = user.ValidatePassword(req.Password); err != nil {
 		if errors.Is(err, domain.ErrInvalidCredentials) {
 			return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
 		}
-		h.logger.Error("error while validating password: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	token, err := h.ts.GenerateToken(user.Id.String(), user.Role, time.Now())
+	token, err := h.ts.GenerateAuthToken(user.Id.String(), user.Role)
 	if err != nil {
-		h.logger.Error("error while generating token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
