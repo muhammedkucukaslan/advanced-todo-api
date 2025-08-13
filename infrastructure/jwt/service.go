@@ -38,6 +38,7 @@ func NewJWTTokenService(config Config) *Service {
 	}
 }
 
+// TODO need to encrypt payload
 func (s *Service) GenerateAuthAccessToken(userID, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
@@ -49,6 +50,7 @@ func (s *Service) GenerateAuthAccessToken(userID, role string) (string, error) {
 	return token.SignedString(s.accessTokenSecretKeyByte)
 }
 
+// TODO need to encrypt payload
 func (s *Service) GenerateAuthRefreshToken(userID, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
@@ -83,6 +85,7 @@ func (s *Service) ValidateAuthAccessToken(tokenString string) (*auth.TokenPayloa
 	return s.validateAuthClaims(token)
 }
 
+// TODO need to encrypt payload
 func (s *Service) GenerateTokenForForgotPassword(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
@@ -106,6 +109,7 @@ func (s *Service) ValidateForgotPasswordToken(tokenString string) (string, error
 	return s.validateEmailClaims(token)
 }
 
+// TODO need to encrypt payload
 func (s *Service) GenerateEmailVerificationToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
