@@ -64,7 +64,7 @@ func CreateRedisTestContainer(t *testing.T, ctx context.Context) (*tcredis.Redis
 func NewTestJWTTokenService() *jwtInfra.Service {
 	return jwtInfra.NewJWTTokenService(jwtInfra.Config{
 		SecretKey:                 "test_secret_key",
-		AuthTokenDuration:         time.Hour * 24,
+		AuthAccessTokenDuration:   time.Hour * 24,
 		EmailVerificationDuration: time.Minute * 10,
 		ForgotPasswordDuration:    time.Minute * 10,
 	})

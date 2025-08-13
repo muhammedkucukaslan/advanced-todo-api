@@ -12,14 +12,14 @@ import (
 
 type Config struct {
 	SecretKey                 string
-	AuthTokenDuration         time.Duration
+	AuthAccessTokenDuration   time.Duration
 	EmailVerificationDuration time.Duration
 	ForgotPasswordDuration    time.Duration
 }
 
 type Service struct {
 	secretKey                 []byte
-	authTokenDuration         time.Duration
+	AuthAccessTokenDuration   time.Duration
 	emailVerificationDuration time.Duration
 	forgotPasswordDuration    time.Duration
 }
@@ -27,7 +27,7 @@ type Service struct {
 func NewJWTTokenService(config Config) *Service {
 	return &Service{
 		secretKey:                 []byte(config.SecretKey),
-		authTokenDuration:         config.AuthTokenDuration,
+		AuthAccessTokenDuration:   config.AuthAccessTokenDuration,
 		emailVerificationDuration: config.EmailVerificationDuration,
 		forgotPasswordDuration:    config.ForgotPasswordDuration,
 	}
@@ -38,7 +38,7 @@ func (s *Service) GenerateAuthAccessToken(userID, role string) (string, error) {
 		"userID": userID,
 		"role":   role,
 		"iat":    time.Now().Unix(),
-		"exp":    time.Now().Add(s.authTokenDuration).Unix(),
+		"exp":    time.Now().Add(s.AuthAccessTokenDuration).Unix(),
 	})
 
 	return token.SignedString(s.secretKey)

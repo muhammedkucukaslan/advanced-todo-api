@@ -93,7 +93,7 @@ func SetupRoutes(app *fiber.App) {
 
 	tokenServiceConfig := jwtInfra.Config{
 		SecretKey:                 os.Getenv("JWT_SECRET_KEY"),
-		AuthTokenDuration:         time.Hour * 24,
+		AuthAccessTokenDuration:   time.Hour * 24,
 		EmailVerificationDuration: time.Minute * 10,
 		ForgotPasswordDuration:    time.Minute * 10,
 	}
