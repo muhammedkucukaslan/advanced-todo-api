@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
@@ -14,18 +15,39 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	AccessToken string `json:"access_token"`
+}
+
+type LoginConfig struct {
+	RefreshTokenCookieDuration time.Duration
+	Secure                     bool
+	Repo                       Repository
+	TokenService               TokenService
+	CookieService              CookieService
+	Validator                  domain.Validator
+	Logger                     domain.Logger
 }
 
 type LoginHandler struct {
-	repo      Repository
-	ts        TokenService
-	validator domain.Validator
-	logger    domain.Logger
+	refreshTokenCookieDuration time.Duration
+	secure                     bool
+	repo                       Repository
+	ts                         TokenService
+	validator                  domain.Validator
+	logger                     domain.Logger
+	cs                         CookieService
 }
 
-func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validator, logger domain.Logger) *LoginHandler {
-	return &LoginHandler{repo: repo, ts: ts, validator: validator, logger: logger}
+func NewLoginHandler(config *LoginConfig) *LoginHandler {
+	return &LoginHandler{
+		refreshTokenCookieDuration: config.RefreshTokenCookieDuration,
+		secure:                     config.Secure,
+		repo:                       config.Repo,
+		ts:                         config.TokenService,
+		validator:                  config.Validator,
+		logger:                     config.Logger,
+		cs:                         config.CookieService,
+	}
 }
 
 // @Summary		Login
@@ -36,6 +58,7 @@ func NewLoginHandler(repo Repository, ts TokenService, validator domain.Validato
 // @Param			request	body		LoginRequest	true	"Login Request"
 // @Success		200		{object}	LoginResponse
 // @Failure		400
+// @Failure		401
 // @Failure		404
 // @Failure		500
 // @Router			/login [post]
@@ -66,5 +89,25 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return &LoginResponse{Token: token}, http.StatusOK, nil
+	refreshToken, err := h.ts.GenerateAuthRefreshToken(user.Id.String(), user.Role)
+	if err != nil {
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	}
+
+	if err := h.repo.SaveRefreshToken(ctx, domain.NewRefreshToken(
+		user.Id,
+		refreshToken,
+		h.refreshTokenCookieDuration,
+	)); err != nil {
+		h.logger.Error("error while saving refresh token: ", err)
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	}
+
+	h.cs.SetRefreshToken(ctx, &RefreshTokenCookieClaims{
+		Token:    refreshToken,
+		Duration: h.refreshTokenCookieDuration,
+		Secure:   h.secure,
+	})
+
+	return &LoginResponse{AccessToken: token}, http.StatusOK, nil
 }
