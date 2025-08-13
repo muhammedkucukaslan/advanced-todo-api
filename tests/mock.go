@@ -62,6 +62,7 @@ func (m *MockTokenService) GenerateAuthAccessToken(userID, role string) (string,
 }
 
 func (m *MockTokenService) ValidateAuthAccessToken(token string) (*auth.TokenPayload, error) {
+
 	return &auth.TokenPayload{
 		UserID: domain.TestUser.Id.String(),
 		Role:   domain.TestUser.Role,
