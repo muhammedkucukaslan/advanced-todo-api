@@ -49,3 +49,5 @@ func (r *Repository) SaveRefreshToken(ctx context.Context, record *domain.Refres
 	}
 	return nil
 }
+
+// TODO delete refresh token from db when user logs out
