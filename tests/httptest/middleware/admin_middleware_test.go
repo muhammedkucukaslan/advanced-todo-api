@@ -32,10 +32,10 @@ func TestAdminMiddleware(t *testing.T) {
 		fiberInfra.Handle(healthCheckHandler, logger),
 	)
 
-	adminToken, err := tokenService.GenerateAuthToken(domain.RealUserId, "ADMIN")
+	adminToken, err := tokenService.GenerateAuthAccessToken(domain.RealUserId, "ADMIN")
 	require.NoError(t, err, "failed to generate valid token")
 
-	userToken, err := tokenService.GenerateAuthToken(domain.RealUserId, "USER")
+	userToken, err := tokenService.GenerateAuthAccessToken(domain.RealUserId, "USER")
 	require.NoError(t, err, "failed to generate valid token")
 
 	type args struct {

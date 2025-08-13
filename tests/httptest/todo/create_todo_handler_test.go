@@ -44,10 +44,10 @@ func TestCreateTodoHandler(t *testing.T) {
 	createTodoHandler := todo.NewCreateTodoHandler(repo, testUtils.NewMockCache(), testUtils.NewMockLogger())
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 
-	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	validToken, err := tokenService.GenerateAuthAccessToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
-	fakeUserIdToken, err := tokenService.GenerateAuthToken(domain.FakeUserId, domain.TestUser.Role)
+	fakeUserIdToken, err := tokenService.GenerateAuthAccessToken(domain.FakeUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate fake token")
 
 	validTokenHeader := "Bearer " + validToken

@@ -57,11 +57,11 @@ func NewMockTokenService() *MockTokenService {
 	return &MockTokenService{}
 }
 
-func (m *MockTokenService) GenerateAuthToken(userID, role string) (string, error) {
+func (m *MockTokenService) GenerateAuthAccessToken(userID, role string) (string, error) {
 	return domain.MockToken, nil
 }
 
-func (m *MockTokenService) ValidateAuthToken(token string) (*auth.TokenPayload, error) {
+func (m *MockTokenService) ValidateAuthAccessToken(token string) (*auth.TokenPayload, error) {
 	return &auth.TokenPayload{
 		UserID: domain.TestUser.Id.String(),
 		Role:   domain.TestUser.Role,

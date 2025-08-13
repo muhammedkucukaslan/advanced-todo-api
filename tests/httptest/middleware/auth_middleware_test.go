@@ -31,13 +31,13 @@ func TestAuthMiddleware(t *testing.T) {
 	healthCheckHandler := healthcheck.NewHealthcheckHandler()
 	app.Get("/healthcheck", middlewareManager.AuthMiddleware, fiberInfra.Handle(healthCheckHandler, logger))
 
-	validToken, err := realTokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	validToken, err := realTokenService.GenerateAuthAccessToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
-	fakeToken, err := fakeTokenService.GenerateAuthToken(domain.FakeUserId, domain.TestUser.Role)
+	fakeToken, err := fakeTokenService.GenerateAuthAccessToken(domain.FakeUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate fake token")
 
-	expiredToken, err := expiredTokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	expiredToken, err := expiredTokenService.GenerateAuthAccessToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate expired token")
 
 	validTokenHeader := "Bearer " + validToken

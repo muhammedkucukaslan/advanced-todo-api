@@ -6,7 +6,7 @@ type TokenPayload struct {
 }
 
 type TokenService interface {
-	GenerateAuthToken(userID string, role string) (string, error)
-	ValidateAuthToken(token string) (*TokenPayload, error)
+	GenerateAuthAccessToken(userID string, role string) (string, error)
+	ValidateAuthAccessToken(token string) (*TokenPayload, error)
 	GenerateEmailVerificationToken(email string) (string, error)
 }

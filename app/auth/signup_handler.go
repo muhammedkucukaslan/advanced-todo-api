@@ -57,7 +57,7 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	token, err := h.ts.GenerateAuthToken(user.Id.String(), user.Role)
+	token, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
 	if err != nil {
 		h.logger.Error("error while generating token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer

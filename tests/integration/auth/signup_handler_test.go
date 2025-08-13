@@ -181,7 +181,7 @@ func TestSignupHandler(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
 				assert.NotEmpty(t, got.Token)
-				payload, err := tokenService.ValidateAuthToken(got.Token)
+				payload, err := tokenService.ValidateAuthAccessToken(got.Token)
 				assert.NoError(t, err)
 				assert.NotNil(t, payload)
 				assert.Equal(t, domain.TestUser.Role, payload.Role)

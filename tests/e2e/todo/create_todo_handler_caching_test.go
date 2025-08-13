@@ -70,7 +70,7 @@ func TestCreateTodoHandlerCaching(t *testing.T) {
 	app.Post("/todos", fiberInfra.Handle(createTodoHandler, logger))
 	app.Get("/todos", fiberInfra.Handle(getTodosHandler, logger))
 
-	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	validToken, err := tokenService.GenerateAuthAccessToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
 	validTokenHeader := "Bearer " + validToken

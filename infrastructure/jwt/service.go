@@ -33,7 +33,7 @@ func NewJWTTokenService(config Config) *Service {
 	}
 }
 
-func (s *Service) GenerateAuthToken(userID, role string) (string, error) {
+func (s *Service) GenerateAuthAccessToken(userID, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 		"role":   role,
@@ -44,7 +44,7 @@ func (s *Service) GenerateAuthToken(userID, role string) (string, error) {
 	return token.SignedString(s.secretKey)
 }
 
-func (s *Service) ValidateAuthToken(tokenString string) (*auth.TokenPayload, error) {
+func (s *Service) ValidateAuthAccessToken(tokenString string) (*auth.TokenPayload, error) {
 	token, err := jwt.Parse(tokenString, s.keyFunc)
 
 	if err != nil {

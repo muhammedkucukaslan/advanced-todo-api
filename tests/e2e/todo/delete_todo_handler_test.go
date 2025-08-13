@@ -60,7 +60,7 @@ func TestDeleteTodoHandler(t *testing.T) {
 	app.Delete("/todos/:id", fiberInfra.Handle(deleteTodoHandler, logger))
 	app.Get("/todos/:id", fiberInfra.Handle(getTodoByIdHandler, logger))
 
-	validToken, err := tokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	validToken, err := tokenService.GenerateAuthAccessToken(domain.RealUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate valid token")
 
 	validTokenHeader := "Bearer " + validToken
