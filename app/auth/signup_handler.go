@@ -47,6 +47,7 @@ func NewSignupHandler(config *SignupConfig) *SignupHandler {
 		refreshTokenCookieDuration: config.RefreshTokenCookieDuration,
 		secure:                     config.Secure,
 		repo:                       config.Repo,
+		cs:                         config.CookieService,
 		ts:                         config.TokenService,
 		es:                         config.EmailService,
 		validator:                  config.Validator,
