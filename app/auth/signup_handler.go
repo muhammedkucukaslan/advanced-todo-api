@@ -78,7 +78,7 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		const retryInterval = 30 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
-			verificationToken, err := h.ts.GenerateVerificationToken(email)
+			verificationToken, err := h.ts.GenerateEmailVerificationToken(email)
 			if err != nil {
 				h.logger.Error(fmt.Sprintf("[Signup] Attempt %d: Failed to generate token for %s: %v", attempt, email, err))
 				time.Sleep(retryInterval)
