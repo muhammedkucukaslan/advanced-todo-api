@@ -92,10 +92,12 @@ func SetupRoutes(app *fiber.App) {
 	fmt.Println("Connected to database")
 
 	tokenServiceConfig := jwtInfra.Config{
-		SecretKey:                 os.Getenv("JWT_SECRET_KEY"),
-		AuthAccessTokenDuration:   time.Hour * 24,
-		EmailVerificationDuration: time.Minute * 10,
-		ForgotPasswordDuration:    time.Minute * 10,
+		AccessTokenSecretKey:      os.Getenv("JWT_ACCESS_TOKEN_SECRET_KEY"),
+		RefreshTokenSecretKey:     os.Getenv("JWT_REFRESH_TOKEN_SECRET_KEY"),
+		AuthAccessTokenDuration:   time.Minute * 15,
+		AuthRefreshTokenDuration:  time.Hour * 24 * 30,
+		EmailVerificationDuration: time.Minute * 11,
+		ForgotPasswordDuration:    time.Minute * 11,
 	}
 
 	jwtTokenService := jwtInfra.NewJWTTokenService(tokenServiceConfig)
@@ -109,8 +111,34 @@ func SetupRoutes(app *fiber.App) {
 	middlewareManager := NewMiddlewareManager(jwtTokenService, slogLogger)
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
-	signupHandler := auth.NewSignupHandler(postgresRepo, jwtTokenService, mailersendService, validator, slogLogger)
-	loginHandler := auth.NewLoginHandler(postgresRepo, jwtTokenService, validator, slogLogger)
+
+	var secureFlag bool
+	if domain.IsProdEnv() {
+		secureFlag = true
+	} else {
+		secureFlag = false
+	}
+
+	signupHandler := auth.NewSignupHandler(&auth.SignupConfig{
+		RefreshTokenCookieDuration: time.Hour * 24 * 30,
+		Secure:                     secureFlag,
+		Repo:                       postgresRepo,
+		TokenService:               jwtTokenService,
+		CookieService:              NewCookieService(),
+		EmailService:               mailersendService,
+		Validator:                  validator,
+		Logger:                     slogLogger,
+	})
+
+	loginHandler := auth.NewLoginHandler(&auth.LoginConfig{
+		RefreshTokenCookieDuration: time.Hour * 24 * 30,
+		Secure:                     secureFlag,
+		Repo:                       postgresRepo,
+		TokenService:               jwtTokenService,
+		CookieService:              NewCookieService(),
+		Validator:                  validator,
+		Logger:                     slogLogger,
+	})
 
 	getUserHandler := user.NewGetUserHandler(postgresRepo)
 	getUsersHandler := user.NewGetUsersHandler(postgresRepo, validator)
