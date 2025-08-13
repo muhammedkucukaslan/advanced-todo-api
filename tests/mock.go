@@ -61,14 +61,14 @@ func (m *MockTokenService) GenerateAuthToken(userID, role string) (string, error
 	return domain.MockToken, nil
 }
 
-func (m *MockTokenService) ValidateAuthToken(token string) (auth.TokenPayload, error) {
-	return auth.TokenPayload{
+func (m *MockTokenService) ValidateAuthToken(token string) (*auth.TokenPayload, error) {
+	return &auth.TokenPayload{
 		UserID: domain.TestUser.Id.String(),
 		Role:   domain.TestUser.Role,
 	}, nil
 }
 
-func (m *MockTokenService) GenerateVerificationToken(email string) (string, error) {
+func (m *MockTokenService) GenerateEmailVerificationToken(email string) (string, error) {
 	return "mockedVerificationToken", nil
 }
 
