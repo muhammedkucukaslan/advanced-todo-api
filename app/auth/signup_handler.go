@@ -17,19 +17,41 @@ type SignupRequest struct {
 }
 
 type SignupResponse struct {
-	Token string `json:"token"`
+	AccessToken string `json:"access_token"`
+}
+
+type SignupConfig struct {
+	RefreshTokenCookieDuration time.Duration
+	Secure                     bool
+	Repo                       Repository
+	TokenService               TokenService
+	CookieService              CookieService
+	EmailService               EmailService
+	Validator                  domain.Validator
+	Logger                     domain.Logger
 }
 
 type SignupHandler struct {
-	repo      Repository
-	ts        TokenService
-	es        EmailService
-	validator domain.Validator
-	logger    domain.Logger
+	refreshTokenCookieDuration time.Duration
+	secure                     bool
+	repo                       Repository
+	cs                         CookieService
+	ts                         TokenService
+	es                         EmailService
+	validator                  domain.Validator
+	logger                     domain.Logger
 }
 
-func NewSignupHandler(repo Repository, ts TokenService, es EmailService, validator domain.Validator, logger domain.Logger) *SignupHandler {
-	return &SignupHandler{repo: repo, ts: ts, es: es, validator: validator, logger: logger}
+func NewSignupHandler(config *SignupConfig) *SignupHandler {
+	return &SignupHandler{
+		refreshTokenCookieDuration: config.RefreshTokenCookieDuration,
+		secure:                     config.Secure,
+		repo:                       config.Repo,
+		ts:                         config.TokenService,
+		es:                         config.EmailService,
+		validator:                  config.Validator,
+		logger:                     config.Logger,
+	}
 }
 
 // @Summary		Signup
@@ -57,9 +79,13 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	token, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
+	accessToken, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
 	if err != nil {
-		h.logger.Error("error while generating token: ", err)
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	}
+
+	refreshToken, err := h.ts.GenerateAuthRefreshToken(user.Id.String(), user.Role)
+	if err != nil {
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
@@ -69,6 +95,15 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 			return nil, http.StatusConflict, domain.ErrEmailAlreadyExists
 		}
 		h.logger.Error("error while creating user in repository: ", err)
+		return nil, http.StatusInternalServerError, domain.ErrInternalServer
+	}
+
+	if err := h.repo.SaveRefreshToken(ctx, domain.NewRefreshToken(
+		user.Id,
+		refreshToken,
+		h.refreshTokenCookieDuration,
+	)); err != nil {
+		h.logger.Error("error while saving refresh token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
@@ -127,5 +162,11 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
 	}(user.FullName, user.Email)
 
-	return &SignupResponse{Token: token}, http.StatusCreated, nil
+	h.cs.SetRefreshToken(ctx, &RefreshTokenCookieClaims{
+		Token:    refreshToken,
+		Duration: h.refreshTokenCookieDuration,
+		Secure:   h.secure,
+	})
+
+	return &SignupResponse{AccessToken: accessToken}, http.StatusCreated, nil
 }
