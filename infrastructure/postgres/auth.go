@@ -39,3 +39,13 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 	}
 	return &user, nil
 }
+
+func (r *Repository) SaveRefreshToken(ctx context.Context, record *domain.RefreshToken) error {
+	_, err := r.db.ExecContext(ctx,
+		"INSERT INTO refresh_tokens (id, user_id, token, expires_at, created_at) VALUES ($1, $2, $3, $4, $5)",
+		record.Id, record.UserID, record.Token, record.ExpiresAt, record.CreatedAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}

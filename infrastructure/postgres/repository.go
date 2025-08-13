@@ -67,6 +67,14 @@ func runTableMigrations(db *sql.DB) {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			completed_at TIMESTAMP DEFAULT NULL
 		);
+
+		CREATE TABLE IF NOT EXISTS refresh_tokens (
+			id              UUID PRIMARY KEY,
+			user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			token           TEXT NOT NULL UNIQUE,
+			expires_at      TIMESTAMP NOT NULL,
+			created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+		);
 	`
 	_, err := db.Exec(createTableQuery)
 
