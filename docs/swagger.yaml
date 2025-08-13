@@ -12,7 +12,7 @@ definitions:
     type: object
   auth.LoginResponse:
     properties:
-      token:
+      access_token:
         type: string
     type: object
   auth.SignupRequest:
@@ -30,7 +30,7 @@ definitions:
     type: object
   auth.SignupResponse:
     properties:
-      token:
+      access_token:
         type: string
     type: object
   todo.CreateTodoRequest:
@@ -311,13 +311,15 @@ paths:
             $ref: '#/definitions/auth.LoginResponse'
         "400":
           description: Bad Request
+        "401":
+          description: Unauthorized
         "404":
           description: Not Found
         "500":
           description: Internal Server Error
       summary: Login
       tags:
-      - Autg
+      - Auth
   /signup:
     post:
       consumes:
@@ -345,7 +347,7 @@ paths:
           description: Internal Server Error
       summary: Signup
       tags:
-      - Autg
+      - Auth
   /todos:
     get:
       consumes:

@@ -136,7 +136,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Autg"
+                    "Auth"
                 ],
                 "summary": "Login",
                 "parameters": [
@@ -160,6 +160,9 @@
                     "400": {
                         "description": "Bad Request"
                     },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
                     "404": {
                         "description": "Not Found"
                     },
@@ -179,7 +182,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Autg"
+                    "Auth"
                 ],
                 "summary": "Signup",
                 "parameters": [
@@ -810,7 +813,7 @@
         "auth.LoginResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
                 }
             }
@@ -837,7 +840,7 @@
         "auth.SignupResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
                 }
             }

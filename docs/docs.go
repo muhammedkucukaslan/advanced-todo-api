@@ -144,7 +144,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Autg"
+                    "Auth"
                 ],
                 "summary": "Login",
                 "parameters": [
@@ -168,6 +168,9 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request"
                     },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
                     "404": {
                         "description": "Not Found"
                     },
@@ -187,7 +190,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Autg"
+                    "Auth"
                 ],
                 "summary": "Signup",
                 "parameters": [
@@ -818,7 +821,7 @@ const docTemplate = `{
         "auth.LoginResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
                 }
             }
@@ -845,7 +848,7 @@ const docTemplate = `{
         "auth.SignupResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
                     "type": "string"
                 }
             }
