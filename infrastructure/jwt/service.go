@@ -11,23 +11,28 @@ import (
 )
 
 type Config struct {
-	SecretKey                 string
+	AccessTokenSecretKey      string
+	RefreshTokenSecretKey     string
 	AuthAccessTokenDuration   time.Duration
+	AuthRefreshTokenDuration  time.Duration
 	EmailVerificationDuration time.Duration
 	ForgotPasswordDuration    time.Duration
 }
 
 type Service struct {
-	secretKey                 []byte
-	AuthAccessTokenDuration   time.Duration
+	accessTokenSecretKeyByte  []byte
+	refreshTokenSecretKeyByte []byte
+	authAccessTokenDuration   time.Duration
+	authRefreshTokenDuration  time.Duration
 	emailVerificationDuration time.Duration
 	forgotPasswordDuration    time.Duration
 }
 
 func NewJWTTokenService(config Config) *Service {
 	return &Service{
-		secretKey:                 []byte(config.SecretKey),
-		AuthAccessTokenDuration:   config.AuthAccessTokenDuration,
+		accessTokenSecretKeyByte:  []byte(config.AccessTokenSecretKey),
+		authAccessTokenDuration:   config.AuthAccessTokenDuration,
+		authRefreshTokenDuration:  config.AuthRefreshTokenDuration,
 		emailVerificationDuration: config.EmailVerificationDuration,
 		forgotPasswordDuration:    config.ForgotPasswordDuration,
 	}
@@ -38,10 +43,21 @@ func (s *Service) GenerateAuthAccessToken(userID, role string) (string, error) {
 		"userID": userID,
 		"role":   role,
 		"iat":    time.Now().Unix(),
-		"exp":    time.Now().Add(s.AuthAccessTokenDuration).Unix(),
+		"exp":    time.Now().Add(s.authAccessTokenDuration).Unix(),
 	})
 
-	return token.SignedString(s.secretKey)
+	return token.SignedString(s.accessTokenSecretKeyByte)
+}
+
+func (s *Service) GenerateAuthRefreshToken(userID, role string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": userID,
+		"role":   role,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(s.authRefreshTokenDuration).Unix(),
+	})
+
+	return token.SignedString(s.refreshTokenSecretKeyByte)
 }
 
 func (s *Service) ValidateAuthAccessToken(tokenString string) (*auth.TokenPayload, error) {
@@ -74,7 +90,7 @@ func (s *Service) GenerateTokenForForgotPassword(email string) (string, error) {
 		"exp":   time.Now().Add(s.forgotPasswordDuration).Unix(),
 	})
 
-	return token.SignedString(s.secretKey)
+	return token.SignedString(s.accessTokenSecretKeyByte)
 }
 
 func (s *Service) ValidateForgotPasswordToken(tokenString string) (string, error) {
@@ -97,7 +113,7 @@ func (s *Service) GenerateEmailVerificationToken(email string) (string, error) {
 		"exp":   time.Now().Add(s.emailVerificationDuration).Unix(),
 	})
 
-	return token.SignedString(s.secretKey)
+	return token.SignedString(s.accessTokenSecretKeyByte)
 }
 
 func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
@@ -121,7 +137,7 @@ func (s *Service) keyFunc(token *jwt.Token) (any, error) {
 		return nil, errors.New("unexpected signing method")
 	}
 
-	return s.secretKey, nil
+	return s.accessTokenSecretKeyByte, nil
 }
 
 func (s *Service) validateAuthClaims(token *jwt.Token) (*auth.TokenPayload, error) {
