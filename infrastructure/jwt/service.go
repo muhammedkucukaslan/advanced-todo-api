@@ -1,12 +1,12 @@
 package jwt
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Config struct {
@@ -17,7 +17,7 @@ type Config struct {
 }
 
 type Service struct {
-	secretKey                 string
+	secretKey                 []byte
 	authTokenDuration         time.Duration
 	emailVerificationDuration time.Duration
 	forgotPasswordDuration    time.Duration
@@ -25,7 +25,7 @@ type Service struct {
 
 func NewJWTTokenService(config Config) *Service {
 	return &Service{
-		secretKey:                 config.SecretKey,
+		secretKey:                 []byte(config.SecretKey),
 		authTokenDuration:         config.AuthTokenDuration,
 		emailVerificationDuration: config.EmailVerificationDuration,
 		forgotPasswordDuration:    config.ForgotPasswordDuration,
@@ -33,7 +33,6 @@ func NewJWTTokenService(config Config) *Service {
 }
 
 func (s *Service) GenerateAuthToken(userID, role string) (string, error) {
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 		"role":   role,
@@ -41,134 +40,123 @@ func (s *Service) GenerateAuthToken(userID, role string) (string, error) {
 		"exp":    time.Now().Add(s.authTokenDuration).Unix(),
 	})
 
-	return token.SignedString([]byte(s.secretKey))
+	return token.SignedString(s.secretKey)
 }
 
-func (s *Service) ValidateAuthToken(tokenString string) (auth.TokenPayload, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(s.secretKey), nil
-	})
+func (s *Service) ValidateAuthToken(tokenString string) (*auth.TokenPayload, error) {
+	token, err := jwt.Parse(tokenString, s.keyFunc)
+
 	if err != nil {
-		return auth.TokenPayload{}, err
+		return nil, err
 	}
 
 	if !token.Valid {
-		return auth.TokenPayload{}, fmt.Errorf("invalid token")
+		return nil, errors.New("invalid token")
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return auth.TokenPayload{}, fmt.Errorf("invalid token claims")
-	}
-
-	userIDClaim, exists := claims["userID"]
-	if !exists || userIDClaim == nil {
-		return auth.TokenPayload{}, fmt.Errorf("userID claim is missing or nil")
-	}
-
-	roleClaim, exists := claims["role"]
-	if !exists || roleClaim == nil {
-		return auth.TokenPayload{}, fmt.Errorf("role claim is missing or nil")
-	}
-
-	userID, ok := userIDClaim.(string)
-	if !ok {
-		return auth.TokenPayload{}, fmt.Errorf("invalid userID type")
-	}
-
-	role, ok := roleClaim.(string)
-	if !ok {
-		return auth.TokenPayload{}, fmt.Errorf("invalid role type")
-	}
-
-	return auth.TokenPayload{
-		UserID: userID,
-		Role:   role,
-	}, nil
+	return s.validateAuthClaims(token)
 }
 
 func (s *Service) GenerateTokenForForgotPassword(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
+		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(s.forgotPasswordDuration).Unix(),
 	})
 
-	return token.SignedString([]byte(s.secretKey))
+	return token.SignedString(s.secretKey)
 }
 
 func (s *Service) ValidateForgotPasswordToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(s.secretKey), nil
-	})
+	token, err := jwt.Parse(tokenString, s.keyFunc)
+
 	if err != nil {
 		return "", err
 	}
 
 	if !token.Valid {
-		return "", fmt.Errorf("invalid token")
+		return "", errors.New("invalid token")
 	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", fmt.Errorf("invalid token claims")
-	}
-
-	emailClaim, exists := claims["email"]
-	if !exists || emailClaim == nil {
-		return "", fmt.Errorf("email claim is missing or nil")
-	}
-
-	email, ok := emailClaim.(string)
-	if !ok {
-		return "", fmt.Errorf("invalid email type")
-	}
-
-	return email, nil
+	return s.validateEmailClaims(token)
 }
 
-func (s *Service) GenerateVerificationToken(email string) (string, error) {
+func (s *Service) GenerateEmailVerificationToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
+		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(s.emailVerificationDuration).Unix(),
 	})
 
-	return token.SignedString([]byte(s.secretKey))
+	return token.SignedString(s.secretKey)
 }
 
 func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(s.secretKey), nil
-	})
+	token, err := jwt.Parse(tokenString, s.keyFunc)
 	if err != nil {
 		return "", err
 	}
 
 	if !token.Valid {
-		return "", fmt.Errorf("invalid token")
+		return "", errors.New("invalid token")
 	}
 
+	return s.validateEmailClaims(token)
+}
+
+func (s *Service) keyFunc(token *jwt.Token) (any, error) {
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, errors.New("unexpected signing method")
+	}
+
+	return s.secretKey, nil
+}
+
+func (s *Service) validateAuthClaims(token *jwt.Token) (*auth.TokenPayload, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", fmt.Errorf("invalid token claims")
+		return nil, errors.New("invalid token claims")
+	}
+
+	userIDClaim, exists := claims["userID"]
+	if !exists || userIDClaim == nil {
+		return nil, errors.New("userID claim is missing or nil")
+	}
+
+	roleClaim, exists := claims["role"]
+	if !exists || roleClaim == nil {
+		return nil, errors.New("role claim is missing or nil")
+	}
+
+	userID, ok := userIDClaim.(string)
+	if !ok {
+		return nil, errors.New("invalid userID type")
+	}
+
+	role, ok := roleClaim.(string)
+	if !ok {
+		return nil, errors.New("invalid role type")
+	}
+
+	return &auth.TokenPayload{
+		UserID: userID,
+		Role:   role,
+	}, nil
+}
+
+func (s *Service) validateEmailClaims(token *jwt.Token) (string, error) {
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("invalid token claims")
 	}
 
 	emailClaim, exists := claims["email"]
 	if !exists || emailClaim == nil {
-		return "", fmt.Errorf("email claim is missing or nil")
+		return "", errors.New("email claim is missing or nil")
 	}
 
 	email, ok := emailClaim.(string)
 	if !ok {
-		return "", fmt.Errorf("invalid email type")
+		return "", errors.New("invalid email type")
 	}
 
 	return email, nil
