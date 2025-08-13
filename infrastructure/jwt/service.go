@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -47,6 +48,15 @@ func (s *Service) ValidateAuthToken(tokenString string) (*auth.TokenPayload, err
 	token, err := jwt.Parse(tokenString, s.keyFunc)
 
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, domain.ErrExpiredToken
+		}
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
+			return nil, domain.ErrInvalidTokenSignature
+		}
+		if errors.Is(err, jwt.ErrTokenMalformed) {
+			return nil, domain.ErrInvalidToken
+		}
 		return nil, err
 	}
 
@@ -93,6 +103,9 @@ func (s *Service) GenerateEmailVerificationToken(email string) (string, error) {
 func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, s.keyFunc)
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return "", domain.ErrExpiredToken
+		}
 		return "", err
 	}
 

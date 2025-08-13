@@ -23,6 +23,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 	realTokenService := jwtInfra.NewJWTTokenService(realTokenServiceConfig)
 	fakeTokenService := jwtInfra.NewJWTTokenService(fakeTokenServiceConfig)
+	expiredTokenService := jwtInfra.NewJWTTokenService(expiredTokenServiceConfig)
 
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(realTokenService, logger)
@@ -36,11 +37,15 @@ func TestAuthMiddleware(t *testing.T) {
 	fakeToken, err := fakeTokenService.GenerateAuthToken(domain.FakeUserId, domain.TestUser.Role)
 	require.NoError(t, err, "failed to generate fake token")
 
+	expiredToken, err := expiredTokenService.GenerateAuthToken(domain.RealUserId, domain.TestUser.Role)
+	require.NoError(t, err, "failed to generate expired token")
+
 	validTokenHeader := "Bearer " + validToken
 	fakeTokenHeader := "Bearer " + fakeToken
 	invalidTokenHeader := "Bearer " + "invalid_token"
 	invalidHeader := " Bearerrrrrr " + validToken
 	missingTokenHeader := "Bearer "
+	expiredTokenHeader := "Bearer " + expiredToken
 
 	type args struct {
 		authHeader string
@@ -72,7 +77,7 @@ func TestAuthMiddleware(t *testing.T) {
 			"fake token", args{
 				authHeader: fakeTokenHeader,
 				req:        &healthcheck.HealthcheckRequest{},
-			}, nil, http.StatusUnauthorized, domain.ErrInvalidToken,
+			}, nil, http.StatusUnauthorized, domain.ErrInvalidTokenSignature,
 		},
 		{
 			"invalid header", args{
@@ -85,6 +90,12 @@ func TestAuthMiddleware(t *testing.T) {
 			"missing header", args{
 				req: &healthcheck.HealthcheckRequest{},
 			}, nil, http.StatusUnauthorized, domain.ErrMissingAuthHeader,
+		},
+		{
+			"expired token", args{
+				authHeader: expiredTokenHeader,
+				req:        &healthcheck.HealthcheckRequest{},
+			}, nil, http.StatusUnauthorized, domain.ErrExpiredToken,
 		},
 		{
 			"missing token", args{
@@ -128,5 +139,9 @@ var (
 	fakeTokenServiceConfig = jwtInfra.Config{
 		SecretKey:         "fake-key",
 		AuthTokenDuration: time.Hour * 24,
+	}
+	expiredTokenServiceConfig = jwtInfra.Config{
+		SecretKey:         domain.MockJWTTestKey,
+		AuthTokenDuration: -time.Hour * 24,
 	}
 )

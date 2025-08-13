@@ -44,7 +44,7 @@ func (m *MiddlewareManager) AuthMiddleware(c *fiber.Ctx) error {
 	payload, err := m.tokenService.ValidateAuthToken(token)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.Error{
-			Message: domain.ErrInvalidToken.Error(),
+			Message: err.Error(),
 			Code:    fiber.StatusUnauthorized,
 		})
 	}
