@@ -83,6 +83,10 @@ func (m *MockTokenService) ValidateForgotPasswordToken(tokenString string) (stri
 	return "", nil
 }
 
+func (m *MockTokenService) GenerateAuthRefreshToken(userID, role string) (string, error) {
+	return "mockedRefreshToken", nil
+}
+
 // MockCache
 type MockCache struct {
 }
@@ -101,4 +105,16 @@ func (m *MockCache) Set(ctx context.Context, key string, value []byte, ttl time.
 
 func (m *MockCache) Delete(ctx context.Context, key string) error {
 	return nil
+}
+
+// MockCookie Service
+
+type MockCookieService struct {
+}
+
+func NewMockCookieService() *MockCookieService {
+	return &MockCookieService{}
+}
+
+func (m *MockCookieService) SetRefreshToken(ctx context.Context, claims *auth.RefreshTokenCookieClaims) {
 }

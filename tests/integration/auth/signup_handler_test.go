@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,9 +35,17 @@ func TestSignupHandler(t *testing.T) {
 	tokenService := testUtils.NewTestJWTTokenService()
 	logger := slogInfra.NewLogger()
 	validator := validator.NewValidator(logger)
-	mailService := mock.NewMockEmailService()
 
-	handler := auth.NewSignupHandler(repo, tokenService, mailService, validator, logger)
+	handler := auth.NewSignupHandler(&auth.SignupConfig{
+		RefreshTokenCookieDuration: time.Hour * 24 * 30,
+		Secure:                     false,
+		Repo:                       repo,
+		TokenService:               tokenService,
+		CookieService:              testUtils.NewMockCookieService(),
+		EmailService:               mock.NewMockEmailService(),
+		Validator:                  validator,
+		Logger:                     logger,
+	})
 
 	type args struct {
 		ctx context.Context
@@ -67,7 +76,7 @@ func TestSignupHandler(t *testing.T) {
 				},
 			},
 			want: &auth.SignupResponse{
-				Token: "valid-token",
+				AccessToken: "valid-token",
 			},
 			code:    http.StatusCreated,
 			wantErr: nil,
@@ -180,8 +189,8 @@ func TestSignupHandler(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
-				assert.NotEmpty(t, got.Token)
-				payload, err := tokenService.ValidateAuthAccessToken(got.Token)
+				assert.NotEmpty(t, got.AccessToken)
+				payload, err := tokenService.ValidateAuthAccessToken(got.AccessToken)
 				assert.NoError(t, err)
 				assert.NotNil(t, payload)
 				assert.Equal(t, domain.TestUser.Role, payload.Role)

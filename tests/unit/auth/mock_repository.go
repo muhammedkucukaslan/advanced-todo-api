@@ -34,3 +34,7 @@ func (m *MockRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 	}
 	return nil, errors.New("user not found")
 }
+
+func (m *MockRepository) SaveRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
+	return nil
+}

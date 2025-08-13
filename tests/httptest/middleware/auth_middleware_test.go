@@ -133,15 +133,15 @@ func TestAuthMiddleware(t *testing.T) {
 
 var (
 	realTokenServiceConfig = jwtInfra.Config{
-		SecretKey:         domain.MockJWTTestKey,
-		AuthTokenDuration: time.Hour * 24,
+		AccessTokenSecretKey:    domain.MockJWTTestKey,
+		AuthAccessTokenDuration: time.Hour * 24,
 	}
 	fakeTokenServiceConfig = jwtInfra.Config{
-		SecretKey:         "fake-key",
-		AuthTokenDuration: time.Hour * 24,
+		AccessTokenSecretKey:    "fake-key",
+		AuthAccessTokenDuration: time.Hour * 24,
 	}
 	expiredTokenServiceConfig = jwtInfra.Config{
-		SecretKey:         domain.MockJWTTestKey,
-		AuthTokenDuration: -time.Hour * 24,
+		AccessTokenSecretKey:    domain.MockJWTTestKey,
+		AuthAccessTokenDuration: -time.Hour * 24,
 	}
 )
