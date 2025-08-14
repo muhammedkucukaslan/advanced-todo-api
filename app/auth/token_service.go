@@ -10,4 +10,5 @@ type TokenService interface {
 	ValidateAuthAccessToken(token string) (*TokenPayload, error)
 	GenerateEmailVerificationToken(email string) (string, error)
 	GenerateAuthRefreshToken(userID string, role string) (string, error)
+	ValidateAuthRefreshToken(token string) (*TokenPayload, error)
 }

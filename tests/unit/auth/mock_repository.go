@@ -46,3 +46,7 @@ func (m *MockRepository) DeleteRefreshToken(ctx context.Context, token string) e
 func (m *MockRepository) UpsertRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
 	return nil
 }
+
+func (m *MockRepository) RefreshTokenExists(ctx context.Context, token string) (bool, error) {
+	return true, nil
+}

@@ -40,7 +40,7 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 
 	userId := domain.GetUserID(ctx)
 
-	// deletes user current bucket and  user, also returns email
+	// deletes user and todos, also returns email
 	fullName, email, err := h.repo.DeleteAccount(ctx, userId)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("failed to delete user account: %v", err))

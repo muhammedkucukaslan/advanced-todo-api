@@ -23,6 +23,7 @@ type Todo struct {
 	CompletedAt time.Time `json:"completed_at"`
 }
 
+// TODO add domain.Logger
 type GetTodosHandler struct {
 	repo  TodoRepository
 	cache domain.Cache

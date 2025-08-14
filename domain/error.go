@@ -36,6 +36,7 @@ var (
 	ErrForbidden             = errors.New("forbidden access")
 	ErrExpiredToken          = errors.New("expired token")
 	ErrInvalidTokenSignature = errors.New("invalid token signature")
+	ErrNotExistRefreshToken  = errors.New("refresh token does not exist")
 
 	ErrEmptyFullName      = errors.New("full name cannot be empty")
 	ErrPasswordTooShort   = errors.New("password must be at least 8 characters long")

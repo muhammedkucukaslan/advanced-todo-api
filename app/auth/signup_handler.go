@@ -108,6 +108,8 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
+	// TODO make here clean
+
 	go func(fullname, email string) {
 		var err error
 		const maxRetries = 3
