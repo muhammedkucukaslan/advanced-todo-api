@@ -141,6 +141,8 @@ func SetupRoutes(app *fiber.App) {
 		Logger:                     slogLogger,
 	})
 
+	logoutHandler := auth.NewLogoutHandler(postgresRepo, NewCookieService())
+
 	getUserHandler := user.NewGetUserHandler(postgresRepo)
 	getUsersHandler := user.NewGetUsersHandler(postgresRepo, validator)
 	deleteAccountHandler := user.NewDeleteAccountHandler(postgresRepo, sl, mailersendService)
@@ -164,8 +166,10 @@ func SetupRoutes(app *fiber.App) {
 
 	adminApp := app.Group("/admin", middlewareManager.AuthMiddleware, middlewareManager.AdminMiddleware)
 
-	app.Post("/signup", Handle(signupHandler, sl))
-	app.Post("/login", Handle(loginHandler, sl))
+	authApp := app.Group("/auth")
+	authApp.Post("/signup", Handle(signupHandler, sl))
+	authApp.Post("/login", Handle(loginHandler, sl))
+	authApp.Post("/logout", Handle(logoutHandler, sl))
 
 	usersPublicApp := app.Group("/users")
 	usersPublicApp.Post("/forgot-password", Handle(forgotPasswordHandler, sl))
