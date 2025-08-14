@@ -14,7 +14,6 @@ type MiddlewareManager struct {
 	logger       domain.Logger
 }
 
-// TODO  Here is dependent on auth.TokenService fix it
 func NewMiddlewareManager(tokenService auth.TokenService, logger domain.Logger) *MiddlewareManager {
 	return &MiddlewareManager{
 		tokenService: tokenService,

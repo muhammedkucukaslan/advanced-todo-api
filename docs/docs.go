@@ -111,30 +111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/healthcheck": {
-            "get": {
-                "description": "Check the health of the service",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Healthcheck"
-                ],
-                "summary": "Healthcheck",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/login": {
+        "/auth/login": {
             "post": {
                 "description": "Login a user or admin",
                 "consumes": [
@@ -180,7 +157,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/signup": {
+        "/auth/logout": {
+            "post": {
+                "description": "Removes the refresh token from the database and clears the refresh token cookie.\nThe API takes refresh token from cookies.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
             "post": {
                 "description": "Signup a new user",
                 "consumes": [
@@ -216,6 +216,29 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/healthcheck": {
+            "get": {
+                "description": "Check the health of the service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Healthcheck"
+                ],
+                "summary": "Healthcheck",
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error"
