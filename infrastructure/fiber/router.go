@@ -142,7 +142,7 @@ func SetupRoutes(app *fiber.App) {
 	})
 
 	logoutHandler := auth.NewLogoutHandler(postgresRepo, NewCookieService())
-
+	refreshTokenHandler := auth.NewRefreshTokenHandler(postgresRepo, jwtTokenService)
 	getUserHandler := user.NewGetUserHandler(postgresRepo)
 	getUsersHandler := user.NewGetUsersHandler(postgresRepo, validator)
 	deleteAccountHandler := user.NewDeleteAccountHandler(postgresRepo, sl, mailersendService)
@@ -170,6 +170,7 @@ func SetupRoutes(app *fiber.App) {
 	authApp.Post("/signup", Handle(signupHandler, sl))
 	authApp.Post("/login", Handle(loginHandler, sl))
 	authApp.Post("/logout", Handle(logoutHandler, sl))
+	authApp.Post("/refresh", Handle(refreshTokenHandler, sl))
 
 	usersPublicApp := app.Group("/users")
 	usersPublicApp.Post("/forgot-password", Handle(forgotPasswordHandler, sl))
