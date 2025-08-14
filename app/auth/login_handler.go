@@ -61,7 +61,7 @@ func NewLoginHandler(config *LoginConfig) *LoginHandler {
 // @Failure		401
 // @Failure		404
 // @Failure		500
-// @Router			/login [post]
+// @Router			/auth/login [post]
 func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginResponse, int, error) {
 	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
@@ -95,7 +95,7 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	if err := h.repo.SaveRefreshToken(ctx, domain.NewRefreshToken(
+	if err := h.repo.UpsertRefreshToken(ctx, domain.NewRefreshToken(
 		user.Id,
 		refreshToken,
 		h.refreshTokenCookieDuration,

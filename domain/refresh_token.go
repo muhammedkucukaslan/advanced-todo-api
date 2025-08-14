@@ -6,6 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	RefreshTokenCookieName = "refresh_token"
+)
+
 type RefreshToken struct {
 	Id        uuid.UUID `json:"id"`
 	UserID    uuid.UUID `json:"user_id"`

@@ -7,6 +7,7 @@ import (
 
 type CookieService interface {
 	SetRefreshToken(ctx context.Context, claims *RefreshTokenCookieClaims)
+	RemoveRefreshToken(ctx context.Context)
 }
 
 type RefreshTokenCookieClaims struct {

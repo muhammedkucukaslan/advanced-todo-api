@@ -65,7 +65,7 @@ func NewSignupHandler(config *SignupConfig) *SignupHandler {
 // @Failure		400
 // @Failure		409
 // @Failure		500
-// @Router			/signup [post]
+// @Router			/auth/signup [post]
 func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*SignupResponse, int, error) {
 	if err := h.validator.Validate(req); err != nil {
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest

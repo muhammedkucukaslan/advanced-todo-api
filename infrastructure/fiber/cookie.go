@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
 type FiberCookieService struct{}
@@ -18,7 +19,7 @@ func (s *FiberCookieService) SetRefreshToken(ctx context.Context, claims *auth.R
 	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
 
 	fiberCtx.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
+		Name:     domain.RefreshTokenCookieName,
 		Value:    claims.Token,
 		Expires:  time.Now().Add(claims.Duration),
 		MaxAge:   int(claims.Duration.Seconds()),
@@ -27,4 +28,10 @@ func (s *FiberCookieService) SetRefreshToken(ctx context.Context, claims *auth.R
 		SameSite: fiber.CookieSameSiteStrictMode,
 		Path:     "/",
 	})
+}
+
+func (s *FiberCookieService) RemoveRefreshToken(ctx context.Context) {
+	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
+
+	fiberCtx.ClearCookie(domain.RefreshTokenCookieName)
 }

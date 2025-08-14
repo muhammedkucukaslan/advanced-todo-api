@@ -275,22 +275,7 @@ paths:
       summary: Get user details by ID for admin
       tags:
       - User
-  /healthcheck:
-    get:
-      consumes:
-      - application/json
-      description: Check the health of the service
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-      summary: Healthcheck
-      tags:
-      - Healthcheck
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -320,7 +305,24 @@ paths:
       summary: Login
       tags:
       - Auth
-  /signup:
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Removes the refresh token from the database and clears the refresh token cookie.
+        The API takes refresh token from cookies.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+      summary: Logout user
+      tags:
+      - Auth
+  /auth/signup:
     post:
       consumes:
       - application/json
@@ -348,6 +350,21 @@ paths:
       summary: Signup
       tags:
       - Auth
+  /healthcheck:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Healthcheck
+      tags:
+      - Healthcheck
   /todos:
     get:
       consumes:
