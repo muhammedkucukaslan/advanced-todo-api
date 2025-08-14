@@ -61,6 +61,7 @@ As a Backend Developer, I am trying to build robust and scalable API projects by
 - 🛡️ Secure RESTful API
 - ⚙️ Onion Architecture
 - ✅ JWT-based Authentication
+- 🔄 Refresh Token Support for Secure Session Management
 - 🔒 Role-based Access Control
 - 🗂️ Account Managing
 - 👤 User Management
@@ -113,7 +114,8 @@ Follow these steps to get the project up and running on your local machine.
     DATABASE_URL="host=db user=postgres password=password123 dbname=advanced_todo_api_db port=5432 sslmode=disable"
     REDIS_URL="redis://:your_redis_password@cache:6379/0"
     ENV="development"
-    JWT_SECRET="your_jwt_secret"
+    JWT_ACCESS_TOKEN_SECRET_KEY="access-secret-key"
+    JWT_REFRESH_TOKEN_SECRET_KEY="refresh-secret-key"
     MAILERSEND_API_KEY="your-api-key"
     MAILERSEND_SENDER_EMAIL="sender@sender_domain.com"
     MAILERSEND_SENDER_NAME="sender_name"
