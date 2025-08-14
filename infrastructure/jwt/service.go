@@ -63,7 +63,30 @@ func (s *Service) GenerateAuthRefreshToken(userID, role string) (string, error) 
 }
 
 func (s *Service) ValidateAuthAccessToken(tokenString string) (*auth.TokenPayload, error) {
-	token, err := jwt.Parse(tokenString, s.keyFunc)
+	token, err := jwt.Parse(tokenString, s.accessKeyFunc)
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, domain.ErrExpiredToken
+		}
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
+			return nil, domain.ErrInvalidTokenSignature
+		}
+		if errors.Is(err, jwt.ErrTokenMalformed) {
+			return nil, domain.ErrInvalidToken
+		}
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	return s.validateAuthClaims(token)
+}
+
+func (s *Service) ValidateAuthRefreshToken(tokenString string) (*auth.TokenPayload, error) {
+	token, err := jwt.Parse(tokenString, s.refreshKeyFunc)
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
@@ -97,7 +120,7 @@ func (s *Service) GenerateTokenForForgotPassword(email string) (string, error) {
 }
 
 func (s *Service) ValidateForgotPasswordToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, s.keyFunc)
+	token, err := jwt.Parse(tokenString, s.accessKeyFunc)
 
 	if err != nil {
 		return "", err
@@ -121,7 +144,7 @@ func (s *Service) GenerateEmailVerificationToken(email string) (string, error) {
 }
 
 func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, s.keyFunc)
+	token, err := jwt.Parse(tokenString, s.accessKeyFunc)
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
 			return "", domain.ErrExpiredToken
@@ -136,12 +159,20 @@ func (s *Service) ValidateVerifyEmailToken(tokenString string) (string, error) {
 	return s.validateEmailClaims(token)
 }
 
-func (s *Service) keyFunc(token *jwt.Token) (any, error) {
+func (s *Service) accessKeyFunc(token *jwt.Token) (any, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, errors.New("unexpected signing method")
 	}
 
 	return s.accessTokenSecretKeyByte, nil
+}
+
+func (s *Service) refreshKeyFunc(token *jwt.Token) (any, error) {
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, errors.New("unexpected signing method")
+	}
+
+	return s.refreshTokenSecretKeyByte, nil
 }
 
 func (s *Service) validateAuthClaims(token *jwt.Token) (*auth.TokenPayload, error) {
