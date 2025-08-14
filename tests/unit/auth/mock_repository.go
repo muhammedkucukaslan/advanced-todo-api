@@ -38,3 +38,11 @@ func (m *MockRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 func (m *MockRepository) SaveRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
 	return nil
 }
+
+func (m *MockRepository) DeleteRefreshToken(ctx context.Context, token string) error {
+	return nil
+}
+
+func (m *MockRepository) UpsertRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
+	return nil
+}

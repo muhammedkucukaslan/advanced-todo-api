@@ -118,3 +118,7 @@ func NewMockCookieService() *MockCookieService {
 
 func (m *MockCookieService) SetRefreshToken(ctx context.Context, claims *auth.RefreshTokenCookieClaims) {
 }
+
+func (m *MockCookieService) RemoveRefreshToken(ctx context.Context) {
+
+}
