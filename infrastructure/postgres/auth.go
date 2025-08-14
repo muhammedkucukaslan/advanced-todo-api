@@ -59,3 +59,11 @@ func (r *Repository) UpsertRefreshToken(ctx context.Context, record *domain.Refr
 	}
 	return nil
 }
+
+func (r *Repository) DeleteRefreshToken(ctx context.Context, token string) error {
+	_, err := r.db.ExecContext(ctx, "DELETE FROM refresh_tokens WHERE token = $1", token)
+	if err != nil {
+		return err
+	}
+	return nil
+}

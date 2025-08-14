@@ -11,4 +11,5 @@ type Repository interface {
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	SaveRefreshToken(ctx context.Context, record *domain.RefreshToken) error
 	UpsertRefreshToken(ctx context.Context, record *domain.RefreshToken) error
+	DeleteRefreshToken(ctx context.Context, token string) error
 }
