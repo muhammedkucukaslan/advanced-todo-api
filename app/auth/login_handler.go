@@ -89,13 +89,12 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	// TODO delete old refresh token
 	refreshToken, err := h.ts.GenerateAuthRefreshToken(user.Id.String(), user.Role)
 	if err != nil {
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	if err := h.repo.SaveRefreshToken(ctx, domain.NewRefreshToken(
+	if err := h.repo.UpsertRefreshToken(ctx, domain.NewRefreshToken(
 		user.Id,
 		refreshToken,
 		h.refreshTokenCookieDuration,
