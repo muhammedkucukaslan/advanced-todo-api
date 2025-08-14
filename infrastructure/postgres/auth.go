@@ -50,4 +50,12 @@ func (r *Repository) SaveRefreshToken(ctx context.Context, record *domain.Refres
 	return nil
 }
 
-// TODO delete refresh token from db when user logs out
+func (r *Repository) UpsertRefreshToken(ctx context.Context, record *domain.RefreshToken) error {
+	_, err := r.db.ExecContext(ctx,
+		"INSERT INTO refresh_tokens (id, user_id, token, expires_at, created_at) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (user_id) DO UPDATE SET token = EXCLUDED.token, expires_at = EXCLUDED.expires_at, created_at = EXCLUDED.created_at",
+		record.Id, record.UserID, record.Token, record.ExpiresAt, record.CreatedAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
