@@ -67,3 +67,4 @@ func (r *Repository) DeleteRefreshToken(ctx context.Context, token string) error
 	}
 	return nil
 }
+
