@@ -87,6 +87,13 @@ func (m *MockTokenService) GenerateAuthRefreshToken(userID, role string) (string
 	return "mockedRefreshToken", nil
 }
 
+func (m *MockTokenService) ValidateAuthRefreshToken(token string) (*auth.TokenPayload, error) {
+	return &auth.TokenPayload{
+		UserID: domain.TestUser.Id.String(),
+		Role:   domain.TestUser.Role,
+	}, nil
+}
+
 // MockCache
 type MockCache struct {
 }

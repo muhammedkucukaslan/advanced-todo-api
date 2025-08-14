@@ -180,6 +180,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Generate a new access token using a valid refresh token.\nThe API takes refresh token from the cookie and returns a new access token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshTokenResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/auth/signup": {
             "post": {
                 "description": "Signup a new user",
@@ -842,6 +871,14 @@ const docTemplate = `{
             }
         },
         "auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.RefreshTokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
