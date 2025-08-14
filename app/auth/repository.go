@@ -12,4 +12,5 @@ type Repository interface {
 	SaveRefreshToken(ctx context.Context, record *domain.RefreshToken) error
 	UpsertRefreshToken(ctx context.Context, record *domain.RefreshToken) error
 	DeleteRefreshToken(ctx context.Context, token string) error
+	RefreshTokenExists(ctx context.Context, token string) (bool, error)
 }

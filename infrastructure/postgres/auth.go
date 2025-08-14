@@ -68,3 +68,15 @@ func (r *Repository) DeleteRefreshToken(ctx context.Context, token string) error
 	return nil
 }
 
+func (r *Repository) RefreshTokenExists(ctx context.Context, token string) (bool, error) {
+	row := r.db.QueryRowContext(ctx, "SELECT 1 FROM refresh_tokens WHERE token = $1", token)
+	var exists int
+	err := row.Scan(&exists)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
