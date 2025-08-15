@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -43,32 +42,31 @@ func (h *DeleteAccountHandler) Handle(ctx context.Context, req *DeleteAccountReq
 	// deletes user and todos, also returns email
 	fullName, email, err := h.repo.DeleteAccount(ctx, userId)
 	if err != nil {
-		h.logger.Error(fmt.Sprintf("failed to delete user account: %v", err))
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	// TODO mail notification
-	go func(fullName, email string) {
-		maxRetries := 3
-		retryInterval := 30 * time.Second
-
-		for attempt := 1; attempt <= maxRetries; attempt++ {
-
-			err := h.ms.SendSuccessfullyDeletedEmail(fullName, email,
-				domain.SuccessfullyDeletedEmailSubject,
-				domain.EnglishSuccessfullyDeletedEmail)
-
-			if err == nil {
-				return
-			}
-			h.logger.Error("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
-			if attempt < maxRetries {
-				time.Sleep(retryInterval)
-			}
-		}
-		h.logger.Error("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
-		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
-	}(fullName, email)
+	go h.sendNotificationEmail(fullName, email)
 
 	return nil, http.StatusNoContent, nil
+}
+
+func (h *DeleteAccountHandler) sendNotificationEmail(fullName, email string) {
+	maxRetries := 3
+	retryInterval := 30 * time.Second
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+
+		err := h.ms.SendSuccessfullyDeletedEmail(fullName, email,
+			domain.SuccessfullyDeletedEmailSubject,
+			domain.EnglishSuccessfullyDeletedEmail)
+
+		if err == nil {
+			return
+		}
+		h.logger.Error("attempt %d failed to send successfully deleted email to %s: %v", attempt, email, err)
+		if attempt < maxRetries {
+			time.Sleep(retryInterval)
+		}
+	}
+	h.logger.Error("all %d attempts failed for successfully deleted email to %s", maxRetries, email)
 }
