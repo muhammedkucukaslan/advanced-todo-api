@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -108,62 +107,9 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	// TODO make here clean
+	go h.SendVerificationEmail(user.FullName, user.Email)
 
-	go func(fullname, email string) {
-		var err error
-		const maxRetries = 3
-		const retryInterval = 30 * time.Second
-
-		for attempt := 1; attempt <= maxRetries; attempt++ {
-			verificationToken, err := h.ts.GenerateEmailVerificationToken(email)
-			if err != nil {
-				h.logger.Error(fmt.Sprintf("[Signup] Attempt %d: Failed to generate token for %s: %v", attempt, email, err))
-				time.Sleep(retryInterval)
-				continue
-			}
-
-			err = h.es.SendVerificationEmail(
-				fullname,
-				email,
-				domain.VerificationEmailSubject,
-				domain.NewVerificationEmailBody(domain.NewVerificationEmailLink(verificationToken)),
-			)
-
-			if err == nil {
-				h.logger.Info(fmt.Sprintf("[Signup] Verification email sent to %s", email))
-				return
-			}
-
-			h.logger.Error(fmt.Sprintf("[Signup] Attempt %d: Failed to send email to %s: %v", attempt, email, err))
-			time.Sleep(retryInterval)
-		}
-
-		h.logger.Error(fmt.Sprintf("[Signup] All retries failed for %s: %v", email, err))
-		// TODO: notify admin, push to dead-letter queue, etc.
-	}(user.FullName, user.Email)
-
-	go func(fullname, email string) {
-		maxRetries := 3
-		retryInterval := 30 * time.Second
-
-		for attempt := 1; attempt <= maxRetries; attempt++ {
-
-			err := h.es.SendWelcomeEmail(fullname, email,
-				domain.WelcomeEmailSubject,
-				domain.NewWelcomeEmailBody(fullname))
-
-			if err == nil {
-				return
-			}
-
-			if attempt < maxRetries {
-				time.Sleep(retryInterval)
-			}
-		}
-		h.logger.Error(fmt.Sprintf("all %d attempts failed for welcome email to %s", maxRetries, email))
-		// TODO handle email sending failure (e.g., log it, notify admin, etc.)
-	}(user.FullName, user.Email)
+	go h.sendWelcomeEmail(user.FullName, user.Email)
 
 	h.cs.SetRefreshToken(ctx, &RefreshTokenCookieClaims{
 		Token:    refreshToken,
@@ -172,4 +118,57 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 	})
 
 	return &SignupResponse{AccessToken: accessToken}, http.StatusCreated, nil
+}
+
+func (h *SignupHandler) sendWelcomeEmail(fullname, email string) {
+	maxRetries := 3
+	retryInterval := 30 * time.Second
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+
+		err := h.es.SendWelcomeEmail(fullname, email,
+			domain.WelcomeEmailSubject,
+			domain.NewWelcomeEmailBody(fullname))
+
+		if err == nil {
+			return
+		}
+
+		if attempt < maxRetries {
+			time.Sleep(retryInterval)
+		}
+	}
+	h.logger.Error("all ", maxRetries, " attempts failed for welcome email to ", email)
+}
+
+func (h *SignupHandler) SendVerificationEmail(fullname, email string) {
+	var err error
+	const maxRetries = 3
+	const retryInterval = 30 * time.Second
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		verificationToken, err := h.ts.GenerateEmailVerificationToken(email)
+		if err != nil {
+			h.logger.Error("[Signup] Attempt ", attempt, ": Failed to generate token for ", email, ": ", err)
+			time.Sleep(retryInterval)
+			continue
+		}
+
+		err = h.es.SendVerificationEmail(
+			fullname,
+			email,
+			domain.VerificationEmailSubject,
+			domain.NewVerificationEmailBody(domain.NewVerificationEmailLink(verificationToken)),
+		)
+
+		if err == nil {
+			h.logger.Info("[Signup] Verification email sent to ", email)
+			return
+		}
+
+		h.logger.Error("[Signup] Attempt ", attempt, ": Failed to send email to ", email, ": ", err)
+		time.Sleep(retryInterval)
+	}
+
+	h.logger.Error("[Signup] All retries failed for ", email, ": ", err)
 }
