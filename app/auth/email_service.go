@@ -10,6 +10,6 @@ type MailClaims struct {
 }
 
 type EmailService interface {
-	SendWelcomeEmail(ctx context.Context, ml MailClaims) error
-	SendVerificationEmail(ctx context.Context, ml MailClaims) error
+	SendWelcomeEmail(ctx context.Context, ml *MailClaims) error
+	SendVerificationEmail(ctx context.Context, ml *MailClaims) error
 }
