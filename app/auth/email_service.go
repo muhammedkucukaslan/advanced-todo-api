@@ -1,6 +1,15 @@
 package auth
 
+import "context"
+
+type MailClaims struct {
+	Name    string
+	To      string
+	Subject string
+	HTML    string
+}
+
 type EmailService interface {
-	SendWelcomeEmail(name, to, subject, html string) error
-	SendVerificationEmail(from, to, subject, html string) error
+	SendWelcomeEmail(ctx context.Context, ml MailClaims) error
+	SendVerificationEmail(ctx context.Context, ml MailClaims) error
 }
