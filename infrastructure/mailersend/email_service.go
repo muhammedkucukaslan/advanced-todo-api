@@ -65,7 +65,7 @@ func (m *MailerSendService) SendSuccessfullyDeletedEmail(ctx context.Context, cl
 	return err
 }
 
-func (m *MailerSendService) SendPasswordResetEmail(email, subject, html string) error {
+func (m *MailerSendService) SendPasswordResetEmail(ctx context.Context, claims *domain.EmailClaims) error {
 
 	from := mailersend.From{
 		Name:  m.SenderName,
@@ -74,17 +74,17 @@ func (m *MailerSendService) SendPasswordResetEmail(email, subject, html string) 
 
 	recipients := []mailersend.Recipient{
 		{
-			Email: email,
+			Email: claims.To,
 		},
 	}
 
 	message := m.client.Email.NewMessage()
 	message.SetFrom(from)
 	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
+	message.SetSubject(claims.Subject)
+	message.SetHTML(claims.HTML)
 
-	_, err := m.client.Email.Send(context.Background(), message)
+	_, err := m.client.Email.Send(ctx, message)
 	return err
 }
 
