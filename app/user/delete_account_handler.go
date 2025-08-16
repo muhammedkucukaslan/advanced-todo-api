@@ -56,9 +56,12 @@ func (h *DeleteAccountHandler) sendNotificationEmail(fullName, email string) {
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 
-		err := h.ms.SendSuccessfullyDeletedEmail(fullName, email,
-			domain.SuccessfullyDeletedEmailSubject,
-			domain.EnglishSuccessfullyDeletedEmail)
+		err := h.ms.SendSuccessfullyDeletedEmail(context.Background(), &domain.EmailClaims{
+			Name:    fullName,
+			To:      email,
+			Subject: domain.SuccessfullyDeletedEmailSubject,
+			HTML:    domain.EnglishSuccessfullyDeletedEmail,
+		})
 
 		if err == nil {
 			return

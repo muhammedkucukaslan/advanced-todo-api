@@ -1,6 +1,12 @@
 package auth
 
+import (
+	"context"
+
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
+)
+
 type EmailService interface {
-	SendWelcomeEmail(name, to, subject, html string) error
-	SendVerificationEmail(from, to, subject, html string) error
+	SendWelcomeEmail(ctx context.Context, ml *domain.EmailClaims) error
+	SendVerificationEmail(ctx context.Context, ml *domain.EmailClaims) error
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mailersend/mailersend-go"
+	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
 type MailerSendService struct {
@@ -16,7 +17,7 @@ func NewMailerSendService(apiKey, senderEmail, senderName string) *MailerSendSer
 	return &MailerSendService{client: mailersend.NewMailersend(apiKey), SenderEmail: senderEmail, SenderName: senderName}
 }
 
-func (m *MailerSendService) SendWelcomeEmail(to, email, subject, html string) error {
+func (m *MailerSendService) SendWelcomeEmail(ctx context.Context, claims *domain.EmailClaims) error {
 
 	from := mailersend.From{
 		Name:  m.SenderName,
@@ -25,22 +26,22 @@ func (m *MailerSendService) SendWelcomeEmail(to, email, subject, html string) er
 
 	recipients := []mailersend.Recipient{
 		{
-			Name:  to,
-			Email: email,
+			Name:  claims.Name,
+			Email: claims.To,
 		},
 	}
 
 	message := m.client.Email.NewMessage()
 	message.SetFrom(from)
 	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
+	message.SetSubject(claims.Subject)
+	message.SetHTML(claims.HTML)
 
 	_, err := m.client.Email.Send(context.Background(), message)
 	return err
 }
 
-func (m *MailerSendService) SendSuccessfullyDeletedEmail(to, email, subject, html string) error {
+func (m *MailerSendService) SendSuccessfullyDeletedEmail(ctx context.Context, claims *domain.EmailClaims) error {
 
 	from := mailersend.From{
 		Name:  m.SenderName,
@@ -49,22 +50,22 @@ func (m *MailerSendService) SendSuccessfullyDeletedEmail(to, email, subject, htm
 
 	recipients := []mailersend.Recipient{
 		{
-			Name:  to,
-			Email: email,
+			Name:  claims.Name,
+			Email: claims.To,
 		},
 	}
 
 	message := m.client.Email.NewMessage()
 	message.SetFrom(from)
 	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
+	message.SetSubject(claims.Subject)
+	message.SetHTML(claims.HTML)
 
 	_, err := m.client.Email.Send(context.Background(), message)
 	return err
 }
 
-func (m *MailerSendService) SendPasswordResetEmail(email, subject, html string) error {
+func (m *MailerSendService) SendPasswordResetEmail(ctx context.Context, claims *domain.EmailClaims) error {
 
 	from := mailersend.From{
 		Name:  m.SenderName,
@@ -73,21 +74,21 @@ func (m *MailerSendService) SendPasswordResetEmail(email, subject, html string) 
 
 	recipients := []mailersend.Recipient{
 		{
-			Email: email,
+			Email: claims.To,
 		},
 	}
 
 	message := m.client.Email.NewMessage()
 	message.SetFrom(from)
 	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
+	message.SetSubject(claims.Subject)
+	message.SetHTML(claims.HTML)
 
-	_, err := m.client.Email.Send(context.Background(), message)
+	_, err := m.client.Email.Send(ctx, message)
 	return err
 }
 
-func (m *MailerSendService) SendVerificationEmail(to, email, subject, html string) error {
+func (m *MailerSendService) SendVerificationEmail(ctx context.Context, claims *domain.EmailClaims) error {
 
 	from := mailersend.From{
 		Name:  m.SenderName,
@@ -96,17 +97,17 @@ func (m *MailerSendService) SendVerificationEmail(to, email, subject, html strin
 
 	recipients := []mailersend.Recipient{
 		{
-			Name:  to,
-			Email: email,
+			Name:  claims.Name,
+			Email: claims.To,
 		},
 	}
 
 	message := m.client.Email.NewMessage()
 	message.SetFrom(from)
 	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
+	message.SetSubject(claims.Subject)
+	message.SetHTML(claims.HTML)
 
-	_, err := m.client.Email.Send(context.Background(), message)
+	_, err := m.client.Email.Send(ctx, message)
 	return err
 }

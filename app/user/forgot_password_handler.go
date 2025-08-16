@@ -63,11 +63,11 @@ func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordR
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	if err := h.emailService.SendPasswordResetEmail(
-		req.Email,
-		domain.ForgotPasswordEmailSubject,
-		domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token)),
-	); err != nil {
+	if err := h.emailService.SendPasswordResetEmail(context.Background(), &domain.EmailClaims{
+		To:      req.Email,
+		Subject: domain.ForgotPasswordEmailSubject,
+		HTML:    domain.NewForgotPasswordEmail(domain.NewForgotPasswordLink(token)),
+	}); err != nil {
 		h.logger.Error("failed to send forgot password email: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
