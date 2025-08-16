@@ -16,16 +16,16 @@ func NewMockEmailService() *MockEmailService {
 	return &MockEmailService{}
 }
 
-func (m *MockEmailService) SendWelcomeEmail(name, to, subject, html string) error {
+func (m *MockEmailService) SendWelcomeEmail(ctx context.Context, claims *domain.EmailClaims) error {
 	return nil
 }
-func (m *MockEmailService) SendSuccessfullyDeletedEmail(to, email, subject, html string) error {
+func (m *MockEmailService) SendSuccessfullyDeletedEmail(ctx context.Context, claims *domain.EmailClaims) error {
 	return nil
 }
-func (m *MockEmailService) SendPasswordResetEmail(email, subject, html string) error {
+func (m *MockEmailService) SendPasswordResetEmail(ctx context.Context, claims *domain.EmailClaims) error {
 	return nil
 }
-func (m *MockEmailService) SendVerificationEmail(name, to, subject, html string) error {
+func (m *MockEmailService) SendVerificationEmail(ctx context.Context, claims *domain.EmailClaims) error {
 	return nil
 }
 
