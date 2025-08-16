@@ -65,12 +65,12 @@ func (h *SendVerificationEmailHandler) Handle(ctx context.Context, req *SendVeri
 		return nil, http.StatusInternalServerError, err
 	}
 
-	if err = h.ms.SendVerificationEmail(
-		fullname,
-		email,
-		domain.VerificationEmailSubject,
-		domain.NewVerificationEmailBody(domain.NewVerificationEmailLink(token)),
-	); err != nil {
+	if err = h.ms.SendVerificationEmail(context.Background(), &domain.EmailClaims{
+		Name:    fullname,
+		To:      email,
+		Subject: domain.VerificationEmailSubject,
+		HTML:    domain.NewVerificationEmailBody(domain.NewVerificationEmailLink(token)),
+	}); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 
