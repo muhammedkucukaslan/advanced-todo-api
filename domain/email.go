@@ -5,6 +5,13 @@ import (
 	"os"
 )
 
+type EmailClaims struct {
+	Name    string
+	To      string
+	Subject string
+	HTML    string
+}
+
 func NewWelcomeEmailBody(name string) string {
 	return fmt.Sprintf(`
 <!DOCTYPE html>

@@ -126,7 +126,7 @@ func (h *SignupHandler) sendWelcomeEmail(fullname, email string) {
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 
-		err := h.es.SendWelcomeEmail(context.Background(), &MailClaims{
+		err := h.es.SendWelcomeEmail(context.Background(), &domain.EmailClaims{
 			Name:    fullname,
 			To:      email,
 			Subject: domain.WelcomeEmailSubject,
@@ -157,7 +157,7 @@ func (h *SignupHandler) SendVerificationEmail(fullname, email string) {
 			continue
 		}
 
-		err = h.es.SendVerificationEmail(context.Background(), &MailClaims{
+		err = h.es.SendVerificationEmail(context.Background(), &domain.EmailClaims{
 			Name:    fullname,
 			To:      email,
 			Subject: domain.VerificationEmailSubject,
