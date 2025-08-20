@@ -1,4 +1,4 @@
-package testuser
+package unittest_user
 
 import (
 	"context"
