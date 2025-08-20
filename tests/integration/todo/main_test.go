@@ -1,4 +1,4 @@
-package testtodo
+package integrationtest_todo
 
 import (
 	"database/sql"

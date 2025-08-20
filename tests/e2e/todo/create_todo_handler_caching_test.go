@@ -1,4 +1,4 @@
-package e2e_todo
+package e2etest_todo
 
 import (
 	"bytes"

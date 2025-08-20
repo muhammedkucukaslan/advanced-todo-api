@@ -1,4 +1,4 @@
-package testuser
+package integrationtest_tuser
 
 import (
 	"database/sql"

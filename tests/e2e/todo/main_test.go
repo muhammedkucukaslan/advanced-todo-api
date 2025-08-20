@@ -1,4 +1,4 @@
-package e2e_todo
+package e2etest_todo
 
 import (
 	"database/sql"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	fmt.Println("Running tests in e2e_todo package...")
+	fmt.Println("Running tests in e2etest_todo package...")
 
 	code := m.Run()
 

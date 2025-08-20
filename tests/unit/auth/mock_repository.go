@@ -1,4 +1,4 @@
-package testauth
+package unittest_auth
 
 import (
 	"context"
