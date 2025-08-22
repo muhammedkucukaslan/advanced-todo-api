@@ -16,41 +16,36 @@ type SignupRequest struct {
 }
 
 type SignupResponse struct {
-	AccessToken string `json:"access_token"`
+	Role string `json:"role"`
 }
 
 type SignupConfig struct {
-	RefreshTokenCookieDuration time.Duration
-	Secure                     bool
-	Repo                       Repository
-	TokenService               TokenService
-	CookieService              CookieService
-	EmailService               EmailService
-	Validator                  domain.Validator
-	Logger                     domain.Logger
+	Repo          Repository
+	TokenService  TokenService
+	CookieService CookieService
+	EmailService  EmailService
+	Validator     domain.Validator
+	Logger        domain.Logger
 }
 
 type SignupHandler struct {
-	refreshTokenCookieDuration time.Duration
-	secure                     bool
-	repo                       Repository
-	cs                         CookieService
-	ts                         TokenService
-	es                         EmailService
-	validator                  domain.Validator
-	logger                     domain.Logger
+	secure    bool
+	repo      Repository
+	cs        CookieService
+	ts        TokenService
+	es        EmailService
+	validator domain.Validator
+	logger    domain.Logger
 }
 
 func NewSignupHandler(config *SignupConfig) *SignupHandler {
 	return &SignupHandler{
-		refreshTokenCookieDuration: config.RefreshTokenCookieDuration,
-		secure:                     config.Secure,
-		repo:                       config.Repo,
-		cs:                         config.CookieService,
-		ts:                         config.TokenService,
-		es:                         config.EmailService,
-		validator:                  config.Validator,
-		logger:                     config.Logger,
+		repo:      config.Repo,
+		cs:        config.CookieService,
+		ts:        config.TokenService,
+		es:        config.EmailService,
+		validator: config.Validator,
+		logger:    config.Logger,
 	}
 }
 
@@ -101,7 +96,6 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 	if err := h.repo.SaveRefreshToken(ctx, domain.NewRefreshToken(
 		user.Id,
 		refreshToken,
-		h.refreshTokenCookieDuration,
 	)); err != nil {
 		h.logger.Error("error while saving refresh token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
@@ -111,13 +105,10 @@ func (h *SignupHandler) Handle(ctx context.Context, req *SignupRequest) (*Signup
 
 	go h.sendWelcomeEmail(user.FullName, user.Email)
 
-	h.cs.SetRefreshToken(ctx, &RefreshTokenCookieClaims{
-		Token:    refreshToken,
-		Duration: h.refreshTokenCookieDuration,
-		Secure:   h.secure,
-	})
+	h.cs.SetRefreshToken(ctx, refreshToken)
+	h.cs.SetAccessToken(ctx, accessToken)
 
-	return &SignupResponse{AccessToken: accessToken}, http.StatusCreated, nil
+	return &SignupResponse{Role: user.Role}, http.StatusCreated, nil
 }
 
 func (h *SignupHandler) sendWelcomeEmail(fullname, email string) {

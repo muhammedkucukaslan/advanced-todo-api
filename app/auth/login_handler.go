@@ -15,21 +15,20 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	Role string `json:"role"`
 }
 
 type LoginConfig struct {
-	RefreshTokenCookieDuration time.Duration
-	Secure                     bool
-	Repo                       Repository
-	TokenService               TokenService
-	CookieService              CookieService
-	Validator                  domain.Validator
-	Logger                     domain.Logger
+	Repo          Repository
+	TokenService  TokenService
+	CookieService CookieService
+	Validator     domain.Validator
+	Logger        domain.Logger
 }
 
 type LoginHandler struct {
 	refreshTokenCookieDuration time.Duration
+	accessTokenCookieDuration  time.Duration
 	secure                     bool
 	repo                       Repository
 	ts                         TokenService
@@ -39,14 +38,13 @@ type LoginHandler struct {
 }
 
 func NewLoginHandler(config *LoginConfig) *LoginHandler {
+
 	return &LoginHandler{
-		refreshTokenCookieDuration: config.RefreshTokenCookieDuration,
-		secure:                     config.Secure,
-		repo:                       config.Repo,
-		ts:                         config.TokenService,
-		validator:                  config.Validator,
-		logger:                     config.Logger,
-		cs:                         config.CookieService,
+		repo:      config.Repo,
+		ts:        config.TokenService,
+		validator: config.Validator,
+		logger:    config.Logger,
+		cs:        config.CookieService,
 	}
 }
 
@@ -84,7 +82,7 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	token, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
+	accessToken, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
 	if err != nil {
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
@@ -97,17 +95,13 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 	if err := h.repo.UpsertRefreshToken(ctx, domain.NewRefreshToken(
 		user.Id,
 		refreshToken,
-		h.refreshTokenCookieDuration,
 	)); err != nil {
 		h.logger.Error("error while saving refresh token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	h.cs.SetRefreshToken(ctx, &RefreshTokenCookieClaims{
-		Token:    refreshToken,
-		Duration: h.refreshTokenCookieDuration,
-		Secure:   h.secure,
-	})
+	h.cs.SetRefreshToken(ctx, refreshToken)
+	h.cs.SetAccessToken(ctx, accessToken)
 
-	return &LoginResponse{AccessToken: token}, http.StatusOK, nil
+	return &LoginResponse{Role: user.Role}, http.StatusOK, nil
 }
