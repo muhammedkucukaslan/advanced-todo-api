@@ -2,16 +2,10 @@ package auth
 
 import (
 	"context"
-	"time"
 )
 
 type CookieService interface {
-	SetRefreshToken(ctx context.Context, claims *RefreshTokenCookieClaims)
+	SetRefreshToken(ctx context.Context, token string)
+	SetAccessToken(ctx context.Context, token string)
 	RemoveRefreshToken(ctx context.Context)
-}
-
-type RefreshTokenCookieClaims struct {
-	Token    string
-	Duration time.Duration
-	Secure   bool
 }

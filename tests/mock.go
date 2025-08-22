@@ -123,7 +123,10 @@ func NewMockCookieService() *MockCookieService {
 	return &MockCookieService{}
 }
 
-func (m *MockCookieService) SetRefreshToken(ctx context.Context, claims *auth.RefreshTokenCookieClaims) {
+func (m *MockCookieService) SetRefreshToken(ctx context.Context, token string) {
+}
+
+func (m *MockCookieService) SetAccessToken(ctx context.Context, token string) {
 }
 
 func (m *MockCookieService) RemoveRefreshToken(ctx context.Context) {

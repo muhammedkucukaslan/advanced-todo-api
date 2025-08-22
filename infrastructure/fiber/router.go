@@ -113,32 +113,25 @@ func SetupRoutes(app *fiber.App) {
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
 
-	var secureFlag bool
-	if domain.IsProdEnv() {
-		secureFlag = true
-	} else {
-		secureFlag = false
+	if !domain.IsProdEnv() {
+		domain.CookieSecure = false
 	}
 
 	signupHandler := auth.NewSignupHandler(&auth.SignupConfig{
-		RefreshTokenCookieDuration: time.Hour * 24 * 30,
-		Secure:                     secureFlag,
-		Repo:                       postgresRepo,
-		TokenService:               jwtTokenService,
-		CookieService:              NewCookieService(),
-		EmailService:               mailersendService,
-		Validator:                  validator,
-		Logger:                     slogLogger,
+		Repo:          postgresRepo,
+		TokenService:  jwtTokenService,
+		CookieService: NewCookieService(),
+		EmailService:  mailersendService,
+		Validator:     validator,
+		Logger:        slogLogger,
 	})
 
 	loginHandler := auth.NewLoginHandler(&auth.LoginConfig{
-		RefreshTokenCookieDuration: time.Hour * 24 * 30,
-		Secure:                     secureFlag,
-		Repo:                       postgresRepo,
-		TokenService:               jwtTokenService,
-		CookieService:              NewCookieService(),
-		Validator:                  validator,
-		Logger:                     slogLogger,
+		Repo:          postgresRepo,
+		TokenService:  jwtTokenService,
+		CookieService: NewCookieService(),
+		Validator:     validator,
+		Logger:        slogLogger,
 	})
 
 	logoutHandler := auth.NewLogoutHandler(postgresRepo, NewCookieService())

@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,14 +36,12 @@ func TestSignupHandler(t *testing.T) {
 	validator := validator.NewValidator(logger)
 
 	handler := auth.NewSignupHandler(&auth.SignupConfig{
-		RefreshTokenCookieDuration: time.Hour * 24 * 30,
-		Secure:                     false,
-		Repo:                       repo,
-		TokenService:               tokenService,
-		CookieService:              testUtils.NewMockCookieService(),
-		EmailService:               mock.NewMockEmailService(),
-		Validator:                  validator,
-		Logger:                     logger,
+		Repo:          repo,
+		TokenService:  tokenService,
+		CookieService: testUtils.NewMockCookieService(),
+		EmailService:  mock.NewMockEmailService(),
+		Validator:     validator,
+		Logger:        logger,
 	})
 
 	type args struct {
@@ -76,7 +73,7 @@ func TestSignupHandler(t *testing.T) {
 				},
 			},
 			want: &auth.SignupResponse{
-				AccessToken: "valid-token",
+				Role: domain.TestUser.Role,
 			},
 			code:    http.StatusCreated,
 			wantErr: nil,
@@ -189,11 +186,8 @@ func TestSignupHandler(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, got)
-				assert.NotEmpty(t, got.AccessToken)
-				payload, err := tokenService.ValidateAuthAccessToken(got.AccessToken)
-				assert.NoError(t, err)
-				assert.NotNil(t, payload)
-				assert.Equal(t, domain.TestUser.Role, payload.Role)
+				assert.NotEmpty(t, got.Role)
+
 			}
 		})
 	}
