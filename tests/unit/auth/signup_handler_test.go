@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/auth"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
@@ -15,14 +14,12 @@ import (
 func Test_Name(t *testing.T) {
 
 	handler := auth.NewSignupHandler(&auth.SignupConfig{
-		RefreshTokenCookieDuration: time.Hour * 24 * 30,
-		Secure:                     false,
-		Repo:                       NewMockRepository(),
-		TokenService:               mock.NewMockTokenService(),
-		CookieService:              mock.NewMockCookieService(),
-		EmailService:               mock.NewMockEmailService(),
-		Validator:                  mock.NewMockValidator(),
-		Logger:                     mock.NewMockLogger(),
+		Repo:          NewMockRepository(),
+		TokenService:  mock.NewMockTokenService(),
+		CookieService: mock.NewMockCookieService(),
+		EmailService:  mock.NewMockEmailService(),
+		Validator:     mock.NewMockValidator(),
+		Logger:        mock.NewMockLogger(),
 	})
 
 	type args struct {
@@ -42,7 +39,7 @@ func Test_Name(t *testing.T) {
 			Password: "validpassword",
 			Email:    domain.TestUser.Email,
 		}}, &auth.SignupResponse{
-			AccessToken: domain.MockToken,
+			Role: domain.TestUser.Role,
 		}, http.StatusCreated, nil},
 		{"too short fullName", args{context.Background(), &auth.SignupRequest{
 			FullName: "sh",
