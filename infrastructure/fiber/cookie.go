@@ -2,7 +2,6 @@ package fiber
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,10 +16,6 @@ func NewCookieService() *FiberCookieService {
 
 func (s *FiberCookieService) SetRefreshToken(ctx context.Context, token string) {
 	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
-
-	fmt.Printf("RefreshCookiePath: %s\n", domain.RefreshCookiePath)
-	fmt.Printf("RefreshTokenCookieMaxAge: %v\n", domain.RefreshTokenCookieMaxAge)
-	fmt.Printf("CookieSecure: %v\n", domain.CookieSecure)
 
 	fiberCtx.Cookie(&fiber.Cookie{
 		Name:     domain.RefreshTokenCookieName,
@@ -37,10 +32,6 @@ func (s *FiberCookieService) SetRefreshToken(ctx context.Context, token string) 
 func (s *FiberCookieService) SetAccessToken(ctx context.Context, token string) {
 	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
 
-	fmt.Printf("AccessCookiePath: %s\n", domain.AccessTokenCookiePath)
-	fmt.Printf("AccessTokenCookieMaxAge: %v\n", domain.AccessTokenCookieMaxAge)
-	fmt.Printf("CookieSecure: %v\n", domain.CookieSecure)
-
 	fiberCtx.Cookie(&fiber.Cookie{
 		Name:     domain.AccessTokenCookieName,
 		Value:    token,
@@ -53,8 +44,9 @@ func (s *FiberCookieService) SetAccessToken(ctx context.Context, token string) {
 	})
 }
 
-func (s *FiberCookieService) RemoveRefreshToken(ctx context.Context) {
+func (s *FiberCookieService) RemoveTokens(ctx context.Context) {
 	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
 
 	fiberCtx.ClearCookie(domain.RefreshTokenCookieName)
+	fiberCtx.ClearCookie(domain.AccessTokenCookieName)
 }
