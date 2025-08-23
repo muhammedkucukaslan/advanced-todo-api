@@ -108,6 +108,7 @@ func SetupRoutes(app *fiber.App) {
 	sl := slogLogger
 	validator := validatorInfra.NewValidator(slogLogger)
 	redisClient := redisInfra.NewRedisClient(os.Getenv("REDIS_URL"))
+	fiberCookieService := NewCookieService()
 
 	middlewareManager := NewMiddlewareManager(jwtTokenService, slogLogger)
 
@@ -120,7 +121,7 @@ func SetupRoutes(app *fiber.App) {
 	signupHandler := auth.NewSignupHandler(&auth.SignupConfig{
 		Repo:          postgresRepo,
 		TokenService:  jwtTokenService,
-		CookieService: NewCookieService(),
+		CookieService: fiberCookieService,
 		EmailService:  mailersendService,
 		Validator:     validator,
 		Logger:        slogLogger,
@@ -129,13 +130,13 @@ func SetupRoutes(app *fiber.App) {
 	loginHandler := auth.NewLoginHandler(&auth.LoginConfig{
 		Repo:          postgresRepo,
 		TokenService:  jwtTokenService,
-		CookieService: NewCookieService(),
+		CookieService: fiberCookieService,
 		Validator:     validator,
 		Logger:        slogLogger,
 	})
 
-	logoutHandler := auth.NewLogoutHandler(postgresRepo, NewCookieService())
-	refreshTokenHandler := auth.NewRefreshTokenHandler(postgresRepo, jwtTokenService)
+	logoutHandler := auth.NewLogoutHandler(postgresRepo, fiberCookieService)
+	refreshTokenHandler := auth.NewRefreshTokenHandler(postgresRepo, jwtTokenService, fiberCookieService)
 	getUserHandler := user.NewGetUserHandler(postgresRepo)
 	getUsersHandler := user.NewGetUsersHandler(postgresRepo, validator)
 	deleteAccountHandler := user.NewDeleteAccountHandler(postgresRepo, sl, mailersendService)

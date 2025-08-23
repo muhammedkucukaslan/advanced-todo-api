@@ -30,7 +30,6 @@ func NewLogoutHandler(repo Repository, cs CookieService) *LogoutHandler {
 //
 //	@Summary		Logout user
 //	@Description	Removes the refresh token from the database and clears the refresh token cookie.
-//	@Description	The API takes refresh token from cookies.
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
@@ -45,6 +44,6 @@ func (h *LogoutHandler) Handle(ctx context.Context, req *LogoutRequest) (*Logout
 	if err := h.repo.DeleteRefreshToken(ctx, req.RefreshToken); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
-	h.cs.RemoveRefreshToken(ctx)
+	h.cs.RemoveTokens(ctx)
 	return nil, http.StatusNoContent, nil
 }
