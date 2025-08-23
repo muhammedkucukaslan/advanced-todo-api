@@ -129,6 +129,6 @@ func (m *MockCookieService) SetRefreshToken(ctx context.Context, token string) {
 func (m *MockCookieService) SetAccessToken(ctx context.Context, token string) {
 }
 
-func (m *MockCookieService) RemoveRefreshToken(ctx context.Context) {
+func (m *MockCookieService) RemoveTokens(ctx context.Context) {
 
 }
