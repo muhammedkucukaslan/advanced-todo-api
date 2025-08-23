@@ -13,28 +13,29 @@ type RefreshTokenRequest struct {
 }
 
 type RefreshTokenResponse struct {
-	AccessToken string `json:"access_token"`
 }
 
 type RefreshTokenHandler struct {
 	repo Repository
 	ts   TokenService
+	cs   CookieService
 }
 
-func NewRefreshTokenHandler(repo Repository, ts TokenService) *RefreshTokenHandler {
+func NewRefreshTokenHandler(repo Repository, ts TokenService, cs CookieService) *RefreshTokenHandler {
 	return &RefreshTokenHandler{
 		repo: repo,
 		ts:   ts,
+		cs:   cs,
 	}
 }
 
 // @Summary		Refresh access token
 // @Description	Generate a new access token using a valid refresh token.
-// @Description	The API takes refresh token from the cookie and returns a new access token.
+// @Description	The API takes refresh token from the cookie and sets a new access token.
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	RefreshTokenResponse
+// @Success		204
 // @Failure		401
 // @Failure		500
 // @Router			/auth/refresh [post]
@@ -62,7 +63,6 @@ func (h *RefreshTokenHandler) Handle(ctx context.Context, req *RefreshTokenReque
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
-	return &RefreshTokenResponse{
-		AccessToken: accessToken,
-	}, http.StatusOK, nil
+	h.cs.SetAccessToken(ctx, accessToken)
+	return nil, http.StatusNoContent, nil
 }
