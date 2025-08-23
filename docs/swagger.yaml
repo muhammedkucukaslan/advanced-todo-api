@@ -12,12 +12,7 @@ definitions:
     type: object
   auth.LoginResponse:
     properties:
-      access_token:
-        type: string
-    type: object
-  auth.RefreshTokenResponse:
-    properties:
-      access_token:
+      role:
         type: string
     type: object
   auth.SignupRequest:
@@ -35,7 +30,7 @@ definitions:
     type: object
   auth.SignupResponse:
     properties:
-      access_token:
+      role:
         type: string
     type: object
   todo.CreateTodoRequest:
@@ -314,9 +309,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: |-
-        Removes the refresh token from the database and clears the refresh token cookie.
-        The API takes refresh token from cookies.
+      description: Removes the refresh token from the database and clears the refresh
+        token cookie.
       produces:
       - application/json
       responses:
@@ -333,14 +327,12 @@ paths:
       - application/json
       description: |-
         Generate a new access token using a valid refresh token.
-        The API takes refresh token from the cookie and returns a new access token.
+        The API takes refresh token from the cookie and sets a new access token.
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/auth.RefreshTokenResponse'
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "500":

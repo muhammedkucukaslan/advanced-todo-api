@@ -159,7 +159,7 @@ const docTemplate = `{
         },
         "/auth/logout": {
             "post": {
-                "description": "Removes the refresh token from the database and clears the refresh token cookie.\nThe API takes refresh token from cookies.",
+                "description": "Removes the refresh token from the database and clears the refresh token cookie.",
                 "consumes": [
                     "application/json"
                 ],
@@ -182,7 +182,7 @@ const docTemplate = `{
         },
         "/auth/refresh": {
             "post": {
-                "description": "Generate a new access token using a valid refresh token.\nThe API takes refresh token from the cookie and returns a new access token.",
+                "description": "Generate a new access token using a valid refresh token.\nThe API takes refresh token from the cookie and sets a new access token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -194,11 +194,8 @@ const docTemplate = `{
                 ],
                 "summary": "Refresh access token",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/auth.RefreshTokenResponse"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -873,15 +870,7 @@ const docTemplate = `{
         "auth.LoginResponse": {
             "type": "object",
             "properties": {
-                "access_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
+                "role": {
                     "type": "string"
                 }
             }
@@ -908,7 +897,7 @@ const docTemplate = `{
         "auth.SignupResponse": {
             "type": "object",
             "properties": {
-                "access_token": {
+                "role": {
                     "type": "string"
                 }
             }
