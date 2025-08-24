@@ -44,7 +44,7 @@ func (h *VerifyEmailHandler) Handle(ctx context.Context, req *VerifiyEmailReques
 		return nil, http.StatusBadRequest, err
 	}
 
-	email, err := h.ts.ValidateVerifyEmailToken(req.Token)
+	email, err := h.ts.ValidateSecureEmailToken(req.Token)
 	if err != nil {
 		return nil, http.StatusUnauthorized, domain.ErrUnauthorized
 	}

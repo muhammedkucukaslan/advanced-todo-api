@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -84,11 +85,13 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 
 	accessToken, err := h.ts.GenerateAuthAccessToken(user.Id.String(), user.Role)
 	if err != nil {
+		fmt.Println("error while generating access token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 
 	refreshToken, err := h.ts.GenerateAuthRefreshToken(user.Id.String(), user.Role)
 	if err != nil {
+		fmt.Println("error while generating refresh token: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
 

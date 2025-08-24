@@ -49,7 +49,7 @@ func (h *ResetPasswordHandler) Handle(ctx context.Context, req *ResetPasswordReq
 		return nil, http.StatusBadRequest, domain.ErrInvalidRequest
 	}
 
-	email, err := h.tokenService.ValidateForgotPasswordToken(req.Token)
+	email, err := h.tokenService.ValidateSecureEmailToken(req.Token)
 	if err != nil {
 		h.logger.Error("failed to validate token for forgot password: ", err)
 		return nil, http.StatusUnauthorized, domain.ErrUnauthorized

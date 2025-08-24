@@ -141,7 +141,7 @@ func (h *SignupHandler) SendVerificationEmail(fullname, email string) {
 	const retryInterval = 30 * time.Second
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
-		verificationToken, err := h.ts.GenerateEmailVerificationToken(email)
+		verificationToken, err := h.ts.GenerateSecureEmailToken(email)
 		if err != nil {
 			h.logger.Error("[Signup] Attempt ", attempt, ": Failed to generate token for ", email, ": ", err)
 			time.Sleep(retryInterval)
