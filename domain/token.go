@@ -8,7 +8,7 @@ import (
 
 var (
 	RefreshTokenCookieName   = "refresh_token"
-	RefreshCookiePath        = "/auth/refresh"
+	RefreshCookiePath        = "/auth"
 	RefreshTokenCookieMaxAge = 30 * 24 * time.Hour
 	AccessTokenCookieMaxAge  = 15 * time.Minute
 	AccessTokenCookiePath    = "/"
