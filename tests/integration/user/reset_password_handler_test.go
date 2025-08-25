@@ -29,11 +29,11 @@ func TestResetPasswordHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := testUtils.NewTestJWTTokenService()
+	tokenService := testUtils.NewTestJWETokenService()
 	logger := slog.NewLogger()
 	validator := validator.NewValidator(logger)
 
-	mockJWTToken, err := tokenService.GenerateTokenForForgotPassword(domain.TestUser.Email)
+	mockJWTToken, err := tokenService.GenerateSecureEmailToken(domain.TestUser.Email)
 	require.NoError(t, err, "failed to generate mock JWT token")
 
 	handler := user.NewResetPasswordHandler(repo, tokenService, logger, validator)

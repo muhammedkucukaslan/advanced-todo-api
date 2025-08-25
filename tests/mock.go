@@ -57,41 +57,34 @@ func NewMockTokenService() *MockTokenService {
 	return &MockTokenService{}
 }
 
-func (m *MockTokenService) GenerateAuthAccessToken(userID, role string) (string, error) {
-	return domain.MockToken, nil
+func (s *MockTokenService) GenerateAuthAccessToken(userID string, role string) (string, error) {
+	return "mockAccessToken", nil
 }
 
-func (m *MockTokenService) ValidateAuthAccessToken(token string) (*auth.TokenPayload, error) {
+func (s *MockTokenService) GenerateAuthRefreshToken(userID string, role string) (string, error) {
+	return "mockRefreshToken", nil
+}
+
+func (s *MockTokenService) GenerateSecureEmailToken(email string) (string, error) {
+	return "mockEmailToken", nil
+}
+
+func (s *MockTokenService) ValidateAuthAccessToken(tokenString string) (*auth.TokenPayload, error) {
 	return &auth.TokenPayload{
-		UserID: domain.TestUser.Id.String(),
-		Role:   domain.TestUser.Role,
+		UserID: "mockUserID",
+		Role:   "mockRole",
 	}, nil
 }
 
-func (m *MockTokenService) GenerateEmailVerificationToken(email string) (string, error) {
-	return "mockedVerificationToken", nil
-}
-
-func (m *MockTokenService) ValidateVerifyEmailToken(tokenString string) (string, error) {
-	return "", nil
-}
-func (m *MockTokenService) GenerateTokenForForgotPassword(email string) (string, error) {
-	return "mockedForgotPasswordToken", nil
-}
-
-func (m *MockTokenService) ValidateForgotPasswordToken(tokenString string) (string, error) {
-	return "", nil
-}
-
-func (m *MockTokenService) GenerateAuthRefreshToken(userID, role string) (string, error) {
-	return "mockedRefreshToken", nil
-}
-
-func (m *MockTokenService) ValidateAuthRefreshToken(token string) (*auth.TokenPayload, error) {
+func (s *MockTokenService) ValidateAuthRefreshToken(tokenString string) (*auth.TokenPayload, error) {
 	return &auth.TokenPayload{
-		UserID: domain.TestUser.Id.String(),
-		Role:   domain.TestUser.Role,
+		UserID: "mockUserID",
+		Role:   "mockRole",
 	}, nil
+}
+
+func (s *MockTokenService) ValidateSecureEmailToken(tokenString string) (string, error) {
+	return "mockEmail", nil
 }
 
 // MockCache

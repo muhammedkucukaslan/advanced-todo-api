@@ -39,7 +39,7 @@ type updateTodoHandlerTestCase struct {
 func TestUpdateTodoHandler(t *testing.T) {
 	app := fiber.New()
 
-	tokenService := testUtils.NewTestJWTTokenService()
+	tokenService := testUtils.NewTestJWETokenService()
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(tokenService, logger)
 	app.Use(middlewareManager.AuthMiddleware)

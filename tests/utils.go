@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	jweInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -61,13 +61,13 @@ func CreateRedisTestContainer(t *testing.T, ctx context.Context) (*tcredis.Redis
 
 }
 
-func NewTestJWTTokenService() *jwtInfra.Service {
-	return jwtInfra.NewJWTTokenService(jwtInfra.Config{
-		AccessTokenSecretKey:      "test_secret_key",
-		RefreshTokenSecretKey:     "test_refresh_secret_key",
-		AuthAccessTokenDuration:   time.Hour * 24,
-		AuthRefreshTokenDuration:  time.Hour * 24 * 30,
-		EmailVerificationDuration: time.Minute * 10,
-		ForgotPasswordDuration:    time.Minute * 10,
+func NewTestJWETokenService() *jweInfra.Service {
+	return jweInfra.NewJWETokenService(&jweInfra.Config{
+		AccessTokenEncryptionKey:  "12345678901234567890123456789012",
+		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
+		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
+		AuthAccessTokenDuration:   time.Minute * 3,
+		AuthRefreshTokenDuration:  time.Hour * 24,
+		SecureEmailTokenDuration:  time.Minute * 10,
 	})
 }

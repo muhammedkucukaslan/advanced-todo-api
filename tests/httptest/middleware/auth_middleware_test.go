@@ -11,7 +11,7 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/healthcheck"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 	fiberInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/fiber"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	jweInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwe"
 	slogInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/slog"
 	testUtils "github.com/muhammedkucukaslan/advanced-todo-api/tests"
 	"github.com/stretchr/testify/assert"
@@ -21,9 +21,9 @@ import (
 func TestAuthMiddleware(t *testing.T) {
 	app := fiber.New()
 
-	realTokenService := jwtInfra.NewJWTTokenService(realTokenServiceConfig)
-	fakeTokenService := jwtInfra.NewJWTTokenService(fakeTokenServiceConfig)
-	expiredTokenService := jwtInfra.NewJWTTokenService(expiredTokenServiceConfig)
+	realTokenService := jweInfra.NewJWETokenService(&realTokenServiceConfig)
+	fakeTokenService := jweInfra.NewJWETokenService(&fakeTokenServiceConfig)
+	expiredTokenService := jweInfra.NewJWETokenService(&expiredTokenServiceConfig)
 
 	logger := slogInfra.NewLogger()
 	middlewareManager := fiberInfra.NewMiddlewareManager(realTokenService, logger)
@@ -77,7 +77,7 @@ func TestAuthMiddleware(t *testing.T) {
 			"fake token", args{
 				authHeader: fakeTokenHeader,
 				req:        &healthcheck.HealthcheckRequest{},
-			}, nil, http.StatusUnauthorized, domain.ErrInvalidTokenSignature,
+			}, nil, http.StatusUnauthorized, domain.ErrInvalidToken,
 		},
 		{
 			"invalid header", args{
@@ -132,16 +132,22 @@ func TestAuthMiddleware(t *testing.T) {
 }
 
 var (
-	realTokenServiceConfig = jwtInfra.Config{
-		AccessTokenSecretKey:    domain.MockJWTTestKey,
-		AuthAccessTokenDuration: time.Hour * 24,
+	realTokenServiceConfig = jweInfra.Config{
+		AccessTokenEncryptionKey:  "12345678901234567890123456789012",
+		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
+		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
+		AuthAccessTokenDuration:   time.Hour * 24,
 	}
-	fakeTokenServiceConfig = jwtInfra.Config{
-		AccessTokenSecretKey:    "fake-key",
-		AuthAccessTokenDuration: time.Hour * 24,
+	fakeTokenServiceConfig = jweInfra.Config{
+		AccessTokenEncryptionKey:  "1234567890123456789012345678901a",
+		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
+		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
+		AuthAccessTokenDuration:   time.Hour * 24,
 	}
-	expiredTokenServiceConfig = jwtInfra.Config{
-		AccessTokenSecretKey:    domain.MockJWTTestKey,
-		AuthAccessTokenDuration: -time.Hour * 24,
+	expiredTokenServiceConfig = jweInfra.Config{
+		AccessTokenEncryptionKey:  "12345678901234567890123456789012",
+		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
+		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
+		AuthAccessTokenDuration:   -time.Hour * 24,
 	}
 )
