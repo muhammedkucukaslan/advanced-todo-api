@@ -43,7 +43,7 @@ type EmailClaims struct {
 	Exp   int64  `json:"exp"`
 }
 
-func NewJWETokenService(config Config) *Service {
+func NewJWETokenService(config *Config) *Service {
 
 	if !config.hasProperEncryptionKeys() {
 		panic("encryption key must be 32 bytes for AES-256")

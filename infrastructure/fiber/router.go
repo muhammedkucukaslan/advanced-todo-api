@@ -89,7 +89,7 @@ func SetupRoutes(app *fiber.App) {
 	postgresRepo := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
 	fmt.Println("Connected to database")
 
-	jweTokenService := jwe.NewJWETokenService(jwe.Config{
+	jweTokenService := jwe.NewJWETokenService(&jwe.Config{
 		AccessTokenEncryptionKey:  "12345678901234567890123456789012",
 		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
 		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
