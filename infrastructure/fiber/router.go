@@ -11,7 +11,7 @@
 //	@description	Some endpoints require authentication. In this case, you need to log in first.
 //	@description	I created two types of users for this project: admin and regular user.
 //	@description	Just send a POST request as below at [here](http://localhost:3000/swagger/index.html/).
-//	@description	After login, you will get a JWT token in cookies.
+//	@description	After login, you will get a JWE token in cookies.
 //	@description	If you're using cookie-based auth, the cookie will be sent automatically.
 //	@description	Alternatively, you can use Bearer Token authentication via the "Authorize" button.
 //	@description
@@ -55,14 +55,12 @@
 //	@description	Status code with `5xx` is a server error code.
 //
 
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
+// @description				Enter your Bearer token in the format **Bearer &lt;token&gt;**
 //
-//	@securityDefinitions.apikey	BearerAuth
-//	@in							header
-//	@name						Authorization
-//	@description				Enter your Bearer token in the format **Bearer &lt;token&gt;**
-//
-//	@host						localhost:3000
-
+// @host						localhost:3000
 package fiber
 
 import (
@@ -76,7 +74,7 @@ import (
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/todo"
 	"github.com/muhammedkucukaslan/advanced-todo-api/app/user"
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
-	jwtInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwt"
+	jwe "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/jwe"
 	mailersendInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/mailersend"
 	postgresInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/postgres"
 	redisInfra "github.com/muhammedkucukaslan/advanced-todo-api/infrastructure/redis"
@@ -91,16 +89,14 @@ func SetupRoutes(app *fiber.App) {
 	postgresRepo := postgresInfra.NewRepository(os.Getenv("DATABASE_URL"))
 	fmt.Println("Connected to database")
 
-	tokenServiceConfig := jwtInfra.Config{
-		AccessTokenSecretKey:      os.Getenv("JWT_ACCESS_TOKEN_SECRET_KEY"),
-		RefreshTokenSecretKey:     os.Getenv("JWT_REFRESH_TOKEN_SECRET_KEY"),
+	jweTokenService := jwe.NewJWETokenService(&jwe.Config{
+		AccessTokenEncryptionKey:  "12345678901234567890123456789012",
+		RefreshTokenEncryptionKey: "12345678901234567890123456789012",
+		SecureEmailEncryptionKey:  "12345678901234567890123456789012",
 		AuthAccessTokenDuration:   time.Minute * 15,
 		AuthRefreshTokenDuration:  time.Hour * 24 * 30,
-		EmailVerificationDuration: time.Minute * 11,
-		ForgotPasswordDuration:    time.Minute * 11,
-	}
-
-	jwtTokenService := jwtInfra.NewJWTTokenService(tokenServiceConfig)
+		SecureEmailTokenDuration:  time.Minute * 11,
+	})
 
 	mailersendService := mailersendInfra.NewMailerSendService(os.Getenv("MAILERSEND_API_KEY"), os.Getenv("MAILERSEND_SENDER_EMAIL"), os.Getenv("MAILERSEND_SENDER_NAME"))
 
@@ -110,7 +106,7 @@ func SetupRoutes(app *fiber.App) {
 	redisClient := redisInfra.NewRedisClient(os.Getenv("REDIS_URL"))
 	fiberCookieService := NewCookieService()
 
-	middlewareManager := NewMiddlewareManager(jwtTokenService, slogLogger)
+	middlewareManager := NewMiddlewareManager(jweTokenService, slogLogger)
 
 	healthcheckHandler := healthcheck.NewHealthcheckHandler()
 
@@ -120,7 +116,7 @@ func SetupRoutes(app *fiber.App) {
 
 	signupHandler := auth.NewSignupHandler(&auth.SignupConfig{
 		Repo:          postgresRepo,
-		TokenService:  jwtTokenService,
+		TokenService:  jweTokenService,
 		CookieService: fiberCookieService,
 		EmailService:  mailersendService,
 		Validator:     validator,
@@ -129,24 +125,24 @@ func SetupRoutes(app *fiber.App) {
 
 	loginHandler := auth.NewLoginHandler(&auth.LoginConfig{
 		Repo:          postgresRepo,
-		TokenService:  jwtTokenService,
+		TokenService:  jweTokenService,
 		CookieService: fiberCookieService,
 		Validator:     validator,
 		Logger:        slogLogger,
 	})
 
 	logoutHandler := auth.NewLogoutHandler(postgresRepo, fiberCookieService)
-	refreshTokenHandler := auth.NewRefreshTokenHandler(postgresRepo, jwtTokenService, fiberCookieService)
+	refreshTokenHandler := auth.NewRefreshTokenHandler(postgresRepo, jweTokenService, fiberCookieService)
 	getUserHandler := user.NewGetUserHandler(postgresRepo)
 	getUsersHandler := user.NewGetUsersHandler(postgresRepo, validator)
 	deleteAccountHandler := user.NewDeleteAccountHandler(postgresRepo, sl, mailersendService)
 	updateFullNameHandler := user.NewUpdateFullNameHandler(postgresRepo, validator)
 	getCurrentUserHandler := user.NewGetCurrentUserHandler(postgresRepo)
 	updatePasswordHandler := user.NewChangePasswordHandler(postgresRepo, validator)
-	forgotPasswordHandler := user.NewForgotPasswordHandler(postgresRepo, mailersendService, jwtTokenService, sl, validator)
-	resetPasswordHandler := user.NewResetPasswordHandler(postgresRepo, jwtTokenService, sl, validator)
-	verifyEmailHandler := user.NewVerifyEmailHandler(postgresRepo, validator, jwtTokenService)
-	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(postgresRepo, validator, jwtTokenService, mailersendService)
+	forgotPasswordHandler := user.NewForgotPasswordHandler(postgresRepo, mailersendService, jweTokenService, sl, validator)
+	resetPasswordHandler := user.NewResetPasswordHandler(postgresRepo, jweTokenService, sl, validator)
+	verifyEmailHandler := user.NewVerifyEmailHandler(postgresRepo, validator, jweTokenService)
+	sendVerificationEmailHandler := user.NewSendVerificationEmailHandler(postgresRepo, validator, jweTokenService, mailersendService)
 
 	createTodoHandler := todo.NewCreateTodoHandler(postgresRepo, redisClient, sl)
 	getTodoByIdHandler := todo.NewGetTodoByIdHandler(postgresRepo)

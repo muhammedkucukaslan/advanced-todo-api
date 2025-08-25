@@ -57,7 +57,7 @@ func (h *ForgotPasswordHandler) Handle(ctx context.Context, req *ForgotPasswordR
 		return nil, http.StatusNoContent, nil
 	}
 
-	token, err := h.tokenService.GenerateTokenForForgotPassword(req.Email)
+	token, err := h.tokenService.GenerateSecureEmailToken(req.Email)
 	if err != nil {
 		h.logger.Error("failed to generate token for forgot password: ", err)
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer

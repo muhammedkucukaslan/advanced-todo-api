@@ -31,7 +31,7 @@ func TestSignupHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := testUtils.NewTestJWTTokenService()
+	tokenService := testUtils.NewTestJWETokenService()
 	logger := slogInfra.NewLogger()
 	validator := validator.NewValidator(logger)
 

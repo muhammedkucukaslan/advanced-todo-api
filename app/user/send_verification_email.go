@@ -60,7 +60,7 @@ func (h *SendVerificationEmailHandler) Handle(ctx context.Context, req *SendVeri
 		return nil, http.StatusInternalServerError, err
 	}
 
-	token, err := h.tokenService.GenerateEmailVerificationToken(email)
+	token, err := h.tokenService.GenerateSecureEmailToken(email)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

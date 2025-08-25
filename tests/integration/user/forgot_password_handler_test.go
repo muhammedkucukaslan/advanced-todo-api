@@ -30,7 +30,7 @@ func TestForgotPasswordHandler(t *testing.T) {
 	runMigrations(t, connStr)
 	setupTestUser(t, connStr)
 
-	tokenService := testUtils.NewTestJWTTokenService()
+	tokenService := testUtils.NewTestJWETokenService()
 	logger := slog.NewLogger()
 	validator := validator.NewValidator(logger)
 	mockEmailService := &mock.MockEmailService{}

@@ -47,6 +47,25 @@ func (s *FiberCookieService) SetAccessToken(ctx context.Context, token string) {
 func (s *FiberCookieService) RemoveTokens(ctx context.Context) {
 	fiberCtx, _ := ctx.Value(FiberContextKey{}).(*fiber.Ctx)
 
-	fiberCtx.ClearCookie(domain.RefreshTokenCookieName)
-	fiberCtx.ClearCookie(domain.AccessTokenCookieName)
+	fiberCtx.Cookie(&fiber.Cookie{
+		Name:     domain.RefreshTokenCookieName,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour * 24),
+		MaxAge:   -1,
+		HTTPOnly: true,
+		Secure:   domain.CookieSecure,
+		SameSite: fiber.CookieSameSiteStrictMode,
+		Path:     domain.RefreshCookiePath,
+	})
+
+	fiberCtx.Cookie(&fiber.Cookie{
+		Name:     domain.AccessTokenCookieName,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour * 24),
+		MaxAge:   -1,
+		HTTPOnly: true,
+		Secure:   domain.CookieSecure,
+		SameSite: fiber.CookieSameSiteStrictMode,
+		Path:     domain.AccessTokenCookiePath,
+	})
 }
