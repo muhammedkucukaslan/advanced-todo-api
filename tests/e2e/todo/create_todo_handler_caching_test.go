@@ -149,7 +149,7 @@ func sendTestGetRequestForCreatedTodos(t *testing.T, app *fiber.App, cgt *CacheG
 func createNTodosAndCache(t *testing.T, repo todo.TodoRepository, cacheClient domain.Cache, n int) {
 	ctx := context.Background()
 	var todos []*domain.Todo
-	for i := 0; i < n; i++ {
+	for range n {
 		newTodo, _ := domain.NewTodo(domain.TestUser.Id, domain.TestTodo.Title)
 		err := repo.CreateTodo(ctx, newTodo)
 		require.NoError(t, err, "failed to create todo")
