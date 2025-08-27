@@ -145,7 +145,7 @@ func TestLoginHandler(t *testing.T) {
 			},
 			want:    nil,
 			code:    http.StatusBadRequest,
-			wantErr: domain.ErrInvalidRequest,
+			wantErr: domain.ErrPasswordTooShort,
 		},
 	}
 
