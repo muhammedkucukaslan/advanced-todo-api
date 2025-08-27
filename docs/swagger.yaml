@@ -4,7 +4,6 @@ definitions:
       email:
         type: string
       password:
-        minLength: 8
         type: string
     required:
     - email
@@ -169,7 +168,7 @@ info:
     Some endpoints require authentication. In this case, you need to log in first.
     I created two types of users for this project: admin and regular user.
     Just send a POST request as below at [here](http://localhost:3000/swagger/index.html/).
-    After login, you will get a JWT token in cookies.
+    After login, you will get a JWE token in cookies.
     If you're using cookie-based auth, the cookie will be sent automatically.
     Alternatively, you can use Bearer Token authentication via the "Authorize" button.
 

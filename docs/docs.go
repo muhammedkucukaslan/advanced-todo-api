@@ -862,8 +862,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 8
+                    "type": "string"
                 }
             }
         },
@@ -1106,7 +1105,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Advanced Todo API",
-	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html/).\nAfter login, you will get a JWT token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes. Because I love to host my API on \"api\" subdomain.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
+	Description:      "\n## How to use the API\n1- Click which endpoint you want to use.\n2- Click \"Try it out\" button.\n3- Add your request body or your parameters which are showed and required by the endpoint.\n4- Click \"Execute\" button.\n5- You will see the response.\n\nSome endpoints require authentication. In this case, you need to log in first.\nI created two types of users for this project: admin and regular user.\nJust send a POST request as below at [here](http://localhost:3000/swagger/index.html/).\nAfter login, you will get a JWE token in cookies.\nIf you're using cookie-based auth, the cookie will be sent automatically.\nAlternatively, you can use Bearer Token authentication via the \"Authorize\" button.\n\n### Login Request For Admin\n```json\n{\n\"email\": \"admin@admin.com\",\n\"password\": \"admin123\"\n}\n```\n\n### Login Request For User\n```json\n{\n\"email\": \"user@user.com\",\n\"password\": \"user1234\"\n}\n```\n\n## Error Handling\nAll error responses will follow this JSON format:\n\n```json\n{\n\"message\": string,\n\"code\": int\n}\n```\n### Example\n```json\n{\n\"message\": \"invalid request\",\n\"code\": 400\n}\n```\n\n## Reminder\nI did not use `/api` prefix for the endpoint routes. Because I love to host my API on \"api\" subdomain.\nStatus code with `2xx` is a success code.\nStatus code with `4xx` is a client error code.\nStatus code with `5xx` is a server error code.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
