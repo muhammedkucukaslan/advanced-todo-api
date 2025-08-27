@@ -12,7 +12,7 @@ import (
 
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required"`
 }
 
 type LoginResponse struct {
@@ -77,8 +77,8 @@ func (h *LoginHandler) Handle(ctx context.Context, req *LoginRequest) (*LoginRes
 	}
 
 	if err = user.ValidatePassword(req.Password); err != nil {
-		if errors.Is(err, domain.ErrInvalidCredentials) {
-			return nil, http.StatusBadRequest, domain.ErrInvalidCredentials
+		if !errors.Is(err, domain.ErrInternalServer) {
+			return nil, http.StatusBadRequest, err
 		}
 		return nil, http.StatusInternalServerError, domain.ErrInternalServer
 	}
