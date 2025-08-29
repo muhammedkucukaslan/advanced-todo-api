@@ -29,7 +29,6 @@ type SignupConfig struct {
 }
 
 type SignupHandler struct {
-	secure    bool
 	repo      Repository
 	cs        CookieService
 	ts        TokenService

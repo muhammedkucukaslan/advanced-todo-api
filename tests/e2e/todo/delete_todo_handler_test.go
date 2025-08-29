@@ -65,10 +65,6 @@ func TestDeleteTodoHandler(t *testing.T) {
 
 	validTokenHeader := "Bearer " + validToken
 
-	type args struct {
-		authHeader string
-	}
-
 	tests := []deleteTodoHandlerTestCase{
 		{
 			name: "valid delete",

@@ -108,6 +108,10 @@ func runTestUserMigrations(db *sql.DB) {
 		domain.TestUser.Role,
 	)
 
+	if err != nil {
+		panic("Failed to insert test user: " + err.Error())
+	}
+
 	adminHashedPassword, err := domain.HashPassword("admin123")
 	if err != nil {
 		panic("Failed to hash password: " + err.Error())

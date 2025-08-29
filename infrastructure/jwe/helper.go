@@ -40,8 +40,5 @@ func decryptClaims[T any](encryptedToken string, key []byte, claims *T) error {
 }
 
 func isExpired(exp int64) bool {
-	if time.Now().Unix() > exp {
-		return true
-	}
-	return false
+	return time.Now().Unix() > exp
 }
