@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
@@ -28,14 +27,11 @@ type LoginConfig struct {
 }
 
 type LoginHandler struct {
-	refreshTokenCookieDuration time.Duration
-	accessTokenCookieDuration  time.Duration
-	secure                     bool
-	repo                       Repository
-	ts                         TokenService
-	validator                  domain.Validator
-	logger                     domain.Logger
-	cs                         CookieService
+	repo      Repository
+	ts        TokenService
+	validator domain.Validator
+	logger    domain.Logger
+	cs        CookieService
 }
 
 func NewLoginHandler(config *LoginConfig) *LoginHandler {

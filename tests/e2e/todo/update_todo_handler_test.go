@@ -67,11 +67,6 @@ func TestUpdateTodoHandler(t *testing.T) {
 
 	validTokenHeader := "Bearer " + validToken
 
-	type args struct {
-		authHeader string
-		req        *todo.UpdateTodoRequest
-	}
-
 	newTitle := "Updated Test Todo"
 
 	// I made id as uuid.Nil.
