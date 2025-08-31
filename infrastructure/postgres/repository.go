@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/muhammedkucukaslan/advanced-todo-api/domain"
 )
 
 type Repository struct {
@@ -28,10 +26,6 @@ func NewRepository(databaseUrl string) *Repository {
 	}
 
 	runTableMigrations(db)
-
-	if !domain.IsProdEnv() {
-		runTestUserMigrations(db)
-	}
 
 	return &Repository{db: db}
 }
@@ -83,52 +77,4 @@ func runTableMigrations(db *sql.DB) {
 		panic("Failed to create tables: " + err.Error())
 	}
 
-}
-
-func runTestUserMigrations(db *sql.DB) {
-	tx, err := db.Begin()
-
-	if err != nil {
-		panic("Failed to begin transaction: " + err.Error())
-	}
-	defer rollbackTx(tx)
-
-	userHashedPassword, err := domain.HashPassword(domain.TestUser.Password)
-	if err != nil {
-		panic("Failed to hash password: " + err.Error())
-	}
-
-	addUserQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
-	ON CONFLICT (email) DO NOTHING`
-	_, err = tx.Exec(addUserQuery,
-		domain.TestUser.Id,
-		domain.TestUser.FullName,
-		domain.TestUser.Email,
-		userHashedPassword,
-		domain.TestUser.Role,
-	)
-
-	if err != nil {
-		panic("Failed to insert test user: " + err.Error())
-	}
-
-	adminHashedPassword, err := domain.HashPassword("admin123")
-	if err != nil {
-		panic("Failed to hash password: " + err.Error())
-	}
-	addAdminQuery := `INSERT INTO users (id, fullname, email, password, role) VALUES ($1, $2, $3, $4, $5)
-	ON CONFLICT (email) DO NOTHING`
-	_, err = tx.Exec(addAdminQuery,
-		uuid.New(),
-		"Admin User",
-		"admin@admin.com",
-		adminHashedPassword,
-		"ADMIN",
-	)
-	if err != nil {
-		panic("Failed to insert admin user: " + err.Error())
-	}
-	if tx.Commit() != nil {
-		panic("Failed to commit transaction: " + tx.Commit().Error())
-	}
 }
